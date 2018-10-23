@@ -102,3 +102,16 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# Eclipse settings
+.project
+.pydevproject
+.settings
+
+# ANTLR generated files
+*.tokens
+*.interp
+*Lexer.py
+*Parser.py
+*Visitor.py
+*Listener.py
