@@ -45,7 +45,7 @@ class CMTLFormula(object):
         elif self.op == Operation.PRED:
             self.duration = kwargs['duration']
             self.proposition = kwargs['proposition']
-            self.capabilities = kwargs['capabilities']
+            self.capability_requests = kwargs['capabilities']
         elif self.op in (Operation.AND, Operation.OR):
             self.children = kwargs['children']
         elif self.op == Operation.IMPLIES:
@@ -90,22 +90,22 @@ class CMTLFormula(object):
         if self.op == Operation.PRED:
             return {self.proposition}
         elif self.op in (Operation.AND, Operation.OR):
-            return set.union(*[child.variables() for child in self.children])
+            return set.union(*[child.propositions() for child in self.children])
         elif self.op in (Operation.IMPLIES, Operation.UNTIL):
-            return self.left.variables() | self.right.variables()
+            return self.left.propositions() | self.right.propositions()
         elif self.op in (Operation.NOT, Operation.ALWAYS, Operation.EVENT):
-            return self.child.variables()
+            return self.child.propositions()
 
     def capabilities(self):
         '''Computes the set of capabilities involved in the CMTL formula.'''
         if self.op == Operation.PRED:
-            return {cr.capability for cr in self.capabilities}
+            return {cr.capability for cr in self.capability_requests}
         elif self.op in (Operation.AND, Operation.OR):
-            return set.union(*[child.variables() for child in self.children])
+            return set.union(*[child.capabilities() for child in self.children])
         elif self.op in (Operation.IMPLIES, Operation.UNTIL):
-            return self.left.variables() | self.right.variables()
+            return self.left.capabilities() | self.right.capabilities()
         elif self.op in (Operation.NOT, Operation.ALWAYS, Operation.EVENT):
-            return self.child.variables()
+            return self.child.capabilities()
 
     def identifier(self):
         h = hash(self)
@@ -135,13 +135,13 @@ class CMTLFormula(object):
             s = str(self.value)
         elif self.op == Operation.PRED:
             s = '({p} {d} {caps})'.format(p=self.proposition, d=self.duration,
-                                          caps=self.capabilities)
+                                          caps=self.capability_requests)
         elif self.op == Operation.IMPLIES:
-            s = '{left} {op} {right}'.format(left=self.left, op=opname,
-                                             right=self.right)
+            s = '({left} {op} {right})'.format(left=self.left, op=opname,
+                                               right=self.right)
         elif self.op in (Operation.AND, Operation.OR):
             children = [str(child) for child in self.children]
-            s = ' {op} '.format(op=opname).join(children)
+            s = '(' + ' {op} '.format(op=opname).join(children) + ')'
         elif self.op == Operation.NOT:
             s = '{op} {child}'.format(op=opname, child=self.child)
         elif self.op == Operation.UNTIL:
@@ -161,7 +161,7 @@ class CMTLAbstractSyntaxTreeExtractor(cmtlVisitor):
 
     def visitFormula(self, ctx):
         op = Operation.getCode(ctx.op.text)
-        print ctx.op.text, op
+#         print ctx.op.text, op
         ret = None
         low = -1
         high = -1
@@ -186,7 +186,7 @@ class CMTLAbstractSyntaxTreeExtractor(cmtlVisitor):
             ret = CMTLFormula(op, left=self.visit(ctx.left),
                              right=self.visit(ctx.right), low=low, high=high)
         elif op in (Operation.ALWAYS, Operation.EVENT):
-            print 'EVENT/ALWAYS:', ctx.low.text, ctx.high.text
+#             print 'EVENT/ALWAYS:', ctx.low.text, ctx.high.text
             low = float(ctx.low.text)
             high = float(ctx.high.text)
             ret = CMTLFormula(op, child=self.visit(ctx.child),
@@ -210,8 +210,8 @@ class CMTLAbstractSyntaxTreeExtractor(cmtlVisitor):
                                             if not isinstance(ch, TerminalNode)}
 
     def visitCapabilityRequest(self, ctx):
-        print CapabilityRequest(capability=ctx.cap.text,
-                                count=int(ctx.count.text))
+#         print CapabilityRequest(capability=ctx.cap.text,
+#                                 count=int(ctx.count.text))
         return CapabilityRequest(capability=ctx.cap.text,
                                  count=int(ctx.count.text))
 
@@ -232,6 +232,8 @@ if __name__ == '__main__':
 
     ast = CMTLAbstractSyntaxTreeExtractor().visit(t)
     print 'AST:', ast
+    print 'Propositions:', ast.propositions()
+    print 'Capabilities:', ast.capabilities()
 
-    s = () #TODO:
-    print 'r:', ast.robustness(s, 0)
+#     s = () #TODO:
+#     print 'r:', ast.robustness(s, 0)
