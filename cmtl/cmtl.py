@@ -76,7 +76,9 @@ class CMTLFormula(object):
             return 0
         elif self.op == Operation.PRED:
             return self.duration
-        elif self.op in (Operation.AND, Operation.OR, Operation.IMPLIES):
+        elif self.op in (Operation.AND, Operation.OR):
+            return max([ch.bound() for ch in self.children])
+        elif self.op == Operation.IMPLIES:
             return max(self.left.bound(), self.right.bound())
         elif self.op == Operation.NOT:
             return self.child.bound()
@@ -155,6 +157,16 @@ class CMTLFormula(object):
         self.__string = s
         return self.__string
 
+    @classmethod
+    def from_formula(cls, formula):
+        '''TODO:
+        '''
+        lexer = cmtlLexer(InputStream(formula))
+        tokens = CommonTokenStream(lexer)
+        parser = cmtlParser(tokens)
+        t = parser.cmtlProperty()
+        return CMTLAbstractSyntaxTreeExtractor().visit(t)
+
 
 class CMTLAbstractSyntaxTreeExtractor(cmtlVisitor):
     '''Parse Tree visitor that constructs the AST of an CMTL formula'''
@@ -220,20 +232,13 @@ class CMTLAbstractSyntaxTreeExtractor(cmtlVisitor):
 
 
 if __name__ == '__main__':
-    lexer = cmtlLexer(InputStream('F[0, 2] T(4, test, {(a, 2), (b, 3)})'
+    ast = CMTLFormula.from_formula('F[0, 2] T(4, test, {(a, 2), (b, 3)})'
                                   '&& G[1, 7] T(2, test, {(a, 1), (c, 4)})'
-                                  '&& F[3, 5] T(3, test2, {(b, 1), (d, 2)})'))
-
-    tokens = CommonTokenStream(lexer)
-
-    parser = cmtlParser(tokens)
-    t = parser.cmtlProperty()
-    print t.toStringTree()
-
-    ast = CMTLAbstractSyntaxTreeExtractor().visit(t)
+                                  '&& F[3, 5] T(3, test2, {(b, 1), (d, 2)})')
     print 'AST:', ast
     print 'Propositions:', ast.propositions()
     print 'Capabilities:', ast.capabilities()
+    print 'Bound:', ast.bound()
 
 #     s = () #TODO:
 #     print 'r:', ast.robustness(s, 0)
