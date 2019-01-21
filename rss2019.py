@@ -13,7 +13,7 @@ from visualization import show_environment
 def case_rss2019(ts_filename='farm.yaml'):
     '''TODO:
     '''
-    
+
     ts = Ts.load(ts_filename)
     for u, v in ts.g.edges():
         assert ts.g.has_edge(v, u)
@@ -30,10 +30,15 @@ def case_rss2019(ts_filename='farm.yaml'):
               ('q8', {'Vis', 'IR'}),
               ('q9', {'Vis', 'UV'}),
               ('q10', {'Vis', 'IR'}), ('q10', {'Vis', 'IR'})]
+    # make sure all agents' initial states are in the TS
     for state, _ in agents:
-        assert state in ts.g
+        assert state in ts.g, 'State "{}" not in TS!'.format(state)
 
     specification = 'TODO:'
+    # Example
+    'F[0, 2] T(4, test, {(a, 2), (b, 3)})'
+    '&& G[1, 7] T(2, test, {(a, 1), (c, 4)})'
+    '&& F[3, 5] T(3, test2, {(b, 1), (d, 2)})'
 
 #     route_planning(ts, agents, specification)
 
