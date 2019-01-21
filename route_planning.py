@@ -143,15 +143,6 @@ def add_system_constraints(m, ts, agent_classes, capability_distribution,
     where \eta_{state}_g is the number of agents of class g at state {state} at
     time 0.
     '''
-    # initial time constraints
-    for u in ts.g.nodes():
-        for g, g_enc in agent_classes.items():
-            conserve = sum([d['vars'][d['weight']][g]
-                            for _, _, d in ts.g.out_edges_iter(u, data=True)
-                                if d['weight'] <= bound])
-            conserve = (conserve == capability_distribution[u][g])
-            m.addConstr(conserve, 'init_distrib_{}_{}'.format(u, g_enc))
-
     # edge conservation constraints
     for u, ud in ts.g.nodes(data=True):
         for k in range(bound):
@@ -170,15 +161,64 @@ def add_system_constraints(m, ts, agent_classes, capability_distribution,
                 conserve = (conserve == 0)
                 m.addConstr(conserve, 'conserve_{}_{}_{}'.format(u, g_enc, k))
 
-def add_proposition_constraints(m, ts):
+#     # initial time constraints - encoding using transition variables
+#     for u in ts.g.nodes():
+#         for g, g_enc in agent_classes.items():
+#             conserve = sum([d['vars'][d['weight']][g]
+#                             for _, _, d in ts.g.out_edges_iter(u, data=True)
+#                                 if d['weight'] <= bound])
+#             conserve = (conserve == capability_distribution[u][g])
+#             m.addConstr(conserve, 'init_distrib_{}_{}'.format(u, g_enc))
+
+    # initial time constraints - encoding using state variables
+    for u, ud in ts.g.nodes(data=True):
+        for g, g_enc in agent_classes.items():
+            conserve = (ud[0][g] == capability_distribution[u][g])
+            m.addConstr(conserve, 'init_distrib_{}_{}'.format(u, g_enc))
+
+def extract_propositions(ts, formula):
+    '''Returns the set of propositions in the formula, and checks that it is
+    included in the transitions system.
+    
+    Input
+    -----
+    - The transition system specifying the environment.
+    - The CaTL specification formula.
+    
+    Output
+    ------
+    Set of propositions.
+    '''
+    ts_propositions = set.union([d['prop'] for _, d in ts.g.nodes(data=True)])
+    formula_propositions = set(formula.propositions())
+    assert formula_propositions <= ts_propositions, \
+                                'There are unknown propositions in the formula!'
+    return formula_propositions
+
+def add_proposition_constraints(m, ts, formula):
     '''TODO:
     '''
-    # proposition variables
+    props = extract_propositions(ts, formula)
+
+#     # proposition variables
 #     for
 #
 
 def route_planning(ts, agents, formula, bound=None):
     '''TODO:
+
+    Input
+    -----
+    - The transition system specifying the environment.
+    - List of agents, where agents are tuples (q, cap), q is the initial state
+    of the agent, and cap is the set of capabilities. Agents' identifiers are
+    their indices in the list.
+    - The CaTL specification formula.
+    - The time bound used in the encoding (default: computed from CaTL formula).
+
+    Output
+    ------
+    TBD
     '''
     ast = CMTLFormula.from_formula(formula)
     if bound is None:
@@ -198,7 +238,7 @@ def route_planning(ts, agents, formula, bound=None):
     add_system_constraints(m, ts, agent_classes, capability_distribution, bound)
 
     # add proposition constraints
-
+    add_proposition_constraints(m, ts, ast)
 
     # add CMTL formula constraints
     stl = cmtl2stl(ast)
