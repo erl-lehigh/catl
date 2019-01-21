@@ -51,8 +51,7 @@ def compute_agent_classes(agents, capabilities):
     Dictionary of agent classes that maps frozen (immutable) sets of
     capabilities to the binary words encoding the sets.
     '''
-    return {frozenset(caps): sum([capabilities[c] for c in caps])
-                                                          for _, caps in agents}
+    return {frozenset(g): sum([capabilities[c] for c in g]) for _, g in agents}
 
 def compute_initial_capability_distribution(ts, agents, capabilities):
     '''Computes the initial number of agents of each class at each state.
@@ -72,9 +71,9 @@ def compute_initial_capability_distribution(ts, agents, capabilities):
     '''
     nc = len(capabilities)
     capability_distribution = {u: [0]*nc for u in ts.g}
-    for state, cap in agents:
-        g = sum([capabilities[c] for c in cap])
-        capability_distribution[state][g] += 1
+    for state, g in agents:
+        g_enc = sum([capabilities[c] for c in g])
+        capability_distribution[state][g_enc] += 1
     return capability_distribution
 
 def create_system_variables(m, ts, agent_classes, bound, vtype=GRB.INTEGER):
@@ -96,7 +95,7 @@ def create_system_variables(m, ts, agent_classes, bound, vtype=GRB.INTEGER):
     - The agent classes given as a dictionary from frozen sets of capabilities
     to bitmaps (integers).
     - Time bound.
-    - Variable type (default: integer)
+    - Variable type (default: integer).
 
     Note
     ----
@@ -114,20 +113,29 @@ def create_system_variables(m, ts, agent_classes, bound, vtype=GRB.INTEGER):
     for u, d in ts.g.nodes(data=True):
         d['vars'] = [] # initialize node variables list
         for k in range(bound+1):
-            name = 'z_' + u + '_{cap}_' + k
+            name = 'z_' + u + '_{g}_' + k
             d['vars'].append({g: m.addVar(vtype=vtype, name=name.format(enc))
                                           for g, enc in agent_classes.items()})
     # edge variables
     for u, v, d in ts.g.edges(data=True):
         d['vars'] = [] # initialize edge variables list
         for k in range(bound+1):
-            name = 'z_' + u + '_' + v + '_{cap}_' + k
+            name = 'z_' + u + '_' + v + '_{g}_' + k
             d['vars'].append({g: m.addVar(vtype=vtype, name=name.format(enc))
                                         for g, enc in agent_classes.items()})
 
 def add_system_constraints(m, ts, agent_classes, capability_distribution,
                            bound):
     '''Computes the constraints that capture the system dynamics.
+
+    Input
+    -----
+    - The Gurobi model variable.
+    - The transition system specifying the environment.
+    - The agent classes given as a dictionary from frozen sets of capabilities
+    to bitmaps (integers).
+    - The initial distribution of capabilities at each state.
+    - Time bound.
 
     Note
     ----
@@ -176,36 +184,123 @@ def add_system_constraints(m, ts, agent_classes, capability_distribution,
             conserve = (ud[0][g] == capability_distribution[u][g])
             m.addConstr(conserve, 'init_distrib_{}_{}'.format(u, g_enc))
 
-def extract_propositions(ts, formula):
+def extract_propositions(ts, ast):
     '''Returns the set of propositions in the formula, and checks that it is
     included in the transitions system.
-    
+
     Input
     -----
     - The transition system specifying the environment.
-    - The CaTL specification formula.
-    
+    - The AST of the CaTL specification formula.
+
     Output
     ------
-    Set of propositions.
+    Set of propositions in the specification formula.
     '''
     ts_propositions = set.union([d['prop'] for _, d in ts.g.nodes(data=True)])
-    formula_propositions = set(formula.propositions())
+    formula_propositions = set(ast.propositions())
     assert formula_propositions <= ts_propositions, \
                                 'There are unknown propositions in the formula!'
     return formula_propositions
 
-def add_proposition_constraints(m, ts, formula):
+def add_proposition_constraints(m, stl_milp, ts, ast, capabilities,
+                                agent_classes, bound, vtype=GRB.INTEGER):
+    '''Adds the proposition constraints. First, the proposition-state variables
+    are defined such that capabilities are not double booked. Second, contraints
+    are added such that proposition are satisfied as best as possible. The
+    variables in the MILP encoding of the STL formula are used for the encoding
+    as the minimizers of over proposition-state variables.
+
+    Input
+    -----
+    - The Gurobi model variable.
+    - The MILP encoding of the STL formula obtained from the CaTL specification.
+    - The transition system specifying the environment.
+    - The AST of the CaTL specification formula.
+    - Dictionary of capability encoding that maps capabilities to binary words
+    represented as integers.
+    - The agent classes given as a dictionary from frozen sets of capabilities
+    to bitmaps (integers).
+    - Time bound.
+    - Variable type (default: integer).
+    '''
+    props = extract_propositions(ts, ast)
+
+    # add proposition-state variables
+    for u, ud in ts.g.nodes(data=True):
+        ud['prop_vars'] = dict()
+        for c in capabilities:
+            ud['prop_vars'][c] = []
+            for k in range(bound+1):
+                ud['prop_vars'][c].append(dict())
+                for prop in ud['props']:
+                    name = 'z_{prop}_{state}_{cap}_{time}'.format(prop, u, c, k)
+                    ud['prop_vars'][c][k][prop] = m.addVar(vtype=vtype,
+                                                           name=name)
+
+    # constraints for relating (proposition, state) pairs to system states
+    for u, ud in ts.g.nodes(data=True):
+        for c in capabilities:
+            for k in range(bound+1):
+                equality = sum([ud['prop_vars'][c][k][prop]
+                                                    for prop in ud['props']])
+                equality -= sum([ud['vars'][k][g] for g in agent_classes
+                                                                    if c in g])
+                equality = (equality == 0)
+                m.addConstr(equality, 'prop_state_{}_{}_{}'.format(u, c, k))
+
+    # add propositions constraints for only those variables appearing in the
+    # MILP encoding of the formula
+    for prop in props:
+        for c in capabilities:
+            for k in range(bound+1):
+                variable = '{prop}_{cap}'.format(prop, c)
+                if (variable in stl_milp.variables
+                                        and k in stl_milp.variables[variable]):
+                    for u, ud in ts.g.nodes(data=True):
+                        if prop in ud['props']:
+                            min_prop = (stl_milp.variables[variable][k]
+                                                <= ud['prop_vars'][c][k][prop])
+                            m.addConstr(min_prop, 'min_prop_{}_{}_{}_{}'.format(
+                                                                prop, c, k, u))
+
+def extract_trajetories(m, ts, agents, bound):
     '''TODO:
     '''
-    props = extract_propositions(ts, formula)
+    raise NotImplementedError
+    # initialize trajectories for each agent
+    trajectories = [[(state, 0)] for state, _ in agents]
 
-#     # proposition variables
-#     for
-#
+    for k in range(1, bound+1):
+        # setup matching problem
+        prev = [trajectories[agent][-1] for agent in len(agents)]
+
+        matching = dict()
+        constraints = {} # active transitions whose constraints have to be met
+        for a, (state, time) in enumerate(prev):
+            assert k-1 <= time
+            if time == k-1: # check if vehicle needs to be assigned next state
+                matching[prev] = [] # initialize possible future states
+                agent_class = agents[a][1] # extract agent class
+                # loop over outgoing transitions that have agents of the given
+                # class traversing them; add outgoing neighbors
+                for _, next_state, d in ts.g.out_edges_iter(state, data=True):
+                    if d['vars'][time+d['weight']][agent_class] > 0:
+                        matching[prev].append((next_state, time+d['weight']))
+                        constraints.add((state, next_state, time+d['weight']))
+
+        # create constraint matching problem
+        # TODO: each agent in `matching' has to be matched to a future state
+        # such that each active transition in `constraints' has exactly the
+        # the correct amount of agents traversing it
+        # NOTE: It seems to me to be an instance of the knapsack problem, but I
+        # am not sure. It can be posed as an ILP.
+
+    return trajectories
 
 def route_planning(ts, agents, formula, bound=None):
-    '''TODO:
+    '''Performs route planning for agents `agents' moving in a transition system
+    `ts' such that the CaTL specification `formula' is satisfied.
 
     Input
     -----
@@ -218,7 +313,7 @@ def route_planning(ts, agents, formula, bound=None):
 
     Output
     ------
-    TBD
+    TODO: TBD
     '''
     ast = CMTLFormula.from_formula(formula)
     if bound is None:
@@ -237,13 +332,14 @@ def route_planning(ts, agents, formula, bound=None):
                                                            agents, capabilities)
     add_system_constraints(m, ts, agent_classes, capability_distribution, bound)
 
-    # add proposition constraints
-    add_proposition_constraints(m, ts, ast)
-
     # add CMTL formula constraints
     stl = cmtl2stl(ast)
     stl_milp = stl2milp(stl, model=m, robust=True)
     z_formula = stl_milp.to_milp()
+
+    # add proposition constraints
+    add_proposition_constraints(m, stl_milp, ts, ast, capabilities,
+                                agent_classes, bound)
 
     # run optimizer
     m.optimize()
@@ -258,3 +354,6 @@ def route_planning(ts, agents, formula, bound=None):
         logging.error('Model is unbounded')
     else:
         logging.error('Optimization ended with status %s', m.status)
+
+#     return extract_trajetories(m, ts, agents, bound) #TODO:
+    return m
