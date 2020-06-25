@@ -25,7 +25,8 @@ cmtlProperty:
          right=cmtlProperty #formula
     ;
 predicate:
-         op='T' '(' duration=INT ',' proposition=VARIABLE  ',' capabilities ')'
+         op='T' '(' duration=(RATIONAL | INT) ',' proposition=VARIABLE
+        ',' capabilities ')'
     |    op=BOOLEAN
     ;
 capabilities: '{' capabilityRequest ( ',' capabilityRequest )* '}'
