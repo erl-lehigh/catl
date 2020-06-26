@@ -28,12 +28,16 @@ catlProperty:
     ;
 predicate:
          op='T' '(' duration=(RATIONAL | INT) ',' proposition=VARIABLE
-        ',' capabilities ')'
+        ',' capabilities ( ',' resources )? ')'
     |    op=BOOLEAN
     ;
 capabilities: '{' capabilityRequest ( ',' capabilityRequest )* '}'
     ;
 capabilityRequest: '(' cap=VARIABLE ',' count=INT ')'
+    ;
+resources: '{' resourceRequest ( ',' resourceRequest )* '}'
+    ;
+resourceRequest: '(' res=VARIABLE ',' quantity=(RATIONAL | INT) ')'
     ;
 
 AND : '&' | '&&' | '/\\' ;

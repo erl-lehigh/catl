@@ -34,6 +34,7 @@ class Operation(object):
         return cls.opnames[op]
 
 CapabilityRequest = namedtuple('CapabilityRequest', ['capability', 'count'])
+ResourceRequest = namedtuple('ResourceRequest', ['resource', 'quantity'])
 
 class CATLFormula(object):
     '''Abstract Syntax Tree representation of an CATL formula'''
@@ -48,6 +49,7 @@ class CATLFormula(object):
             self.duration = kwargs['duration']
             self.proposition = kwargs['proposition']
             self.capability_requests = kwargs['capabilities']
+            self.resource_requests = kwargs['resources']
         elif self.op in (Operation.AND, Operation.OR):
             self.children = kwargs['children']
         elif self.op == Operation.IMPLIES:
@@ -111,6 +113,17 @@ class CATLFormula(object):
         elif self.op in (Operation.NOT, Operation.ALWAYS, Operation.EVENT):
             return self.child.capabilities()
 
+    def resources(self):
+        '''Computes the set of resources involved in the CATL formula.'''
+        if self.op == Operation.PRED:
+            return {cr.resource for cr in self.resource_requests}
+        elif self.op in (Operation.AND, Operation.OR):
+            return set.union(*[child.resources() for child in self.children])
+        elif self.op in (Operation.IMPLIES, Operation.UNTIL):
+            return self.left.resources() | self.right.resources()
+        elif self.op in (Operation.NOT, Operation.ALWAYS, Operation.EVENT):
+            return self.child.resources()
+
     def identifier(self):
         h = hash(self)
         if h < 0:
@@ -138,8 +151,10 @@ class CATLFormula(object):
         if self.op == Operation.BOOL:
             s = str(self.value)
         elif self.op == Operation.PRED:
-            s = '({p} {d} {caps})'.format(p=self.proposition, d=self.duration,
-                                          caps=self.capability_requests)
+            s = '({p} {d} {caps} {res})'.format(p=self.proposition,
+                                                d=self.duration,
+                                                caps=self.capability_requests,
+                                                res=self.resource_requests)
         elif self.op == Operation.IMPLIES:
             s = '({left} {op} {right})'.format(left=self.left, op=opname,
                                                right=self.right)
@@ -214,9 +229,14 @@ class CATLAbstractSyntaxTreeExtractor(catlVisitor):
 
     def visitPredicate(self, ctx):
         if Operation.getCode(ctx.op.text) == Operation.PRED:
+            if ctx.resources():
+                resources = self.visit(ctx.resources())
+            else:
+                resources = set()
             return CATLFormula(Operation.PRED, duration=int(ctx.duration.text),
                                proposition=ctx.proposition.text,
-                               capabilities=self.visit(ctx.capabilities()))
+                               capabilities=self.visit(ctx.capabilities()),
+                               resources=resources)
         return CATLFormula(Operation.BOOL, value=bool(ctx.op.text))
 
     def visitCapabilities(self, ctx):
@@ -229,17 +249,27 @@ class CATLAbstractSyntaxTreeExtractor(catlVisitor):
         return CapabilityRequest(capability=ctx.cap.text,
                                  count=int(ctx.count.text))
 
+    def visitResources(self, ctx):
+        return {self.visit(ch) for ch in ctx.children
+                                            if not isinstance(ch, TerminalNode)}
+
+    def visitResourceRequest(self, ctx):
+        return ResourceRequest(resource=ctx.res.text,
+                               quantity=float(ctx.quantity.text))
+
     def visitParprop(self, ctx):
         return self.visit(ctx.child);
 
 
 if __name__ == '__main__':
-    ast = CATLFormula.from_formula('F[0, 2] T(4, test, {(a, 2), (b, 3)})'
-                                  '&& G[1, 7] T(2, test, {(a, 1), (c, 4)})'
-                                  '&& F[3, 5] T(3, test2, {(b, 1), (d, 2)})')
+    ast = CATLFormula.from_formula(
+            'F[0, 2] T(4, test, {(a, 2), (b, 3)})'
+            '&& G[1, 7] T(2, test, {(a, 1), (c, 4)}, {(h1, 2.3), (h2, 5)})'
+            '&& F[3, 5] T(3, test2, {(b, 1), (d, 2)})')
     print 'AST:', ast
     print 'Propositions:', ast.propositions()
     print 'Capabilities:', ast.capabilities()
+    print 'Resources:', ast.resources()
     print 'Bound:', ast.bound()
 
 #     s = () #TODO:
