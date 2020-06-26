@@ -12,8 +12,8 @@ from gurobipy import GRB
 from lomap import Timer
 
 from stl import stl2milp
-from cmtl import CapabilityRequest, CMTLFormula
-from cmtl import cmtl2stl
+from catl import CapabilityRequest, CMTLFormula
+from catl import cmtl2stl
 from visualization import show_environment
 
 
