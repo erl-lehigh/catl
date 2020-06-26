@@ -190,7 +190,6 @@ class CATLAbstractSyntaxTreeExtractor(catlVisitor):
 
     def visitFormula(self, ctx):
         op = Operation.getCode(ctx.op.text)
-#         print ctx.op.text, op
         ret = None
         low = -1
         high = -1
@@ -215,7 +214,6 @@ class CATLAbstractSyntaxTreeExtractor(catlVisitor):
             ret = CATLFormula(op, left=self.visit(ctx.left),
                              right=self.visit(ctx.right), low=low, high=high)
         elif op in (Operation.ALWAYS, Operation.EVENT):
-#             print 'EVENT/ALWAYS:', ctx.low.text, ctx.high.text
             low = float(ctx.low.text)
             high = float(ctx.high.text)
             ret = CATLFormula(op, child=self.visit(ctx.child),
@@ -244,8 +242,6 @@ class CATLAbstractSyntaxTreeExtractor(catlVisitor):
                                             if not isinstance(ch, TerminalNode)}
 
     def visitCapabilityRequest(self, ctx):
-#         print CapabilityRequest(capability=ctx.cap.text,
-#                                 count=int(ctx.count.text))
         return CapabilityRequest(capability=ctx.cap.text,
                                  count=int(ctx.count.text))
 
@@ -266,11 +262,8 @@ if __name__ == '__main__':
             'F[0, 2] T(4, test, {(a, 2), (b, 3)})'
             '&& G[1, 7] T(2, test, {(a, 1), (c, 4)}, {(h1, 2.3), (h2, 5)})'
             '&& F[3, 5] T(3, test2, {(b, 1), (d, 2)})')
-    print 'AST:', ast
-    print 'Propositions:', ast.propositions()
-    print 'Capabilities:', ast.capabilities()
-    print 'Resources:', ast.resources()
-    print 'Bound:', ast.bound()
-
-#     s = () #TODO:
-#     print 'r:', ast.robustness(s, 0)
+    print('AST:', ast)
+    print('Propositions:', ast.propositions())
+    print('Capabilities:', ast.capabilities())
+    print('Resources:', ast.resources())
+    print('Bound:', ast.bound())
