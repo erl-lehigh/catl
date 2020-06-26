@@ -125,6 +125,9 @@ class CATLFormula(object):
             return self.child.resources()
 
     def identifier(self):
+        '''Computes an integer identifier for the formula based on the object's
+        hash value.
+        '''
         h = hash(self)
         if h < 0:
             h = hex(ord('-'))[2:] + hex(-h)[1:]
@@ -176,7 +179,15 @@ class CATLFormula(object):
 
     @classmethod
     def from_formula(cls, formula):
-        '''TODO:
+        '''Creates a CATLFormula object from a formula string.
+
+        Parameters
+        ----------
+        formula (str) CATL formula
+
+        Returns
+        -------
+        (CATLFormula) an AST of the CATL formula
         '''
         lexer = catlLexer(InputStream(formula))
         tokens = CommonTokenStream(lexer)
