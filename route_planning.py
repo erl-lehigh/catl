@@ -1,5 +1,7 @@
 '''
- Copyright (C) 2018 Cristian Ioan Vasile <cvasile@bu.edu>
+ Copyright (C) 2018-2020 Cristian Ioan Vasile <cvasile@lehigh.edu>
+ Explainable Robotics Lab (ERL), Autonomous and Intelligent Robotics (AIR) Lab,
+ Lehigh University
  Hybrid and Networked Systems (HyNeSs) Group, BU Robotics Lab, Boston University
  See license.txt file for license information.
 '''
@@ -12,8 +14,8 @@ from gurobipy import GRB
 from lomap import Timer
 
 from stl import stl2milp
-from catl import CapabilityRequest, CMTLFormula
-from catl import cmtl2stl
+from catl import CapabilityRequest, CATLFormula
+from catl import catl2stl
 from visualization import show_environment
 
 
@@ -315,7 +317,7 @@ def route_planning(ts, agents, formula, bound=None):
     ------
     TODO: TBD
     '''
-    ast = CMTLFormula.from_formula(formula)
+    ast = CATLFormula.from_formula(formula)
     if bound is None:
         bound = formula.bound()
 
@@ -332,8 +334,8 @@ def route_planning(ts, agents, formula, bound=None):
                                                            agents, capabilities)
     add_system_constraints(m, ts, agent_classes, capability_distribution, bound)
 
-    # add CMTL formula constraints
-    stl = cmtl2stl(ast)
+    # add CATL formula constraints
+    stl = catl2stl(ast)
     stl_milp = stl2milp(stl, model=m, robust=True)
     z_formula = stl_milp.to_milp()
 

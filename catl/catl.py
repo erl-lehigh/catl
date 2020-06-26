@@ -1,5 +1,7 @@
 '''
- Copyright (C) 2018 Cristian Ioan Vasile <cvasile@bu.edu>
+ Copyright (C) 2018-2020 Cristian Ioan Vasile <cvasile@lehigh.edu>
+ Explainable Robotics Lab (ERL), Autonomous and Intelligent Robotics (AIR) Lab,
+ Lehigh University
  Hybrid and Networked Systems (HyNeSs) Group, BU Robotics Lab, Boston University
  See license.txt file for license information.
 '''
@@ -9,13 +11,13 @@ from collections import namedtuple
 
 from antlr4 import InputStream, CommonTokenStream, TerminalNode
 
-from cmtlLexer import cmtlLexer
-from cmtlParser import cmtlParser
-from cmtlVisitor import cmtlVisitor
+from catlLexer import catlLexer
+from catlParser import catlParser
+from catlVisitor import catlVisitor
 
 
 class Operation(object):
-    '''CMTL operations'''
+    '''CATL operations'''
     NOP, NOT, OR, AND, IMPLIES, UNTIL, EVENT, ALWAYS, PRED, BOOL = range(10)
     opnames = [None, '!', '||', '&&', '=>', 'U', 'F', 'G', 'T', 'bool']
     opcodes = {'!': NOT, '&&': AND, '||' : OR, '=>': IMPLIES,
@@ -33,8 +35,8 @@ class Operation(object):
 
 CapabilityRequest = namedtuple('CapabilityRequest', ['capability', 'count'])
 
-class CMTLFormula(object):
-    '''Abstract Syntax Tree representation of an CMTL formula'''
+class CATLFormula(object):
+    '''Abstract Syntax Tree representation of an CATL formula'''
 
     def __init__(self, operation, **kwargs):
         '''Constructor'''
@@ -67,11 +69,11 @@ class CMTLFormula(object):
         self.__hash = None
 
     def robustness(self, s, t):
-        '''Computes the robustness of the CMTL formula.'''
+        '''Computes the robustness of the CATL formula.'''
         raise NotImplementedError
 
     def bound(self):
-        '''Computes the bound of the CMTL formula.'''
+        '''Computes the bound of the CATL formula.'''
         if self.op == Operation.BOOL:
             return 0
         elif self.op == Operation.PRED:
@@ -88,7 +90,7 @@ class CMTLFormula(object):
             return self.high + self.child.bound()
 
     def propositions(self):
-        '''Computes the set of propositions involved in the CMTL formula.'''
+        '''Computes the set of propositions involved in the CATL formula.'''
         if self.op == Operation.PRED:
             return {self.proposition}
         elif self.op in (Operation.AND, Operation.OR):
@@ -99,7 +101,7 @@ class CMTLFormula(object):
             return self.child.propositions()
 
     def capabilities(self):
-        '''Computes the set of capabilities involved in the CMTL formula.'''
+        '''Computes the set of capabilities involved in the CATL formula.'''
         if self.op == Operation.PRED:
             return {cr.capability for cr in self.capability_requests}
         elif self.op in (Operation.AND, Operation.OR):
@@ -161,15 +163,15 @@ class CMTLFormula(object):
     def from_formula(cls, formula):
         '''TODO:
         '''
-        lexer = cmtlLexer(InputStream(formula))
+        lexer = catlLexer(InputStream(formula))
         tokens = CommonTokenStream(lexer)
-        parser = cmtlParser(tokens)
-        t = parser.cmtlProperty()
-        return CMTLAbstractSyntaxTreeExtractor().visit(t)
+        parser = catlParser(tokens)
+        t = parser.catlProperty()
+        return CATLAbstractSyntaxTreeExtractor().visit(t)
 
 
-class CMTLAbstractSyntaxTreeExtractor(cmtlVisitor):
-    '''Parse Tree visitor that constructs the AST of an CMTL formula'''
+class CATLAbstractSyntaxTreeExtractor(catlVisitor):
+    '''Parse Tree visitor that constructs the AST of an CATL formula'''
 
     def visitFormula(self, ctx):
         op = Operation.getCode(ctx.op.text)
@@ -186,36 +188,36 @@ class CMTLAbstractSyntaxTreeExtractor(cmtlVisitor):
             else:
                 children = [left]
             children.append(right)
-            ret = CMTLFormula(op, children=children)
+            ret = CATLFormula(op, children=children)
         elif op == Operation.IMPLIES:
-            ret = CMTLFormula(op, left=self.visit(ctx.left),
+            ret = CATLFormula(op, left=self.visit(ctx.left),
                              right=self.visit(ctx.right))
         elif op == Operation.NOT:
-            ret = CMTLFormula(op, child=self.visit(ctx.child))
+            ret = CATLFormula(op, child=self.visit(ctx.child))
         elif op == Operation.UNTIL:
             low = float(ctx.low.text)
             high = float(ctx.high.text)
-            ret = CMTLFormula(op, left=self.visit(ctx.left),
+            ret = CATLFormula(op, left=self.visit(ctx.left),
                              right=self.visit(ctx.right), low=low, high=high)
         elif op in (Operation.ALWAYS, Operation.EVENT):
 #             print 'EVENT/ALWAYS:', ctx.low.text, ctx.high.text
             low = float(ctx.low.text)
             high = float(ctx.high.text)
-            ret = CMTLFormula(op, child=self.visit(ctx.child),
+            ret = CATLFormula(op, child=self.visit(ctx.child),
                              low=low, high=high)
         else:
             print('Error: unknown operation!')
         return ret
 
-    def visitCmtlPredicate(self, ctx):
+    def visitCatlPredicate(self, ctx):
         return self.visit(ctx.predicate())
 
     def visitPredicate(self, ctx):
         if Operation.getCode(ctx.op.text) == Operation.PRED:
-            return CMTLFormula(Operation.PRED, duration=int(ctx.duration.text),
+            return CATLFormula(Operation.PRED, duration=int(ctx.duration.text),
                                proposition=ctx.proposition.text,
                                capabilities=self.visit(ctx.capabilities()))
-        return CMTLFormula(Operation.BOOL, value=bool(ctx.op.text))
+        return CATLFormula(Operation.BOOL, value=bool(ctx.op.text))
 
     def visitCapabilities(self, ctx):
         return {self.visit(ch) for ch in ctx.children
@@ -232,7 +234,7 @@ class CMTLAbstractSyntaxTreeExtractor(cmtlVisitor):
 
 
 if __name__ == '__main__':
-    ast = CMTLFormula.from_formula('F[0, 2] T(4, test, {(a, 2), (b, 3)})'
+    ast = CATLFormula.from_formula('F[0, 2] T(4, test, {(a, 2), (b, 3)})'
                                   '&& G[1, 7] T(2, test, {(a, 1), (c, 4)})'
                                   '&& F[3, 5] T(3, test2, {(b, 1), (d, 2)})')
     print 'AST:', ast
