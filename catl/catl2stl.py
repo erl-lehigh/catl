@@ -83,10 +83,10 @@ if __name__ == '__main__':
 
     parser = catlParser(tokens)
     t = parser.catlProperty()
-    print t.toStringTree()
+    print(t.toStringTree())
 
     ast = CATLAbstractSyntaxTreeExtractor().visit(t)
-    print 'CATL:', ast
+    print('CATL:', ast)
 
     stl = catl2stl(ast)
-    print 'STL:', stl
+    print('STL:', stl)

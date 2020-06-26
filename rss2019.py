@@ -22,7 +22,7 @@ def case_rss2019(ts_filename='farm.yaml'):
     show_environment(ts)
 
     for u in ts.g:
-        print u, ts.g.node[u]
+        print(u, ts.g.node[u])
 
     agents = [('q1', {'UV', 'Mo'}), ('q1', {'UV', 'Mo'}),
               ('q2', {'Vis', 'Mo'}),
