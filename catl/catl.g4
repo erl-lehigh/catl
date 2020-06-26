@@ -1,28 +1,30 @@
-grammar cmtl;
+grammar catl;
 
 @header {
 '''
- Copyright (C) 2018 Cristian Ioan Vasile <cvasile@mit.edu>
+ Copyright (C) 2018-2020 Cristian Ioan Vasile <cvasile@lehigh.edu>
+ Explainable Robotics Lab (ERL), Autonomous and Intelligent Robotics (AIR) Lab,
+ Lehigh University
  Hybrid and Networked Systems (HyNeSs) Group, BU Robotics Lab, Boston University
  See license.txt file for license information.
 '''
 }
 
 
-cmtlProperty:
-         '(' child=cmtlProperty ')' #parprop
-    |    predicate #cmtlPredicate
-    |    op=NOT child=cmtlProperty #formula
+catlProperty:
+         '(' child=catlProperty ')' #parprop
+    |    predicate #catlPredicate
+    |    op=NOT child=catlProperty #formula
     |    op=EVENT '[' low=(RATIONAL | INT) ',' high=(RATIONAL | INT) ']'
-         child=cmtlProperty #formula
+         child=catlProperty #formula
     |    op=ALWAYS '[' low=(RATIONAL | INT) ',' high=(RATIONAL | INT) ']'
-         child=cmtlProperty #formula
-    |    left=cmtlProperty op=IMPLIES right=cmtlProperty #formula
-    |    left=cmtlProperty op=AND right=cmtlProperty #formula
-    |    left=cmtlProperty op=OR right=cmtlProperty #formula
-    |    left=cmtlProperty
+         child=catlProperty #formula
+    |    left=catlProperty op=IMPLIES right=catlProperty #formula
+    |    left=catlProperty op=AND right=catlProperty #formula
+    |    left=catlProperty op=OR right=catlProperty #formula
+    |    left=catlProperty
          op=UNTIL '[' low=(RATIONAL | INT) ',' high=(RATIONAL | INT) ']'
-         right=cmtlProperty #formula
+         right=catlProperty #formula
     ;
 predicate:
          op='T' '(' duration=(RATIONAL | INT) ',' proposition=VARIABLE
