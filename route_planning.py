@@ -6,6 +6,7 @@
  See license.txt file for license information.
 '''
 
+from collections import defaultdict
 import logging
 
 from gurobipy import Model as GRBModel
@@ -55,7 +56,7 @@ def compute_agent_classes(agents, capabilities):
     '''
     return {frozenset(g): sum([capabilities[c] for c in g]) for _, g in agents}
 
-def compute_initial_capability_distribution(ts, agents, capabilities):
+def compute_initial_capability_distribution(ts, agents, agent_classes):
     '''Computes the initial number of agents of each class at each state.
     Input
     -----
@@ -63,18 +64,18 @@ def compute_initial_capability_distribution(ts, agents, capabilities):
     - List of agents, where agents are tuples (q, cap), q is the initial state of
     the agent, and cap is the set of capabilities. Agents' identifiers are their
     indices in the list.
-    - Dictionary of capability encoding that maps capabilities to binary words
-    represented as integers.
+    - Dictionary of capability class encoding that maps capabilities to binary
+    words represented as integers.
     Output
     ------
     Dictionary from states to distribution of agents from each class. The
-    distribution is a list of length equal to the number of capabilities, and
+    distribution is a list of length equal to the number of classes, and
     each element is the number of agents of having those capabilities (a class).
     '''
-    nc = len(capabilities)
-    capability_distribution = {u: [0]*nc for u in ts.g}
+    nc = len(agent_classes)
+    capability_distribution = {u: defaultdict(int) for u in ts.g}
     for state, g in agents:
-        g_enc = sum([capabilities[c] for c in g])
+        g_enc = agent_classes[frozenset(g)]
         capability_distribution[state][g_enc] += 1
     return capability_distribution
 
@@ -331,7 +332,7 @@ def route_planning(ts, agents, formula, bound=None):
 
     # add system constraints
     capability_distribution = compute_initial_capability_distribution(ts,
-                                                           agents, capabilities)
+                                                          agents, agent_classes)
     add_system_constraints(m, ts, agent_classes, capability_distribution, bound)
 
     # add CATL formula constraints
