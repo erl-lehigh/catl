@@ -237,7 +237,8 @@ def add_proposition_constraints(m, stl_milp, ts, ast, capabilities,
             for k in range(bound+1):
                 ud['prop_vars'][c].append(dict())
                 for prop in ud['prop']:
-                    name = 'z_{prop}_{state}_{cap}_{time}'.format(prop, u, c, k)
+                    name = 'z_{prop}_{state}_{cap}_{time}'.format(
+                        prop=prop, state=u, cap=c, time=k)
                     ud['prop_vars'][c][k][prop] = m.addVar(vtype=vtype,
                                                            name=name)
 
@@ -257,7 +258,7 @@ def add_proposition_constraints(m, stl_milp, ts, ast, capabilities,
     for prop in props:
         for c in capabilities:
             for k in range(bound+1):
-                variable = '{prop}_{cap}'.format(prop, c)
+                variable = '{prop}_{cap}'.format(prop=prop, cap=c)
                 if (variable in stl_milp.variables
                                         and k in stl_milp.variables[variable]):
                     for u, ud in ts.g.nodes(data=True):
