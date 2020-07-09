@@ -200,7 +200,7 @@ def extract_propositions(ts, ast):
     ------
     Set of propositions in the specification formula.
     '''
-    ts_propositions = set.union([d['prop'] for _, d in ts.g.nodes(data=True)])
+    ts_propositions = set.union(*[d['prop'] for _, d in ts.g.nodes(data=True)])
     formula_propositions = set(ast.propositions())
     assert formula_propositions <= ts_propositions, \
                                 'There are unknown propositions in the formula!'
