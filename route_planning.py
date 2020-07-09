@@ -321,7 +321,7 @@ def route_planning(ts, agents, formula, bound=None):
     '''
     ast = CATLFormula.from_formula(formula)
     if bound is None:
-        bound = formula.bound()
+        bound = int(ast.bound())
 
     # create MILP
     m = GRBModel('milp')
