@@ -116,14 +116,14 @@ def create_system_variables(m, ts, agent_classes, bound, vtype=GRB.INTEGER):
     for u, d in ts.g.nodes(data=True):
         d['vars'] = [] # initialize node variables list
         for k in range(bound+1):
-            name = 'z_' + u + '_{g}_' + k
+            name = 'z_{state}_{{}}_{time}'.format(state=u, time=k)
             d['vars'].append({g: m.addVar(vtype=vtype, name=name.format(enc))
                                           for g, enc in agent_classes.items()})
     # edge variables
     for u, v, d in ts.g.edges(data=True):
         d['vars'] = [] # initialize edge variables list
         for k in range(bound+1):
-            name = 'z_' + u + '_' + v + '_{g}_' + k
+            name = 'z_{src}_{dest}_{{}}_{time}'.format(src=u, dest=v, time=k)
             d['vars'].append({g: m.addVar(vtype=vtype, name=name.format(enc))
                                         for g, enc in agent_classes.items()})
 
