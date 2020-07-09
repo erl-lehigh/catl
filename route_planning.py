@@ -184,7 +184,7 @@ def add_system_constraints(m, ts, agent_classes, capability_distribution,
     # initial time constraints - encoding using state variables
     for u, ud in ts.g.nodes(data=True):
         for g, g_enc in agent_classes.items():
-            conserve = (ud[0][g] == capability_distribution[u][g])
+            conserve = (ud['vars'][0][g] == capability_distribution[u][g])
             m.addConstr(conserve, 'init_distrib_{}_{}'.format(u, g_enc))
 
 def extract_propositions(ts, ast):
