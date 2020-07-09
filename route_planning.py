@@ -14,8 +14,8 @@ from gurobipy import GRB
 
 from lomap import Timer
 
-from stl import stl2milp
-from catl import CapabilityRequest, CATLFormula
+from stl.stl2milp import stl2milp
+from catl import CATLFormula
 from catl import catl2stl
 from visualization import show_environment
 
@@ -338,8 +338,9 @@ def route_planning(ts, agents, formula, bound=None):
 
     # add CATL formula constraints
     stl = catl2stl(ast)
-    stl_milp = stl2milp(stl, model=m, robust=True)
-    z_formula = stl_milp.to_milp()
+    ranges = {variable: (0, len(agents)) for variable in stl.variables()}
+    stl_milp = stl2milp(stl, ranges=ranges, model=m, robust=True)
+    stl_milp.translate()
 
     # add proposition constraints
     add_proposition_constraints(m, stl_milp, ts, ast, capabilities,
