@@ -33,19 +33,28 @@ def catl2stl(catl_ast):
 
         T(d, \pi, \{(c_1, n_1), \ldots,(c_m, n_m)\}) \equiv
         \box_{[0, d]} \bigcup_{i=1}^{m} (z_{\pi, c_i} \geq n_i)
+        \bigcup \bigcup_{\ell=1}^{r} (z_{\pi, h_\ell} \geq \Delta_\ell) 
     '''
     if catl_ast.op == CATLOperation.BOOL:
         return STLFormula(STLOperation.BOOL, value=catl_ast.value)
     elif catl_ast.op == CATLOperation.PRED:
         var = catl_ast.proposition + '_{cap}'
-        conjunction_terms = \
+        capability_terms = \
             [STLFormula(STLOperation.PRED, relation=STLRelOperation.GE,
                         variable=var.format(cap=cap), threshold=th)
                                for cap, th in catl_ast.capability_requests]
-        child = STLFormula(STLOperation.AND, children=conjunction_terms)
+        child = STLFormula(STLOperation.AND, children=capability_terms)
+        cap_available = STLFormula(STLOperation.ALWAYS, low=0,
+                                   high=catl_ast.duration, child=child)
 
-        return STLFormula(STLOperation.ALWAYS, low=0, high=catl_ast.duration,
-                          child=child)
+        var = catl_ast.proposition + '_{res}'
+        resource_terms = \
+            [STLFormula(STLOperation.PRED, relation=STLRelOperation.GE,
+                        variable=var.format(res=res), threshold=th)
+                               for res, th in catl_ast.resource_requests])
+
+        return STLFormula(STLOperation.AND,
+                          children=[cap_available] + resource_terms)
     elif catl_ast.op in (CATLOperation.AND, CATLOperation.OR):
         children = [catl2stl(ch) for ch in catl_ast.children]
         if catl_ast.op == CATLOperation.AND:

@@ -191,6 +191,132 @@ def add_system_constraints(m, ts, agent_classes, capability_distribution,
             conserve = (ud['vars'][0][g] == capability_distribution[u][g])
             m.addConstr(conserve, 'init_distrib_{}_{}'.format(u, g_enc))
 
+def create_resource_variables(m, ts, total_resources, time_bound,
+                              vtype=GRB.CONTINUOUS):
+    '''TODO:
+
+    Creates the state and transition variables associated with the given
+    transition system.
+
+    The state variables are z_{state}_{cap}_k, where {state} is a node in the TS
+    graph, {cap} is a capability class encoded as an integer, and k is the time
+    step.
+
+    The transition variables are z_{state1}_{state2}_{cap}_k, where {state1} and
+    {state2} define the transition, {cap} is a capability class encoded as an
+    integer, and k is the time step.
+
+    Input
+    -----
+    - The Gurobi model variable.
+    - The transition system specifying the environment.
+    - resources: Dict
+    - Time bound.
+    - Variable type (default: real).
+
+    Note
+    ----
+    Data structure holding the variables is a list of list of variables, e.g.,
+
+        d['vars'][k][g] is the y_{q/e}_h_k
+
+    where d is the dictionary of attributes for a node q or an edge e in the TS,
+    g is an agent class (frozen set of capabilities), bitmap(g) is the binary
+    encoding of g as an integer, and k is the time step.
+    Also, d['vars'] is a list of length `time_bound+1', d['vars'][k] is a
+    dictionary from frozen sets to gurobi variables.
+    '''
+    # node variables
+    for u, d in ts.g.nodes(data=True):
+        d['res'] = [] # initialize node variables list
+        for k in range(time_bound+1):
+            name = 'y_{state}_{{}}_{time}'.format(state=u, time=k)
+            d['res'].append({h: m.addVar(vtype=vtype, name=name.format(h),
+                                          lb=0, ub=quantity)
+                             for h, quantity in total_resources.items()})
+    # edge variables
+    for u, v, d in ts.g.edges(data=True):
+        d['res'] = [] # initialize edge variables list
+        for k in range(time_bound+1):
+            name = 'y_{src}_{dest}_{{}}_{time}'.format(src=u, dest=v, time=k)
+            d['res'].append({h: m.addVar(vtype=vtype, name=name.format(enc),
+                                          lb=0, ub=quantity)
+                             for h, quantity in total_resources.items()})
+
+def add_resource_constraints(m, ts, resources_distribution, capacities,
+                             time_bound, task_stl_vars, storage_type='general'):
+    '''TODO:
+
+    Computes the constraints that capture the system dynamics.
+
+    Input
+    -----
+    - The Gurobi model variable.
+    - The transition system specifying the environment.
+    - The agent classes given as a dictionary from frozen sets of capabilities
+    to bitmaps (integers).
+    - The initial distribution of capabilities at each state.
+    - Time bound.
+
+    Note
+    ----
+    The initial time constraints
+
+        z_{state}_g_0 = \eta_{state}_g
+
+    is equivalent to
+
+        \sum_{e=(u, v) \in T} z_e_g_W(e) = \eta_{state}_g
+
+    because of the definition of the team state at TS states,
+    where \eta_{state}_g is the number of agents of class g at state {state} at
+    time 0.
+    '''
+    # edge conservation constraints
+    for u, ud in ts.g.nodes(data=True):
+        for k in range(time_bound):
+            for h in resources_distribution:
+                conserve = sum([d['res'][k + d['weight']][h]
+                            for _, _, d in ts.g.out_edges_iter(u, data=True)
+                                if k + d['weight'] <= time_bound])
+
+                # node constraint: team state
+                res_state_eq = (ud['res'][k][h] == conserve)
+                m.addConstr(team_state_eq, 'res_{}_{}_{}'.format(u, h, k))
+
+                # flow balancing constraint
+                conserve -= sum([d['res'][k][h]
+                            for _, _, d in ts.g.in_edges_iter(u, data=True)])
+                # TODO: substract consumption of resources
+                conserve -= sum([var * quantity
+                                 for var, quantity in task_stl_vars[h][k]])
+                conserve = (conserve == 0)
+                m.addConstr(conserve, 'conserve_{}_{}_{}'.format(u, h, k))
+
+    for u, v, d in ts.g.out_edges_iter(data=True):
+        if u != v:
+            for k in range(time_bound + 1):
+                if storage_type == 'general':
+                    for h in resources_distribution:
+                        resource_bound = d['res'][k][h] <= \
+                            sum(capacities[g][h] * var
+                                for g, var in d['var'][k].items())
+                        m.addConstr(resource_bound, 'res_bound_{}_{}_{}'.format(
+                                                                       u, h, k))
+                elif storage_type == 'uniform':
+                    total_res = sum(d['res'][k][h]
+                                    for h in resources_distribution)
+                    total_capacity = sum(capacities[g] * var
+                                         for g, var in d['var'][k].items())
+                    resource_bound = total_res <= total_capacity
+                    m.addConstr(resource_bound, 'res_bound_{}_{}'.format(u, k))
+
+    # initial time constraints - encoding using state variables
+    for u, ud in ts.g.nodes(data=True):
+        for h in resources_distribution:
+            conserve = (ud['res'][0][h] == resources_distribution[h][u])
+            m.addConstr(conserve, 'res_init_distrib_{}_{}'.format(u, h))
+
 def extract_propositions(ts, ast):
     '''Returns the set of propositions in the formula, and checks that it is
     included in the transitions system.
