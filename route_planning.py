@@ -325,7 +325,7 @@ def extract_trajetories(m, ts, agents, time_bound):
     return trajectories
 
 def route_planning(ts, agents, formula, time_bound=None, variable_bound=None,
-                   travel_time_weight=0):
+                   robust=True, travel_time_weight=0):
     '''Performs route planning for agents `agents' moving in a transition system
     `ts' such that the CaTL specification `formula' is satisfied.
 
@@ -338,6 +338,7 @@ def route_planning(ts, agents, formula, time_bound=None, variable_bound=None,
     - The CaTL specification formula.
     - The time bound used in the encoding (default: computed from CaTL formula).
     - The upper bound for variables.
+    - Flag indicating whether to solve the robust or feasibility problem.
     - The weight of the total travel time objective used for regularization.
 
     Output
@@ -368,7 +369,7 @@ def route_planning(ts, agents, formula, time_bound=None, variable_bound=None,
     # add CATL formula constraints
     stl = catl2stl(ast)
     ranges = {variable: (0, len(agents)) for variable in stl.variables()}
-    stl_milp = stl2milp(stl, ranges=ranges, model=m, robust=True)
+    stl_milp = stl2milp(stl, ranges=ranges, model=m, robust=robust)
     stl_milp.translate()
 
     # add proposition constraints
