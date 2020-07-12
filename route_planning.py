@@ -274,6 +274,22 @@ def add_proposition_constraints(m, stl_milp, ts, ast, capabilities,
                             m.addConstr(min_prop, 'min_prop_{}_{}_{}_{}'.format(
                                                                 prop, c, k, u))
 
+def add_travel_time_objective(m, ts, weight, time_bound, variable_bound):
+    '''Adds the total travel time of all agents as an objective.
+
+    Input
+    -----
+    - The Gurobi model variable.
+    - The transition system specifying the environment.
+    - The objective's weight.
+    - Time bound.
+    - The upper bound for variables.
+    '''
+    travel_time = sum(sum(d['vars'].values()) * d['weight']
+                      for _, _, d in ts.g.edges(data=True))
+    travel_time /= (time_bound * variable_bound)
+    m.setObjectiveN(travel_time, m.NumObj, weight=weight)
+
 def extract_trajetories(m, ts, agents, time_bound):
     '''TODO:
     '''
@@ -308,7 +324,8 @@ def extract_trajetories(m, ts, agents, time_bound):
 
     return trajectories
 
-def route_planning(ts, agents, formula, time_bound=None, variable_bound=None):
+def route_planning(ts, agents, formula, time_bound=None, variable_bound=None,
+                   travel_time_weight=0):
     '''Performs route planning for agents `agents' moving in a transition system
     `ts' such that the CaTL specification `formula' is satisfied.
 
@@ -321,6 +338,7 @@ def route_planning(ts, agents, formula, time_bound=None, variable_bound=None):
     - The CaTL specification formula.
     - The time bound used in the encoding (default: computed from CaTL formula).
     - The upper bound for variables.
+    - The weight of the total travel time objective used for regularization.
 
     Output
     ------
@@ -356,6 +374,11 @@ def route_planning(ts, agents, formula, time_bound=None, variable_bound=None):
     # add proposition constraints
     add_proposition_constraints(m, stl_milp, ts, ast, capabilities,
                                 agent_classes, time_bound, variable_bound)
+
+    # add travel time regularization
+    if travel_time_weight > 0:
+        add_travel_time_objective(m, ts, travel_time_weight, time_bound,
+                                  variable_bound)
 
     # run optimizer
     m.optimize()
