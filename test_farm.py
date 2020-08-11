@@ -12,7 +12,7 @@ from route_planning import route_planning
 from visualization import show_environment
 
 
-def case_rss2019(ts_filename='farm.yaml'):
+def case_farm(ts_filename='farm.yaml'):
     '''TODO:
     '''
 
@@ -45,4 +45,4 @@ def case_rss2019(ts_filename='farm.yaml'):
 #     route_planning(ts, agents, specification)
 
 if __name__ == '__main__':
-    case_rss2019()
+    case_farm()
