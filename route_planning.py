@@ -125,7 +125,7 @@ def create_system_variables(m, ts, agent_classes, time_bound, variable_bound,
     # edge variables
     for u, v, d in ts.g.edges(data=True):
         d['vars'] = [] # initialize edge variables list
-        for k in range(time_bound+1):
+        for k in range(time_bound):
             name = 'z_{src}_{dest}_{{}}_{time}'.format(src=u, dest=v, time=k)
             d['vars'].append({g: m.addVar(vtype=vtype, name=name.format(enc),
                                           lb=0, ub=variable_bound)
@@ -175,7 +175,10 @@ def add_system_constraints(m, ts, agent_classes, capability_distribution,
                                 'conserve_{}_{}_{}'.format(u, g_enc, k))
 
                 # node constraint: team state
-                team_state_eq = (ud['vars'][k][g] == departing)
+                if k < time_bound:
+                    team_state_eq = (ud['vars'][k][g] == departing)
+                else:
+                    team_state_eq = (ud['vars'][k][g] == arriving)
                 m.addConstr(team_state_eq, 'team_{}_{}_{}'.format(u, g_enc, k))
 
 #     # initial time constraints - encoding using transition variables
