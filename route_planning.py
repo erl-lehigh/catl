@@ -358,13 +358,13 @@ def route_planning(ts, agents, formula, time_bound=None, variable_bound=None,
     # create system variables
     capabilities = compute_capability_bitmap(agents)
     agent_classes = compute_agent_classes(agents, capabilities)
-    create_system_variables(m, ts, agent_classes, time_bound)
+    create_system_variables(m, ts, agent_classes, time_bound, variable_bound)
 
     # add system constraints
     capability_distribution = compute_initial_capability_distribution(ts,
                                                           agents, agent_classes)
     add_system_constraints(m, ts, agent_classes, capability_distribution,
-                           time_bound, variable_bound)
+                           time_bound)
 
     # add CATL formula constraints
     stl = catl2stl(ast)
