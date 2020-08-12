@@ -160,7 +160,7 @@ def add_system_constraints(m, ts, agent_classes, capability_distribution,
     '''
     # edge conservation constraints
     for u, ud in ts.g.nodes(data=True):
-        for k in range(time_bound):
+        for k in range(time_bound+1):
             for g, g_enc in agent_classes.items():
                 departing = sum([d['vars'][k][g]
                             for _, _, d in ts.g.out_edges_iter(u, data=True)
@@ -169,13 +169,14 @@ def add_system_constraints(m, ts, agent_classes, capability_distribution,
                             for _, _, d in ts.g.in_edges_iter(u, data=True)
                                 if k - d['weight'] >= 0])
 
+                if 0 < k < time_bound:
+                    # flow balancing constraint
+                    m.addConstr(departing == arriving,
+                                'conserve_{}_{}_{}'.format(u, g_enc, k))
+
                 # node constraint: team state
                 team_state_eq = (ud['vars'][k][g] == departing)
                 m.addConstr(team_state_eq, 'team_{}_{}_{}'.format(u, g_enc, k))
-
-                # flow balancing constraint
-                conserve = (departing == arriving)
-                m.addConstr(conserve, 'conserve_{}_{}_{}'.format(u, g_enc, k))
 
 #     # initial time constraints - encoding using transition variables
 #     for u in ts.g.nodes():
