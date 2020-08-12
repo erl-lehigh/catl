@@ -33,7 +33,7 @@ def catl2stl(catl_ast):
 
         T(d, \pi, \{(c_1, n_1), \ldots,(c_m, n_m)\}) \equiv
         \box_{[0, d]} \bigcup_{i=1}^{m} (z_{\pi, c_i} \geq n_i)
-        \bigcup \bigcup_{\ell=1}^{r} (z_{\pi, h_\ell} \geq \Delta_\ell) 
+        \bigcup \bigcup_{\ell=1}^{r} (z_{\pi, h_\ell} \geq \Delta_\ell)
     '''
     if catl_ast.op == CATLOperation.BOOL:
         return STLFormula(STLOperation.BOOL, value=catl_ast.value)
@@ -51,7 +51,7 @@ def catl2stl(catl_ast):
         resource_terms = \
             [STLFormula(STLOperation.PRED, relation=STLRelOperation.GE,
                         variable=var.format(res=res), threshold=th)
-                               for res, th in catl_ast.resource_requests])
+                               for res, th in catl_ast.resource_requests]
 
         return STLFormula(STLOperation.AND,
                           children=[cap_available] + resource_terms)

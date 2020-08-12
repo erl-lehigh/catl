@@ -13,6 +13,7 @@ from lomap import Ts
 
 from route_planning import route_planning
 from visualization import show_environment
+from check_system_constraints import check_initial_states, check_flow_constraints
 
 
 def setup_logging(logfile='test_farm.log', loglevel=logging.DEBUG):
@@ -50,16 +51,32 @@ def case_farm(ts_filename='farm.yaml'):
               ('q8', {'Vis', 'IR'}),
               ('q9', {'Vis', 'UV'}),
               ('q10', {'Vis', 'IR'}), ('q10', {'Vis', 'IR'})]
+
+    initial_locations, capabilities = zip(*agents)
+    agent_classes = set(map(frozenset, capabilities))
+    initial_locations = set(initial_locations)
+    capabilities = set.union(*capabilities)
+
+    logging.debug('Initial locations:', initial_locations)
+    logging.debug('Capabilities:', capabilities)
+    logging.debug('Agent classes:', agent_classes)
+
     # make sure all agents' initial states are in the TS
     for state, _ in agents:
         assert state in ts.g, 'State "{}" not in TS!'.format(state)
 
-    specification = ('F[0, 2] T(4, blue, {(UV, 2), (Mo, 1)})'
+    specification = ('F[0, 1] T(1, blue, {(UV, 2), (Mo, 1)})'
                      # '&& G[1, 4] T(2, green, {(IR, 1), (Vis, 3)})'
                      # '&& F[3, 4] T(3, yellow, {(IR, 3), (Vis, 2), (UV, 3), (Mo, 4)})'
                      )
 
     m = route_planning(ts, agents, specification)
+    time_bound = len(ts.g.nodes(data=True)[0][1]['vars']) - 1
+
+    logging.debug('Planning horizon: %d', time_bound)
+
+    check_initial_states(ts, agents)
+    check_flow_constraints(ts, agents, time_bound)
 
 
 if __name__ == '__main__':
