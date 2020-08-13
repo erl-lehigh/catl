@@ -36,12 +36,20 @@ def case_rss2019(ts_filename='farm.yaml'):
     for state, _ in agents:
         assert state in ts.g, 'State "{}" not in TS!'.format(state)
 
-    specification ='F[0, 2] T(4, blue, {(a, 2), (b, 3)})'\
-                    '&& G[1, 7] T(2, orange, {(a, 1), (c, 4)})'\
+    specification = 'F[0, 2] T(4, blue, {(a, 2), (b, 3)})'\
+        '&& G[1, 7] T(2, orange, {(a, 1), (c, 4)})'\
                     '&& F[3, 5] T(3, red, {(b, 1), (d, 2)})'
-    
 
-    route_planning(ts, agents, specification)
+    m = route_planning(ts, agents, specification)
+    u = 'q1'
+    v = 'q2'
+    g = frozenset(['Vis', 'UV'])
+
+    # print ts.g.node[u]['vars'][0]
+
+    print 'Node:', ts.g.node[u]['vars'][0][g].x
+    print 'Edge:', ts.g.edge[u][v]['vars'][3][g].x
+
 
 if __name__ == '__main__':
     case_rss2019()

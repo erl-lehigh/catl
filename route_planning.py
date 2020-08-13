@@ -168,13 +168,13 @@ def add_system_constraints(m, ts, agent_classes, capability_distribution,
 
                 # node constraint: team state
                 team_state_eq = (ud['vars'][k][g] == conserve)
-                m.addConstr(team_state_eq, 'team_{}_{}_{}'.format(u, g_enc, k))
+                node=m.addConstr(team_state_eq, 'team_{}_{}_{}'.format(u, g_enc, k))
 
                 # flow balancing constraint
                 conserve -= sum([d['vars'][k][g]
                             for _, _, d in ts.g.in_edges_iter(u, data=True)])
                 conserve = (conserve == 0)
-                m.addConstr(conserve, 'conserve_{}_{}_{}'.format(u, g_enc, k))
+                edge=m.addConstr(conserve, 'conserve_{}_{}_{}'.format(u, g_enc, k))
 
 #     # initial time constraints - encoding using transition variables
 #     for u in ts.g.nodes():
@@ -189,7 +189,8 @@ def add_system_constraints(m, ts, agent_classes, capability_distribution,
     for u, ud in ts.g.nodes(data=True):
         for g, g_enc in agent_classes.items():
             conserve = (ud['vars'][0][g] == capability_distribution[u][g])
-            m.addConstr(conserve, 'init_distrib_{}_{}'.format(u, g_enc))
+            init=m.addConstr(conserve, 'init_distrib_{}_{}'.format(u, g_enc))
+    return node,edge, init
 
 def extract_propositions(ts, ast):
     '''Returns the set of propositions in the formula, and checks that it is
@@ -324,6 +325,9 @@ def extract_trajetories(m, ts, agents, time_bound):
 
     return trajectories
 
+def flow_monitor(init, node, edge):
+    pass
+
 def route_planning(ts, agents, formula, time_bound=None, variable_bound=None,
                    robust=True, travel_time_weight=0):
     '''Performs route planning for agents `agents' moving in a transition system
@@ -371,7 +375,7 @@ def route_planning(ts, agents, formula, time_bound=None, variable_bound=None,
     ranges = {variable: (0, len(agents)) for variable in stl.variables()}
     stl_milp = stl2milp(stl, ranges=ranges, model=m, robust=robust)
     stl_milp.translate()
-
+    
     # add proposition constraints
     add_proposition_constraints(m, stl_milp, ts, ast, capabilities,
                                 agent_classes, time_bound, variable_bound)
@@ -395,5 +399,5 @@ def route_planning(ts, agents, formula, time_bound=None, variable_bound=None,
     else:
         logging.error('Optimization ended with status %s', m.status)
 
-#     return extract_trajetories(m, ts, agents, time_bound) #TODO:
-    return m
+    #return extract_trajetories(m, ts, agents, time_bound) #TODO:
+    return m, stl_milp
