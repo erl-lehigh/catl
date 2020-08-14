@@ -40,7 +40,7 @@ def case_rss2019(ts_filename='/home/gustavo/formal_Methods/catl-master/farm.yaml
                     '&& G[1, 7] T(2, orange, {(Vis, 1), (IR, 4)})'\
                     '&& F[3, 5] T(3, red, {(UV, 1), (IR, 2)})'
 
-    m = route_planning(ts, agents, specification)
+    route_planning(ts, agents, specification)
     u = 'q1'
     v = 'q2'
     g = frozenset(['Vis', 'UV'])
