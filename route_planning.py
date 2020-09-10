@@ -29,7 +29,6 @@ def compute_capability_bitmap(agents):
     List of agents, where agents are tuples (q, cap), q is the initial state of
     the agent, and cap is the set of capabilities. Agents' identifiers are their
     indices in the list.
-
     Output
     ------
     The output is a dictionary from capabilities to integers representing the
@@ -83,15 +82,12 @@ def create_system_variables(m, ts, agent_classes, time_bound, variable_bound,
                             vtype=GRB.INTEGER):
     '''Creates the state and transition variables associated with the given
     transition system.
-
     The state variables are z_{state}_{cap}_k, where {state} is a node in the TS
     graph, {cap} is a capability class encoded as an integer, and k is the time
     step.
-
     The transition variables are z_{state1}_{state2}_{cap}_k, where {state1} and
     {state2} define the transition, {cap} is a capability class encoded as an
     integer, and k is the time step.
-
     Input
     -----
     - The Gurobi model variable.
@@ -101,13 +97,10 @@ def create_system_variables(m, ts, agent_classes, time_bound, variable_bound,
     - Time bound.
     - The upper bound for variables.
     - Variable type (default: integer).
-
     Note
     ----
     Data structure holding the variables is a list of list of variables, e.g.,
-
         d['vars'][k][g] is the z_{q/e}_bitmap(g)_k
-
     where d is the dictionary of attributes for a node q or an edge e in the TS,
     g is an agent class (frozen set of capabilities), bitmap(g) is the binary
     encoding of g as an integer, and k is the time step.
@@ -125,7 +118,7 @@ def create_system_variables(m, ts, agent_classes, time_bound, variable_bound,
     # edge variables
     for u, v, d in ts.g.edges(data=True):
         d['vars'] = [] # initialize edge variables list
-        for k in range(time_bound+1):
+        for k in range(time_bound):
             name = 'z_{src}_{dest}_{{}}_{time}'.format(src=u, dest=v, time=k)
             d['vars'].append({g: m.addVar(vtype=vtype, name=name.format(enc),
                                           lb=0, ub=variable_bound)
@@ -134,7 +127,6 @@ def create_system_variables(m, ts, agent_classes, time_bound, variable_bound,
 def add_system_constraints(m, ts, agent_classes, capability_distribution,
                            time_bound):
     '''Computes the constraints that capture the system dynamics.
-
     Input
     -----
     - The Gurobi model variable.
@@ -143,38 +135,38 @@ def add_system_constraints(m, ts, agent_classes, capability_distribution,
     to bitmaps (integers).
     - The initial distribution of capabilities at each state.
     - Time bound.
-
     Note
     ----
     The initial time constraints
-
         z_{state}_g_0 = \eta_{state}_g
-
     is equivalent to
-
         \sum_{e=(u, v) \in T} z_e_g_W(e) = \eta_{state}_g
-
     because of the definition of the team state at TS states,
     where \eta_{state}_g is the number of agents of class g at state {state} at
     time 0.
     '''
     # edge conservation constraints
     for u, ud in ts.g.nodes(data=True):
-        for k in range(time_bound):
+        for k in range(time_bound+1):
             for g, g_enc in agent_classes.items():
-                conserve = sum([d['vars'][k+d['weight']][g]
+                departing = sum([d['vars'][k][g]
                             for _, _, d in ts.g.out_edges_iter(u, data=True)
                                 if k + d['weight'] <= time_bound])
+                arriving = sum([d['vars'][k - d['weight']][g]
+                            for _, _, d in ts.g.in_edges_iter(u, data=True)
+                                if k - d['weight'] >= 0])
+
+                if 0 < k < time_bound:
+                    # flow balancing constraint
+                    m.addConstr(departing == arriving,
+                                'conserve_{}_{}_{}'.format(u, g_enc, k))
 
                 # node constraint: team state
-                team_state_eq = (ud['vars'][k][g] == conserve)
-                node=m.addConstr(team_state_eq, 'team_{}_{}_{}'.format(u, g_enc, k))
-
-                # flow balancing constraint
-                conserve -= sum([d['vars'][k][g]
-                            for _, _, d in ts.g.in_edges_iter(u, data=True)])
-                conserve = (conserve == 0)
-                edge=m.addConstr(conserve, 'conserve_{}_{}_{}'.format(u, g_enc, k))
+                if k < time_bound:
+                    team_state_eq = (ud['vars'][k][g] == departing)
+                else:
+                    team_state_eq = (ud['vars'][k][g] == arriving)
+                m.addConstr(team_state_eq, 'team_{}_{}_{}'.format(u, g_enc, k))
 
 #     # initial time constraints - encoding using transition variables
 #     for u in ts.g.nodes():
@@ -188,19 +180,16 @@ def add_system_constraints(m, ts, agent_classes, capability_distribution,
     # initial time constraints - encoding using state variables
     for u, ud in ts.g.nodes(data=True):
         for g, g_enc in agent_classes.items():
-            conserve = (ud['vars'][0][g] == capability_distribution[u][g])
-            init=m.addConstr(conserve, 'init_distrib_{}_{}'.format(u, g_enc))
-    return node,edge, init
+            conserve = (ud['vars'][0][g] == capability_distribution[u][g_enc])
+            m.addConstr(conserve, 'init_distrib_{}_{}'.format(u, g_enc))
 
 def extract_propositions(ts, ast):
     '''Returns the set of propositions in the formula, and checks that it is
     included in the transitions system.
-
     Input
     -----
     - The transition system specifying the environment.
     - The AST of the CaTL specification formula.
-
     Output
     ------
     Set of propositions in the specification formula.
@@ -219,7 +208,6 @@ def add_proposition_constraints(m, stl_milp, ts, ast, capabilities,
     are added such that proposition are satisfied as best as possible. The
     variables in the MILP encoding of the STL formula are used for the encoding
     as the minimizers of over proposition-state variables.
-
     Input
     -----
     - The Gurobi model variable.
@@ -277,7 +265,6 @@ def add_proposition_constraints(m, stl_milp, ts, ast, capabilities,
 
 def add_travel_time_objective(m, ts, weight, time_bound, variable_bound):
     '''Adds the total travel time of all agents as an objective.
-
     Input
     -----
     - The Gurobi model variable.
@@ -325,14 +312,10 @@ def extract_trajetories(m, ts, agents, time_bound):
 
     return trajectories
 
-def flow_monitor(init, node, edge):
-    pass
-
 def route_planning(ts, agents, formula, time_bound=None, variable_bound=None,
                    robust=True, travel_time_weight=0):
     '''Performs route planning for agents `agents' moving in a transition system
     `ts' such that the CaTL specification `formula' is satisfied.
-
     Input
     -----
     - The transition system specifying the environment.
@@ -344,7 +327,6 @@ def route_planning(ts, agents, formula, time_bound=None, variable_bound=None,
     - The upper bound for variables.
     - Flag indicating whether to solve the robust or feasibility problem.
     - The weight of the total travel time objective used for regularization.
-
     Output
     ------
     TODO: TBD
@@ -375,7 +357,7 @@ def route_planning(ts, agents, formula, time_bound=None, variable_bound=None,
     ranges = {variable: (0, len(agents)) for variable in stl.variables()}
     stl_milp = stl2milp(stl, ranges=ranges, model=m, robust=robust)
     stl_milp.translate()
-    
+
     # add proposition constraints
     add_proposition_constraints(m, stl_milp, ts, ast, capabilities,
                                 agent_classes, time_bound, variable_bound)
@@ -399,5 +381,5 @@ def route_planning(ts, agents, formula, time_bound=None, variable_bound=None,
     else:
         logging.error('Optimization ended with status %s', m.status)
 
-    #return extract_trajetories(m, ts, agents, time_bound) #TODO:
-    return m, stl_milp
+#     return extract_trajetories(m, ts, agents, time_bound) #TODO:
+    return m
