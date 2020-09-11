@@ -85,7 +85,18 @@ def catl2stl(catl_ast):
                           low=catl_ast.low, high=catl_ast.high)
 
 def extract_stl_task_formulae(stl_ast):
-    '''TODO:
+    '''Extract tasks from STL abstract syntax trees obtained from CATL formulae.
+
+    Input
+    -----
+    stl_ast : STLFormula
+        STL abstract syntax tree.
+
+    Output
+    ------
+    tasks : list of pairs of STLFormula and CATLFormula objects
+        A list of pairs of abstract syntax trees in STL and CATL associated with
+        each task.
     '''
     tasks = []
     stack = [stl_ast]
