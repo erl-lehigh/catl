@@ -17,7 +17,15 @@ from lomap import Timer
 from stl.stl2milp import stl2milp
 from catl import CATLFormula
 from catl import catl2stl
+from catl import extract_stl_task_formulae
 from visualization import show_environment
+
+
+resource_variable_types = {
+    'divisible': GRB.CONTINUOUS,
+    'packets': GRB.INTEGER,
+    'indivisible': GRB.BINARY
+}
 
 
 def compute_capability_bitmap(agents):
@@ -78,6 +86,19 @@ def compute_initial_capability_distribution(ts, agents, agent_classes):
         g_enc = agent_classes[frozenset(g)]
         capability_distribution[state][g_enc] += 1
     return capability_distribution
+
+def compute_resource_quantities(resource_distribution):
+    '''Computes the initial total quantity of each resource.
+    Input
+    -----
+    - Dictionary of resources to quantity distributions over the states of the
+    transition system.  Each distribution is a dictionary from states of the TS
+    to positive numbers.
+    Output
+    ------
+    Dictionary from resources to total quantities at initial time.
+    '''
+    return {h: sum(distrib.values()) for h, distrib in resource_distribution}
 
 def create_system_variables(m, ts, agent_classes, time_bound, variable_bound,
                             vtype=GRB.INTEGER):
@@ -196,7 +217,7 @@ def add_system_constraints(m, ts, agent_classes, capability_distribution,
             conserve = (ud['vars'][0][g] == capability_distribution[u][g_enc])
             m.addConstr(conserve, 'init_distrib_{}_{}'.format(u, g_enc))
 
-def create_resource_variables(m, ts, total_resources, time_bound,
+def create_resource_variables(m, ts, resource_quantities, time_bound,
                               vtype=GRB.CONTINUOUS):
     '''TODO:
 
@@ -238,17 +259,51 @@ def create_resource_variables(m, ts, total_resources, time_bound,
             name = 'y_{state}_{{}}_{time}'.format(state=u, time=k)
             d['res'].append({h: m.addVar(vtype=vtype, name=name.format(h),
                                           lb=0, ub=quantity)
-                             for h, quantity in total_resources.items()})
+                             for h, quantity in resource_quantities.items()})
     # edge variables
     for u, v, d in ts.g.edges(data=True):
         d['res'] = [] # initialize edge variables list
-        for k in range(time_bound+1):
+        for k in range(time_bound):
             name = 'y_{src}_{dest}_{{}}_{time}'.format(src=u, dest=v, time=k)
-            d['res'].append({h: m.addVar(vtype=vtype, name=name.format(enc),
+            d['res'].append({h: m.addVar(vtype=vtype, name=name.format(h),
                                           lb=0, ub=quantity)
-                             for h, quantity in total_resources.items()})
+                             for h, quantity in resource_quantities.items()})
 
-def add_resource_constraints(m, ts, resources_distribution, capacities,
+def extract_task_variables(ts, stl, stl_milp):
+    '''TODO:
+    task_stl_vars[u][h][k]
+
+    '''
+    tasks = extract_stl_task_formuale(stl)
+
+    task_stl_vars = {}
+    for u, ud in ts.g.nodes(data=True):
+        tasks_w_prop = [task for task in tasks
+                        if task[1].proposition in ud['prop']]
+        task_stl_vars[u] = [(stl_milp.variables[stl_formula],
+                             dict(task.resource_requests))
+                            for stl_formula, task in tasks_w_prop]
+    return task_stl_vars
+
+    # task_stl_vars = {}
+    # for u, ud in ts.g.nodes(data=True):
+    #     task_stl_vars[u] = {}
+    #     for h in resources:
+    #         task_stl_vars[u][h] = []
+    #         for k in range(time_bound+1):
+    #             task_stl_vars[u][h].append([])
+    #             for stl_formula, task in tasks:
+    #                 if task.proposition in ud['prop']:
+    #                     var = stl_milp.variables[stl_formula][k] # extract variable
+    #                     for res, th in task.resource_requests:
+    #                         if res == h:
+    #                             quantity =  th# extract quantity from task
+    #                     task_stl_vars[u][h][k].append((var, quantity))
+    #
+    #
+    # raise NotImplementedError
+
+def add_resource_constraints(m, ts, resource_distribution, capacities,
                              time_bound, task_stl_vars, storage_type='general'):
     '''TODO:
 
@@ -280,46 +335,53 @@ def add_resource_constraints(m, ts, resources_distribution, capacities,
     # edge conservation constraints
     for u, ud in ts.g.nodes(data=True):
         for k in range(time_bound):
-            for h in resources_distribution:
-                conserve = sum([d['res'][k + d['weight']][h]
+            for h in resource_distribution:
+                departing = sum([d['res'][k][h]
                             for _, _, d in ts.g.out_edges_iter(u, data=True)
                                 if k + d['weight'] <= time_bound])
+                # TODO: substract consumption of resources
+                departing += sum([task_var[k] * quantities.get(h, 0)
+                                 for task_var, quantities in task_stl_vars[u]
+                                 if h in quantities])
+
+                arriving = sum([d['res'][k - d['weight']][h]
+                                for _, _, d in ts.g.in_edges_iter(u, data=True)
+                                    if k - d['weight'] >= 0])
+
+                if 0 < k < time_bound:
+                    # flow balancing constraint
+                    m.addConstr(arriving == departing,
+                                'conserve_{}_{}_{}'.format(u, h, k))
 
                 # node constraint: team state
-                res_state_eq = (ud['res'][k][h] == conserve)
+                if k < time_bound:
+                    res_state_eq = (ud['res'][k][h] == departing)
+                else:
+                    res_state_eq = (ud['res'][k][h] == arriving)
                 m.addConstr(team_state_eq, 'res_{}_{}_{}'.format(u, h, k))
-
-                # flow balancing constraint
-                conserve -= sum([d['res'][k][h]
-                            for _, _, d in ts.g.in_edges_iter(u, data=True)])
-                # TODO: substract consumption of resources
-                conserve -= sum([var * quantity
-                                 for var, quantity in task_stl_vars[h][k]])
-                conserve = (conserve == 0)
-                m.addConstr(conserve, 'conserve_{}_{}_{}'.format(u, h, k))
 
     for u, v, d in ts.g.out_edges_iter(data=True):
         if u != v:
             for k in range(time_bound + 1):
                 if storage_type == 'general':
-                    for h in resources_distribution:
-                        resource_bound = d['res'][k][h] <= \
-                            sum(capacities[g][h] * var
-                                for g, var in d['var'][k].items())
-                        m.addConstr(resource_bound, 'res_bound_{}_{}_{}'.format(
-                                                                       u, h, k))
+                    for h in resource_distribution:
+                        resource_capacity = sum(capacities[g][h] * var
+                                              for g, var in d['var'][k].items())
+                        resource_bound = d['res'][k][h] <= resource_capacity
+                        m.addConstr(resource_bound,
+                                    'res_bound_{}_{}_{}'.format(u, h, k))
                 elif storage_type == 'uniform':
-                    total_res = sum(d['res'][k][h]
-                                    for h in resources_distribution)
+                    total_resources = sum(d['res'][k][h]
+                                    for h in resource_distribution)
                     total_capacity = sum(capacities[g] * var
                                          for g, var in d['var'][k].items())
-                    resource_bound = total_res <= total_capacity
+                    resource_bound = total_resources <= total_capacity
                     m.addConstr(resource_bound, 'res_bound_{}_{}'.format(u, k))
 
     # initial time constraints - encoding using state variables
     for u, ud in ts.g.nodes(data=True):
-        for h in resources_distribution:
-            conserve = (ud['res'][0][h] == resources_distribution[h][u])
+        for h in resource_distribution:
+            conserve = (ud['res'][0][h] == resource_distribution[h][u])
             m.addConstr(conserve, 'res_init_distrib_{}_{}'.format(u, h))
 
 def extract_propositions(ts, ast):
@@ -405,6 +467,71 @@ def add_proposition_constraints(m, stl_milp, ts, ast, capabilities,
                             m.addConstr(min_prop, 'min_prop_{}_{}_{}_{}'.format(
                                                                 prop, c, k, u))
 
+def add_proposition_resource_constraints(m, stl_milp, ts, ast, resources,
+                                         time_bound, variable_bound,
+                                         vtype=GRB.INTEGER):
+    '''TODO:
+
+    Adds the proposition constraints. First, the proposition-state variables
+    are defined such that capabilities are not double booked. Second, contraints
+    are added such that proposition are satisfied as best as possible. The
+    variables in the MILP encoding of the STL formula are used for the encoding
+    as the minimizers of over proposition-state variables.
+
+    Input
+    -----
+    - The Gurobi model variable.
+    - The MILP encoding of the STL formula obtained from the CaTL specification.
+    - The transition system specifying the environment.
+    - The AST of the CaTL specification formula.
+    - Dictionary of capability encoding that maps capabilities to binary words
+    represented as integers.
+    - The agent classes given as a dictionary from frozen sets of capabilities
+    to bitmaps (integers).
+    - Time bound.
+    - The upper bound for variables.
+    - Variable type (default: integer).
+    '''
+    props = extract_propositions(ts, ast)
+
+    # add proposition-state variables
+    for u, ud in ts.g.nodes(data=True):
+        ud['prop_vars'] = dict()
+        for r in resources:
+            ud['prop_vars'][r] = []
+            for k in range(time_bound+1):
+                ud['prop_vars'][r].append(dict())
+                for prop in ud['prop']:
+                    name = 'z_{prop}_{state}_{res}_{time}'.format(
+                        prop=prop, state=u, res=r, time=k)
+                    ud['prop_vars'][r][k][prop] = m.addVar(
+                        vtype=vtype, name=name, lb=0, ub=variable_bound)
+
+    # constraints for relating (proposition, state) pairs to resource states
+    for u, ud in ts.g.nodes(data=True):
+        for r in resources:
+            for k in range(time_bound+1):
+                equality = sum([ud['prop_vars'][r][k][prop]
+                                                    for prop in ud['prop']])
+                equality -= ud['res'][k][r]
+                equality = (equality == 0)
+                m.addConstr(equality, 'prop_state_{}_{}_{}'.format(u, c, k))
+
+    # add propositions constraints for only those variables appearing in the
+    # MILP encoding of the formula
+    for prop in props:
+        for r in resources:
+            for k in range(time_bound+1):
+                variable = '{prop}_{res}'.format(prop=prop, res=r)
+                if (variable in stl_milp.variables
+                                        and k in stl_milp.variables[variable]):
+                    for u, ud in ts.g.nodes(data=True):
+                        if prop in ud['prop']:
+                            min_prop = (stl_milp.variables[variable][k]
+                                                <= ud['prop_vars'][r][k][prop])
+                            m.addConstr(min_prop, 'min_prop_{}_{}_{}_{}'.format(
+                                                                prop, r, k, u))
+
 def add_travel_time_objective(m, ts, weight, time_bound, variable_bound):
     '''Adds the total travel time of all agents as an objective.
 
@@ -456,6 +583,8 @@ def extract_trajetories(m, ts, agents, time_bound):
     return trajectories
 
 def route_planning(ts, agents, formula, time_bound=None, variable_bound=None,
+                   storage_type=None, capacities=None,
+                   resource_distribution=None,  resource_type='divisible',
                    robust=True, travel_time_weight=0):
     '''Performs route planning for agents `agents' moving in a transition system
     `ts' such that the CaTL specification `formula' is satisfied.
@@ -469,6 +598,10 @@ def route_planning(ts, agents, formula, time_bound=None, variable_bound=None,
     - The CaTL specification formula.
     - The time bound used in the encoding (default: computed from CaTL formula).
     - The upper bound for variables.
+    - TODO:
+    - TODO:
+    - TODO:
+    - TODO:
     - Flag indicating whether to solve the robust or feasibility problem.
     - The weight of the total travel time objective used for regularization.
 
@@ -499,13 +632,25 @@ def route_planning(ts, agents, formula, time_bound=None, variable_bound=None,
 
     # add CATL formula constraints
     stl = catl2stl(ast)
-    ranges = {variable: (0, len(agents)) for variable in stl.variables()}
+    ranges = {variable: (0, variable_bound) for variable in stl.variables()}
     stl_milp = stl2milp(stl, ranges=ranges, model=m, robust=robust)
     stl_milp.translate()
 
     # add proposition constraints
     add_proposition_constraints(m, stl_milp, ts, ast, capabilities,
                                 agent_classes, time_bound, variable_bound)
+
+    if storage_type is not None:
+        resource_var_type = resource_variable_types[resource_type]
+        resource_quantities = compute_resource_quantities(resource_distribution)
+        create_resource_variables(m, ts, resource_quantities, time_bound,
+                                  resource_var_type)
+        task_stl_vars = extract_task_variables(ast, stl, stl_milp)
+        add_resource_constraints(m, ts, resource_distribution, capacities,
+                                 time_bound, task_stl_vars, storage_type)
+        add_proposition_resource_constraints(m, stl_milp, ts, ast, resources,
+                                             time_bound, resource_quantities,
+                                             resource_var_type)
 
     # add travel time regularization
     if travel_time_weight > 0:
