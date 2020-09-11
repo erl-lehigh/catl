@@ -53,8 +53,10 @@ def catl2stl(catl_ast):
                         variable=var.format(res=res), threshold=th)
                                for res, th in catl_ast.resource_requests]
 
-        return STLFormula(STLOperation.AND,
-                          children=[cap_available] + resource_terms)
+        stl_ast = STLFormula(STLOperation.AND,
+                             children=[cap_available] + resource_terms)
+        stl_ast.task = catl_ast
+        return stl_ast
     elif catl_ast.op in (CATLOperation.AND, CATLOperation.OR):
         children = [catl2stl(ch) for ch in catl_ast.children]
         if catl_ast.op == CATLOperation.AND:
@@ -82,6 +84,29 @@ def catl2stl(catl_ast):
         return STLFormula(STLOperation.UNTIL, left=left, right=right,
                           low=catl_ast.low, high=catl_ast.high)
 
+def extract_stl_task_formulae(stl_ast):
+    '''TODO:
+    '''
+    tasks = []
+    stack = [stl_ast]
+    while stack:
+        stl_ast = stack.pop(0)
+        assert stl_ast.op != STLOperation.PRED
+
+        if stl_ast.op == STLOperation.AND:
+            if hasattr(stl_ast, 'task'):
+                tasks.append((stl_ast, stl_ast.task))
+            stack.extend(stl_ast.children)
+        elif stl_ast.op == STLOperation.OR:
+            stack.extend(stl_ast.children)
+        elif stl_ast.op in (STLOperation.ALWAYS, STLOperation.EVENT,
+                            STLOperation.NOT):
+            stack.append(stl_ast.child)
+        elif stl_ast.op in (STLOperation.UNTIL, STLOperation.IMPLIES):
+            stack.append(stl_ast.left)
+            stack.append(stl_ast.right)
+    return tasks
+
 
 if __name__ == '__main__':
     lexer = catlLexer(InputStream('F[0, 2] T(4, test, {(a, 2), (b, 3)})'
@@ -99,3 +124,7 @@ if __name__ == '__main__':
 
     stl = catl2stl(ast)
     print('STL:', stl)
+
+    stl_tasks = extract_task_variables(stl)
+    for stl_formula, task in stl_tasks:
+        print('Task:', task, 'STL formula:', stl_formula)
