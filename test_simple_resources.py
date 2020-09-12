@@ -31,8 +31,7 @@ def setup_logging(logfile='test_simple.log', loglevel=logging.DEBUG,
 
 
 def case_simple(ts_filename='simple.yaml'):
-    '''TODO:
-    '''
+    '''Simple example of planning with resource constraints.'''
     setup_logging()
 
     ts = Ts.load(ts_filename)
