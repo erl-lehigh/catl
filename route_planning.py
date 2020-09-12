@@ -219,24 +219,22 @@ def add_system_constraints(m, ts, agent_classes, capability_distribution,
 
 def create_resource_variables(m, ts, resource_quantities, time_bound,
                               vtype=GRB.CONTINUOUS):
-    '''TODO:
+    '''Creates the resource state and transition variables associated with the
+    given transition system.
 
-    Creates the state and transition variables associated with the given
-    transition system.
-
-    The state variables are z_{state}_{cap}_k, where {state} is a node in the TS
-    graph, {cap} is a capability class encoded as an integer, and k is the time
+    The resource state variables are y_{state}_{res}_k, where {state} is a node
+    in the TS graph, {res} is a resource encoded as a string, and k is the time
     step.
 
-    The transition variables are z_{state1}_{state2}_{cap}_k, where {state1} and
-    {state2} define the transition, {cap} is a capability class encoded as an
-    integer, and k is the time step.
+    The resource transition variables are y_{state1}_{state2}_{res}_k, where
+    {state1} and {state2} define the transition, {res} is a resource encoded as
+    a string, and k is the time step.
 
     Input
     -----
     - The Gurobi model variable.
     - The transition system specifying the environment.
-    - resources: Dict
+    - The resources quantities dictionary.
     - Time bound.
     - Variable type (default: real).
 
@@ -244,13 +242,12 @@ def create_resource_variables(m, ts, resource_quantities, time_bound,
     ----
     Data structure holding the variables is a list of list of variables, e.g.,
 
-        d['vars'][k][g] is the y_{q/e}_h_k
+        d['res'][k][g] is the y_{q/e}_h_k
 
     where d is the dictionary of attributes for a node q or an edge e in the TS,
-    g is an agent class (frozen set of capabilities), bitmap(g) is the binary
-    encoding of g as an integer, and k is the time step.
-    Also, d['vars'] is a list of length `time_bound+1', d['vars'][k] is a
-    dictionary from frozen sets to gurobi variables.
+    h is a resource encoded as a string, and k is the time step.
+    Also, d['res'] is a list of length `time_bound+1', d['res'][k] is a
+    dictionary from strings to gurobi variables.
     '''
     # node variables
     for u, d in ts.g.nodes(data=True):
@@ -285,52 +282,33 @@ def extract_task_variables(ts, stl, stl_milp):
                             for stl_formula, task in tasks_w_prop]
     return task_stl_vars
 
-    # task_stl_vars = {}
-    # for u, ud in ts.g.nodes(data=True):
-    #     task_stl_vars[u] = {}
-    #     for h in resources:
-    #         task_stl_vars[u][h] = []
-    #         for k in range(time_bound+1):
-    #             task_stl_vars[u][h].append([])
-    #             for stl_formula, task in tasks:
-    #                 if task.proposition in ud['prop']:
-    #                     var = stl_milp.variables[stl_formula][k] # extract variable
-    #                     for res, th in task.resource_requests:
-    #                         if res == h:
-    #                             quantity =  th# extract quantity from task
-    #                     task_stl_vars[u][h][k].append((var, quantity))
-    #
-    #
-    # raise NotImplementedError
-
 def add_resource_constraints(m, ts, resource_distribution, capacities,
                              time_bound, task_stl_vars, storage_type='general'):
-    '''TODO:
-
-    Computes the constraints that capture the system dynamics.
+    '''Computes the constraints that capture the resource dynamics.
 
     Input
     -----
     - The Gurobi model variable.
     - The transition system specifying the environment.
-    - The agent classes given as a dictionary from frozen sets of capabilities
-    to bitmaps (integers).
-    - The initial distribution of capabilities at each state.
+    - The initial distribution of resources at each state.
+    - The capacities of each agent class.
     - Time bound.
+    - The variables associated with each task.
+    - The storage type.
 
     Note
     ----
     The initial time constraints
 
-        z_{state}_g_0 = \eta_{state}_g
+        y_{state}_h_0 = \delta_{state}_h
 
-    is equivalent to
+    where \delta_{state}_h is the amount of resource h at state {state} at time
+    0.
 
-        \sum_{e=(u, v) \in T} z_e_g_W(e) = \eta_{state}_g
-
-    because of the definition of the team state at TS states,
-    where \eta_{state}_g is the number of agents of class g at state {state} at
-    time 0.
+    The storage type can either be general, in which case the `capacities` maps
+    agent class g and resource type h to a upper bound.  In case the storage
+    type is uniform then the overall carying capacity of each agent class g is
+    given and applies to across resource types.
     '''
     # edge conservation constraints
     for u, ud in ts.g.nodes(data=True):
@@ -339,7 +317,7 @@ def add_resource_constraints(m, ts, resource_distribution, capacities,
                 departing = sum([d['res'][k][h]
                             for _, _, d in ts.g.out_edges_iter(u, data=True)
                                 if k + d['weight'] <= time_bound])
-                # TODO: substract consumption of resources
+                # substract consumption of resources
                 departing += sum([task_var[k] * quantities.get(h, 0)
                                  for task_var, quantities in task_stl_vars[u]
                                  if h in quantities])
@@ -405,7 +383,7 @@ def extract_propositions(ts, ast):
 
 def add_proposition_constraints(m, stl_milp, ts, ast, capabilities,
                                 agent_classes, time_bound, variable_bound,
-                                vtype=GRB.INTEGER):
+                                vtype=GRB.CONTINUOUS):
     '''Adds the proposition constraints. First, the proposition-state variables
     are defined such that capabilities are not double booked. Second, contraints
     are added such that proposition are satisfied as best as possible. The
@@ -424,7 +402,7 @@ def add_proposition_constraints(m, stl_milp, ts, ast, capabilities,
     to bitmaps (integers).
     - Time bound.
     - The upper bound for variables.
-    - Variable type (default: integer).
+    - Variable type (default: real).
     '''
     props = extract_propositions(ts, ast)
 
@@ -469,14 +447,12 @@ def add_proposition_constraints(m, stl_milp, ts, ast, capabilities,
 
 def add_proposition_resource_constraints(m, stl_milp, ts, ast, resources,
                                          time_bound, variable_bound,
-                                         vtype=GRB.INTEGER):
-    '''TODO:
-
-    Adds the proposition constraints. First, the proposition-state variables
-    are defined such that capabilities are not double booked. Second, contraints
-    are added such that proposition are satisfied as best as possible. The
-    variables in the MILP encoding of the STL formula are used for the encoding
-    as the minimizers of over proposition-state variables.
+                                         vtype=GRB.CONTINUOUS):
+    '''Adds the proposition resource constraints. First, the proposition-state
+    variables are defined. Second, contraints are added such that proposition
+    are satisfied as best as possible. The variables in the MILP encoding of the
+    STL formula are used for the encoding as the minimizers of over
+    proposition-state variables.
 
     Input
     -----
@@ -484,13 +460,10 @@ def add_proposition_resource_constraints(m, stl_milp, ts, ast, resources,
     - The MILP encoding of the STL formula obtained from the CaTL specification.
     - The transition system specifying the environment.
     - The AST of the CaTL specification formula.
-    - Dictionary of capability encoding that maps capabilities to binary words
-    represented as integers.
-    - The agent classes given as a dictionary from frozen sets of capabilities
-    to bitmaps (integers).
+    - The resource types available.
     - Time bound.
     - The upper bound for variables.
-    - Variable type (default: integer).
+    - Variable type (default: real).
     '''
     props = extract_propositions(ts, ast)
 
@@ -598,10 +571,11 @@ def route_planning(ts, agents, formula, time_bound=None, variable_bound=None,
     - The CaTL specification formula.
     - The time bound used in the encoding (default: computed from CaTL formula).
     - The upper bound for variables.
-    - TODO:
-    - TODO:
-    - TODO:
-    - TODO:
+    - The agents' storage type (options: general or uniform).
+    - The resource carrying capacities of agent classes.
+    - The initial distribution of resources over states of the transition
+    system.
+    - The resource type (options: divisible, packets or indivisible).
     - Flag indicating whether to solve the robust or feasibility problem.
     - The weight of the total travel time objective used for regularization.
 
