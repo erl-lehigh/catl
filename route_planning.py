@@ -15,6 +15,7 @@ from gurobipy import GRB
 from lomap import Timer
 
 from stl.stl2milp import stl2milp
+from stl import Operation
 from catl import CATLFormula
 from catl import catl2stl
 from visualization import show_environment
@@ -312,6 +313,102 @@ def extract_trajetories(m, ts, agents, time_bound):
 
     return trajectories
 
+#def dummy_pred(formula, t):
+    "this dummy funct checks the satisfaction of a predicate"
+     #objective = stl_milp.variables[ast][t]
+     #objective = stl_milp.variables[stl][t]
+     
+     # return objective
+    #pass
+
+def nsub_formulae_satisfied(stl, stl_milp, t=0):
+
+    #objective = stl_milp.variables[stl][t]
+    # dummy funct satisfaction
+    #satis = dummy_pred(stl,t)  
+    
+    if stl.op == Operation.PRED:
+         return satis 
+    
+    elif stl.op == Operation.AND:
+        for child in stl.children:
+            satis += nsub_formulae_satisfied(child, stl_milp, t)
+        return satis
+
+    elif stl.op == Operation.OR:
+        return satis + max([nsub_formulae_satisfied(child, stl_milp, t)for child in stl.children]) #grb.max_
+
+    elif stl.op == Operation.UNTIL:
+        a, b = int(stl.low), int(stl.high)
+        satis_until=[]
+        for t_ in range(a,b+1):
+            sum_left = 0
+            for t__ in range(0,t_):
+                sum_left += nsub_formulae_satisfied(stl.left, stl_milp, t+t__)    
+            satis_until.append(nsub_formulae_satisfied(stl.right, stl_milp, t+t_)+sum_left)
+
+        return satis + max(satis_until)
+
+    elif stl.op == Operation.EVENT:
+        a, b = int(stl.low), int(stl.high)
+        child = stl.child
+        satis_event = max([nsub_formulae_satisfied(child, stl_milp, t+tau) for tau in range(a, b+1)])
+        return satis + satis_event 
+
+    elif stl.op == Operation.ALWAYS:
+        a, b = int(stl.low), int(stl.high)
+        child = stl.child
+        satis_always = sum([nsub_formulae_satisfied(child, stl_milp, t+tau) for tau in range(a, b+1)])
+        return satis + satis_always 
+
+def partial_robustness(stl, stl_milp, t=0, max_robustness=1000):
+
+    #objective = stl_milp.variables[stl][t]
+    # dummy funct satisfaction
+    #satis = dummy_pred(stl,t)  
+    m = stl_milp.model
+    if stl.op == Operation.PRED:
+        r = grb.addVar('r_{formula}_{t}'.format(stl.indetifier, t)
+        term = grb.addVar('term_{formula}_{t}'.format(stl.indetifier, t)
+        m.addConstr(r==stl_milp.variables[stl.variable][t]-stl.threshold)
+        m.addConstr(term==grb.min_(r/max_robustness,stl_milp.variables[stl][t]))
+        return term, r
+
+    elif stl.op == Operation.AND:
+        r = grb.addVar('r_{formula}_{t}'.format(stl.indetifier, t)
+        term = grb.addVar('term_{formula}_{t}'.format(stl.indetifier, t)
+        term_children, r_children = zip(*[partial_robustness(ch) for ch in stl.children])
+        m.addConstr(r==grb.min_(r_children))
+        m.addConstr(term==grb.min_(r/max_robustness,stl_milp.variables[stl][t]))
+        return term + sum(term_children),r
+
+    elif stl.op == Operation.OR:
+        return satis + max([nsub_formulae_satisfied(child, stl_milp, t)for child in stl.children]) #grb.max_
+
+    elif stl.op == Operation.UNTIL:
+        a, b = int(stl.low), int(stl.high)
+        satis_until=[]
+        for t_ in range(a,b+1):
+            sum_left = 0
+            for t__ in range(0,t_):
+                sum_left += nsub_formulae_satisfied(stl.left, stl_milp, t+t__)    
+            satis_until.append(nsub_formulae_satisfied(stl.right, stl_milp, t+t_)+sum_left)
+
+        return satis + max(satis_until)
+
+    elif stl.op == Operation.EVENT:
+        a, b = int(stl.low), int(stl.high)
+        child = stl.child
+        satis_event = max([nsub_formulae_satisfied(child, stl_milp, t+tau) for tau in range(a, b+1)])
+        return satis + satis_event 
+
+    elif stl.op == Operation.ALWAYS:
+        a, b = int(stl.low), int(stl.high)
+        child = stl.child
+        satis_always = sum([nsub_formulae_satisfied(child, stl_milp, t+tau) for tau in range(a, b+1)])
+        return satis + satis_always          
+
+
 def route_planning(ts, agents, formula, time_bound=None, variable_bound=None,
                    robust=True, travel_time_weight=0):
     '''Performs route planning for agents `agents' moving in a transition system
@@ -367,8 +464,20 @@ def route_planning(ts, agents, formula, time_bound=None, variable_bound=None,
         add_travel_time_objective(m, ts, travel_time_weight, time_bound,
                                   variable_bound)
 
+    #Counting satisfied sub-formulae
+    # count_satis = nsub_formulae_satisfied(stl, stl_milp)
+
+    # tentative new objective:
+    # m.setObjective(sum_i ((1/rho_p) * stl_milp.rho, satis_tasks_i) + count_satis) )
+
     # run optimizer
-    m.optimize()
+    m.optimize()    
+
+    # print '--------------------------------'
+    # print "thingggggg",objective32
+    # print "thingggggg",objective32
+    # print "thingggggg",objective32
+    # print '--------------------------------'
 
     if m.status == GRB.Status.OPTIMAL:
         logging.info('"Optimal objective LP": %f', m.objVal)

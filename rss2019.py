@@ -36,7 +36,7 @@ def case_rss2019(ts_filename='/home/gustavo/formal_Methods/catl-master/farm.yaml
     for state, _ in agents:
         assert state in ts.g, 'State "{}" not in TS!'.format(state)
 
-    specification = 'F[0, 2] T(4, blue, {(Vis, 2), (UV, 3)})'\
+    specification = 'F[0, 4] T(1, blue, {(Vis, 2), (UV, 3)})'\
                     '&& G[1, 7] T(2, orange, {(Vis, 1), (IR, 4)})'\
                     '&& F[3, 5] T(3, red, {(UV, 1), (IR, 2)})'
 

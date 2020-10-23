@@ -270,10 +270,13 @@ class CATLAbstractSyntaxTreeExtractor(catlVisitor):
 
 if __name__ == '__main__':
     ast = CATLFormula.from_formula(
-            'F[0, 2] T(4, test, {(a, 2), (b, 3)})'
-            '&& G[1, 7] T(2, test, {(a, 1), (c, 4)}, {(h1, 2.3), (h2, 5)})'
-            '&& F[3, 5] T(3, test2, {(b, 1), (d, 2)})')
-    print('AST:', ast)
+            'F[0,10](T(3,A,{(C1,2)}) || T(3,B,{(C1,2),(C2,2)})) && F[20,40](T(3,C,{(C2,1)}) U[5,10] (T(3, A, {(C1, 1),(C2,1)}) && T(3,B,{(C1,1),(C2,1)})))')
+
+            #'F[0, 2] T(3, test, {(a, 2), (b, 3)})'
+            #'&& G[1, 7] T(2, test, {(a, 1), (c, 4)}, {(h1, 2.3), (h2, 5)})'
+            #'&& F[3, 5] T(3, test2, {(b, 1), (d, 2)})')
+
+    #print('AST:', ast)
     print('Propositions:', ast.propositions())
     print('Capabilities:', ast.capabilities())
     print('Resources:', ast.resources())

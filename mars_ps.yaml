@@ -1,0 +1,95 @@
+!Ts
+name: mars
+directed: true
+multi: false
+init: []
+final: []
+graph:
+  nodes:
+    q1:
+      prop: !!set {blue: null}
+      shape: [[10, 2.5], [23, 2.5], [23, 5], [10, 5]]
+      color: blue
+    q2:
+      prop: !!set {pink: null}
+      shape: [[10, 5], [30, 5], [30, 10], [10, 10]]
+      color: pink
+    q3:
+      prop: !!set {cyan: null}
+      shape: [[7, 0], [30, 0], [30, 2.5], [7, 2.5]]
+      color: cyan
+    q4:
+      prop: !!set {green: null}
+      shape: [[4, 2.5], [10, 2.5], [10, 6.5], [4, 6.5]]
+      color: green
+    q5:
+      prop: !!set {yellow: null}
+      shape: [[7, 6.5], [10, 6.5], [10, 10], [7, 10]]
+      color: yellow
+    q6:
+      prop: !!set {purple: null}
+      shape: [[0, 6.5], [7, 6.5], [7, 10], [0, 10]]
+      color: purple
+    q7:
+      prop: !!set {gray: null}
+      shape: [[0, 5], [4, 5], [4, 6.5], [0, 6.5]]
+      color: gray
+    q8:
+      prop: !!set {red: null}
+      shape: [[0, 2.5], [4, 2.5], [4, 5], [0, 5]]
+      color: red
+    q9:
+      prop: !!set {orange: null}
+      shape: [[0, 0], [3, 0], [3, 2.5], [0, 2.5]]
+      color: orange
+    q10:
+      prop: !!set {black: null}
+      shape: [[3, 0], [7, 0], [7, 2.5], [3, 2.5]]
+      color: black
+    q11:
+      prop: !!set {black: null}
+      shape: [[23, 2.5], [30, 2.5], [30, 5], [23, 5]]
+      color: black
+    
+
+  edges:
+  - [q1, q1, {weight: 1}]
+  - [q2, q2, {weight: 1}]
+  - [q3, q3, {weight: 1}]
+  - [q4, q4, {weight: 1}]
+  - [q5, q5, {weight: 1}]
+  - [q6, q6, {weight: 1}]
+  - [q7, q7, {weight: 1}]
+  - [q8, q8, {weight: 1}]
+  - [q9, q9, {weight: 1}]
+  - [q10, q10, {weight: 1}]
+  - [q11, q11, {weight: 1}]
+
+  - [q1, q2, {weight: 1}]
+  - [q1, q3, {weight: 1}]
+  - [q1, q4, {weight: 1}]
+  - [q2, q1, {weight: 1}]
+  - [q2, q4, {weight: 1}]
+  - [q2, q5, {weight: 1}]
+  - [q3, q1, {weight: 1}]
+  - [q3, q4, {weight: 1}]
+  - [q4, q1, {weight: 1}]
+  - [q4, q2, {weight: 1}]
+  - [q4, q3, {weight: 1}]
+  - [q4, q5, {weight: 1}]
+  - [q4, q6, {weight: 1}]
+  - [q4, q7, {weight: 1}]
+  - [q4, q8, {weight: 1}]
+  - [q5, q2, {weight: 1}]
+  - [q5, q4, {weight: 1}]
+  - [q5, q6, {weight: 1}]
+  - [q6, q4, {weight: 1}]
+  - [q6, q5, {weight: 1}]
+  - [q6, q7, {weight: 1}]
+  - [q7, q4, {weight: 1}]
+  - [q7, q6, {weight: 1}]
+  - [q7, q8, {weight: 1}]
+  - [q8, q4, {weight: 1}]
+  - [q8, q7, {weight: 1}]
+  - [q8, q9, {weight: 1}]
+  - [q9, q8, {weight: 1}]
