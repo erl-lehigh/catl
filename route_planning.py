@@ -11,6 +11,7 @@ import logging
 
 from gurobipy import Model as GRBModel
 from gurobipy import GRB
+import gurobipy as grb
 
 from lomap import Timer
 
@@ -313,30 +314,26 @@ def extract_trajetories(m, ts, agents, time_bound):
 
     return trajectories
 
-#def dummy_pred(formula, t):
-    "this dummy funct checks the satisfaction of a predicate"
-     #objective = stl_milp.variables[ast][t]
-     #objective = stl_milp.variables[stl][t]
-     
-     # return objective
-    #pass
 
 def nsub_formulae_satisfied(stl, stl_milp, t=0):
+    satis = grb.min_(0,0)
 
-    #objective = stl_milp.variables[stl][t]
-    # dummy funct satisfaction
-    #satis = dummy_pred(stl,t)  
-    
     if stl.op == Operation.PRED:
-         return satis 
+        satis = stl_milp.variables[stl][t]
+        #x = satis
+        #m.addConstr(x == 1)
+        return satis  
     
     elif stl.op == Operation.AND:
         for child in stl.children:
             satis += nsub_formulae_satisfied(child, stl_milp, t)
+        #x = m.addVar('x_{formula}_{t}'.format(stl.indetifier, t)) 
+        #x = satis 
+        #m.addConstr(x == 1)
         return satis
 
     elif stl.op == Operation.OR:
-        return satis + max([nsub_formulae_satisfied(child, stl_milp, t)for child in stl.children]) #grb.max_
+        return satis + grb.max_([nsub_formulae_satisfied(child, stl_milp, t)for child in stl.children]) #grb.max_
 
     elif stl.op == Operation.UNTIL:
         a, b = int(stl.low), int(stl.high)
@@ -352,7 +349,7 @@ def nsub_formulae_satisfied(stl, stl_milp, t=0):
     elif stl.op == Operation.EVENT:
         a, b = int(stl.low), int(stl.high)
         child = stl.child
-        satis_event = max([nsub_formulae_satisfied(child, stl_milp, t+tau) for tau in range(a, b+1)])
+        satis_event = grb.max_([nsub_formulae_satisfied(child, stl_milp, t+tau) for tau in range(a, b+1)])
         return satis + satis_event 
 
     elif stl.op == Operation.ALWAYS:
@@ -362,51 +359,63 @@ def nsub_formulae_satisfied(stl, stl_milp, t=0):
         return satis + satis_always 
 
 def partial_robustness(stl, stl_milp, t=0, max_robustness=1000):
+ 
+    m = stl_milp.model #why is this need it ?
 
-    #objective = stl_milp.variables[stl][t]
-    # dummy funct satisfaction
-    #satis = dummy_pred(stl,t)  
-    m = stl_milp.model
     if stl.op == Operation.PRED:
-        r = grb.addVar('r_{formula}_{t}'.format(stl.indetifier, t)
-        term = grb.addVar('term_{formula}_{t}'.format(stl.indetifier, t)
-        m.addConstr(r==stl_milp.variables[stl.variable][t]-stl.threshold)
-        m.addConstr(term==grb.min_(r/max_robustness,stl_milp.variables[stl][t]))
+        r = m.addVar(name='r_{}_{}'.format(stl.identifier, t)) # m.addVar ??
+        term = m.addVar(name = 'term_{}_{}'.format(stl.identifier, t)) 
+        m.addConstr(r == stl_milp.variables[stl.variable][t] - stl.threshold) 
+        m.addConstr(term == grb.min_(r/max_robustness, stl_milp.variables[stl.variable][t])) #import gurobipy as grb ?? not sure if [stl.variable] or just [stl]
         return term, r
 
     elif stl.op == Operation.AND:
-        r = grb.addVar('r_{formula}_{t}'.format(stl.indetifier, t)
-        term = grb.addVar('term_{formula}_{t}'.format(stl.indetifier, t)
-        term_children, r_children = zip(*[partial_robustness(ch) for ch in stl.children])
-        m.addConstr(r==grb.min_(r_children))
-        m.addConstr(term==grb.min_(r/max_robustness,stl_milp.variables[stl][t]))
-        return term + sum(term_children),r
+        r = m.addVar(name = 'r_{}_{}'.format(stl.identifier, t))
+        term = m.addVar(name = 'term_{}_{}'.format(stl.identifier, t))
+        term_children, r_children = zip(*[partial_robustness(ch, stl_milp) for ch in stl.children])
+        m.addConstr(r == grb.min_(r_children)) 
+        m.addConstr(term == grb.min_(r/max_robustness,stl_milp.variables[stl.variable][t]))
+        return term + sum(term_children), r
 
     elif stl.op == Operation.OR:
-        return satis + max([nsub_formulae_satisfied(child, stl_milp, t)for child in stl.children]) #grb.max_
+        r = m.addVar(name = 'r_{}_{}'.format(stl.identifier, t))
+        term = m.addVar(name = 'term_{}_{}'.format(stl.identifier, t))
+        term_children, r_children = zip(*[partial_robustness(ch, stl_milp) for ch in stl.children])
+        m.addConstr(r == grb.max_(r_children))
+        m.addConstr(term == grb.min_(r/max_robustness,stl_milp.variables[stl.variable][t]))
+        return term + sum(term_children), r
 
     elif stl.op == Operation.UNTIL:
+        r = m.addVar(name = 'r_{}_{}'.format(stl.identifier, t))
+        term = m.addVar(name = 'term_{}_{}'.format(stl.identifier, t))
         a, b = int(stl.low), int(stl.high)
-        satis_until=[]
+        r_until=[]
         for t_ in range(a,b+1):
-            sum_left = 0
-            for t__ in range(0,t_):
-                sum_left += nsub_formulae_satisfied(stl.left, stl_milp, t+t__)    
-            satis_until.append(nsub_formulae_satisfied(stl.right, stl_milp, t+t_)+sum_left)
-
-        return satis + max(satis_until)
+            term_left, r_left =  zip(*[partial_robustness(stl.left, stl_milp, t+t__) for t__ in range(0,t_)])
+            r_until.append(grb.min_(partial_robustness(stl.rigth, stl_milp, t+t_)[1], grb.min_(r_left)))            
+        m.addConstr(r == grb.max_(r_until))
+        m.addConstr(term == grb.min_(r/max_robustness,stl_milp.variables[stl.variable][t]))
+        return term, r # how to compute term?
 
     elif stl.op == Operation.EVENT:
+        r = m.addVar(name = 'r_{}_{}'.format(stl.identifier, t))
+        term = m.addVar(name = 'term_{}_{}'.format(stl.identifier, t))
         a, b = int(stl.low), int(stl.high)
         child = stl.child
-        satis_event = max([nsub_formulae_satisfied(child, stl_milp, t+tau) for tau in range(a, b+1)])
-        return satis + satis_event 
+        term_child, r_child = zip(*[partial_robustness(child, stl_milp, t+tau) for tau in range(a, b+1)])
+        m.addConstr(r == grb.max_(r_child))
+        m.addConstr(term == grb.min_(r/max_robustness,stl_milp.variables[stl.variable][t]))
+        return term + sum(term_child), r
 
     elif stl.op == Operation.ALWAYS:
+        r = m.addVar(name = 'r_{}_{}'.format(stl.identifier, t))
+        term = m.addVar(name = 'term_{}_{}'.format(stl.identifier, t))
         a, b = int(stl.low), int(stl.high)
         child = stl.child
-        satis_always = sum([nsub_formulae_satisfied(child, stl_milp, t+tau) for tau in range(a, b+1)])
-        return satis + satis_always          
+        term_child, r_child = zip(*[partial_robustness(child, stl_milp, t+tau) for tau in range(a, b+1)])
+        m.addConstr(r == grb.min_(r_child))
+        m.addConstr(term == grb.min_(r/max_robustness,stl_milp.variables[stl.variable][t]))
+        return term + sum(term_child), r         
 
 
 def route_planning(ts, agents, formula, time_bound=None, variable_bound=None,
@@ -465,19 +474,14 @@ def route_planning(ts, agents, formula, time_bound=None, variable_bound=None,
                                   variable_bound)
 
     #Counting satisfied sub-formulae
-    # count_satis = nsub_formulae_satisfied(stl, stl_milp)
-
+    #count_satis = nsub_formulae_satisfied(stl, stl_milp)
+    thing = partial_robustness(stl, stl_milp)
     # tentative new objective:
     # m.setObjective(sum_i ((1/rho_p) * stl_milp.rho, satis_tasks_i) + count_satis) )
 
     # run optimizer
     m.optimize()    
 
-    # print '--------------------------------'
-    # print "thingggggg",objective32
-    # print "thingggggg",objective32
-    # print "thingggggg",objective32
-    # print '--------------------------------'
 
     if m.status == GRB.Status.OPTIMAL:
         logging.info('"Optimal objective LP": %f', m.objVal)
