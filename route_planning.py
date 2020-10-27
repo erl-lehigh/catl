@@ -460,7 +460,6 @@ def route_planning(ts, agents, formula, time_bound=None, variable_bound=None,
     # add CATL formula constraints
     stl = catl2stl(ast)
     print (stl.children)
-    sebasesgay
     ranges = {variable: (0, len(agents)) for variable in stl.variables()}
     stl_milp = stl2milp(stl, ranges=ranges, model=m, robust=robust)
     stl_milp.translate()
