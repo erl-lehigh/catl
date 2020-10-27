@@ -320,7 +320,7 @@ def nsub_formulae_satisfied(stl, stl_milp, t=0):
 
     if stl.op == Operation.PRED:
         satis = stl_milp.variables[stl][t]
-        #x = satis
+        #x = m.addVar(satis, name = "part_satisfaction")
         #m.addConstr(x == 1)
         return satis  
     
@@ -328,7 +328,6 @@ def nsub_formulae_satisfied(stl, stl_milp, t=0):
         for child in stl.children:
             satis += nsub_formulae_satisfied(child, stl_milp, t)
         #x = m.addVar('x_{formula}_{t}'.format(stl.indetifier, t)) 
-        #x = satis 
         #m.addConstr(x == 1)
         return satis
 
@@ -460,6 +459,8 @@ def route_planning(ts, agents, formula, time_bound=None, variable_bound=None,
 
     # add CATL formula constraints
     stl = catl2stl(ast)
+    print (stl.children)
+    sebasesgay
     ranges = {variable: (0, len(agents)) for variable in stl.variables()}
     stl_milp = stl2milp(stl, ranges=ranges, model=m, robust=robust)
     stl_milp.translate()
