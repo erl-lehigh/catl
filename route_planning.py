@@ -387,55 +387,60 @@ def partial_robustness(stl, stl_milp, t=0, max_robustness=1000):
         term = m.addVar(name = 'term_{}_{}'.format(stl.identifier, t)) 
         m.addConstr(r == (stl_milp.variables[stl.variable][t] - stl.threshold) / max_robustness) 
         m.addConstr(term == grb.min_(r, stl_milp.variables[stl.variable][t])) 
-        return term, r
+        return term, r, 1
 
     elif stl.op == Operation.AND:
         r = m.addVar(name = 'r_{}_{}'.format(stl.identifier, t))
         term = m.addVar(name = 'term_{}_{}'.format(stl.identifier, t))
-        term_children, r_children = zip(*[partial_robustness(ch, stl_milp) for ch in stl.children])
+        term_children, r_children, n_term_children = zip(*[partial_robustness(ch, stl_milp) for ch in stl.children])
         m.addConstr(r == grb.min_(r_children)) 
         m.addConstr(term == grb.min_(r, stl_milp.variables[stl][t]))
-        return term + sum(term_children), r
+        return term + sum(term_children), r, 1 + sum(n_term_children)
 
     elif stl.op == Operation.OR:
         r = m.addVar(name = 'r_{}_{}'.format(stl.identifier, t))
         term = m.addVar(name = 'term_{}_{}'.format(stl.identifier, t))
-        term_children, r_children = zip(*[partial_robustness(ch, stl_milp) for ch in stl.children])
+        term_children, r_children, n_term_children = zip(*[partial_robustness(ch, stl_milp) for ch in stl.children])
         m.addConstr(r == grb.max_(r_children))
         m.addConstr(term == grb.min_(r, stl_milp.variables[stl][t]))
-        return term + sum(term_children), r
+        return term + sum(term_children), r, 1 + sum(n_term_children)
 
     elif stl.op == Operation.UNTIL:
         r = m.addVar(name = 'r_{}_{}'.format(stl.identifier, t))
         term = m.addVar(name = 'term_{}_{}'.format(stl.identifier, t))
         a, b = int(stl.low), int(stl.high)
         r_until=[]
+        n_terms = 0
+        terms_children = 0
         for t_ in range(a,b+1):
-            term_left, r_left =  zip(*[partial_robustness(stl.left, stl_milp, t+t__) for t__ in range(0,t_)])
-            r_until.append(grb.min_(partial_robustness(stl.rigth, stl_milp, t+t_)[1], grb.min_(r_left)))            
+            term_left, r_left, n_terms_left =  zip(*[partial_robustness(stl.left, stl_milp, t+t__) for t__ in range(0,t_)])
+            term_right, r_right, n_terms_right = partial_robustness(stl.rigth, stl_milp, t+t_)
+            terms_children += term_right + sum(term_left)
+            r_until.append(grb.min_(r_right, grb.min_(r_left)))
+            n_terms += n_terms_right + sum(n_terms_left)
         m.addConstr(r == grb.max_(r_until))
         m.addConstr(term == grb.min_(r, stl_milp.variables[stl][t]))
-        return term, r 
+        return term + terms_children, r, n_terms
 
     elif stl.op == Operation.EVENT:
         r = m.addVar(name = 'r_{}_{}'.format(stl.identifier, t))
         term = m.addVar(name = 'term_{}_{}'.format(stl.identifier, t))
         a, b = int(stl.low), int(stl.high)
         child = stl.child
-        term_child, r_child = zip(*[partial_robustness(child, stl_milp, t+tau) for tau in range(a, b+1)])
+        term_child, r_child, n_term_child = zip(*[partial_robustness(child, stl_milp, t+tau) for tau in range(a, b+1)])
         m.addConstr(r == grb.max_(r_child))
         m.addConstr(term == grb.min_(r, stl_milp.variables[stl][t]))
-        return term + sum(term_child), r
+        return term + sum(term_child), r, 1 + sum(n_term_child)
 
     elif stl.op == Operation.ALWAYS:
         r = m.addVar(name = 'r_{}_{}'.format(stl.identifier, t))
         term = m.addVar(name = 'term_{}_{}'.format(stl.identifier, t))
         a, b = int(stl.low), int(stl.high)
         child = stl.child
-        term_child, r_child = zip(*[partial_robustness(child, stl_milp, t+tau) for tau in range(a, b+1)])
+        term_child, r_child, n_term_child = zip(*[partial_robustness(child, stl_milp, t+tau) for tau in range(a, b+1)])
         m.addConstr(r == grb.min_(r_child))
         m.addConstr(term == grb.min_(r, stl_milp.variables[stl][t]))
-        return term + sum(term_child), r         
+        return term + sum(term_child), r, 1 + sum(n_term_child)
 
 
 def route_planning(ts, agents, formula, time_bound=None, variable_bound=None,
