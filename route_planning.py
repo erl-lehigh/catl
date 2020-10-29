@@ -316,23 +316,21 @@ def extract_trajetories(m, ts, agents, time_bound):
 
 
 def nsub_formulae_satisfied(stl, stl_milp, t=0):
-    satis = grb.min_(0,0)
-
+    m = stl_milp.model 
+   # satis = grb.min_(0,0)
     if stl.op == Operation.PRED:
         satis = stl_milp.variables[stl][t]
-        #x = m.addVar(satis, name = "part_satisfaction")
-        #m.addConstr(x == 1)
-        return satis  
+        x = m.addVar( name = "partial_satisfaction")
+        m.addConstr(x == satis)
+        return x
     
     elif stl.op == Operation.AND:
         for child in stl.children:
             satis += nsub_formulae_satisfied(child, stl_milp, t)
-        #x = m.addVar('x_{formula}_{t}'.format(stl.indetifier, t)) 
-        #m.addConstr(x == 1)
         return satis
 
     elif stl.op == Operation.OR:
-        return satis + grb.max_([nsub_formulae_satisfied(child, stl_milp, t)for child in stl.children]) #grb.max_
+        return satis + grb.max_([nsub_formulae_satisfied(child, stl_milp, t)for child in stl.children]) 
 
     elif stl.op == Operation.UNTIL:
         a, b = int(stl.low), int(stl.high)
@@ -359,13 +357,13 @@ def nsub_formulae_satisfied(stl, stl_milp, t=0):
 
 def partial_robustness(stl, stl_milp, t=0, max_robustness=1000):
  
-    m = stl_milp.model #why is this need it ?
+    m = stl_milp.model 
 
     if stl.op == Operation.PRED:
-        r = m.addVar(name='r_{}_{}'.format(stl.identifier, t)) # m.addVar ??
+        r = m.addVar(name='r_{}_{}'.format(stl.identifier, t)) 
         term = m.addVar(name = 'term_{}_{}'.format(stl.identifier, t)) 
-        m.addConstr(r == stl_milp.variables[stl.variable][t] - stl.threshold) 
-        m.addConstr(term == grb.min_(r/max_robustness, stl_milp.variables[stl.variable][t])) #import gurobipy as grb ?? not sure if [stl.variable] or just [stl]
+        m.addConstr(r == (stl_milp.variables[stl.variable][t] - stl.threshold) / max_robustness) 
+        m.addConstr(term == grb.min_(r, stl_milp.variables[stl.variable][t])) 
         return term, r
 
     elif stl.op == Operation.AND:
@@ -373,7 +371,7 @@ def partial_robustness(stl, stl_milp, t=0, max_robustness=1000):
         term = m.addVar(name = 'term_{}_{}'.format(stl.identifier, t))
         term_children, r_children = zip(*[partial_robustness(ch, stl_milp) for ch in stl.children])
         m.addConstr(r == grb.min_(r_children)) 
-        m.addConstr(term == grb.min_(r/max_robustness,stl_milp.variables[stl.variable][t]))
+        m.addConstr(term == grb.min_(r, stl_milp.variables[stl][t]))
         return term + sum(term_children), r
 
     elif stl.op == Operation.OR:
@@ -381,7 +379,7 @@ def partial_robustness(stl, stl_milp, t=0, max_robustness=1000):
         term = m.addVar(name = 'term_{}_{}'.format(stl.identifier, t))
         term_children, r_children = zip(*[partial_robustness(ch, stl_milp) for ch in stl.children])
         m.addConstr(r == grb.max_(r_children))
-        m.addConstr(term == grb.min_(r/max_robustness,stl_milp.variables[stl.variable][t]))
+        m.addConstr(term == grb.min_(r, stl_milp.variables[stl][t]))
         return term + sum(term_children), r
 
     elif stl.op == Operation.UNTIL:
@@ -393,8 +391,8 @@ def partial_robustness(stl, stl_milp, t=0, max_robustness=1000):
             term_left, r_left =  zip(*[partial_robustness(stl.left, stl_milp, t+t__) for t__ in range(0,t_)])
             r_until.append(grb.min_(partial_robustness(stl.rigth, stl_milp, t+t_)[1], grb.min_(r_left)))            
         m.addConstr(r == grb.max_(r_until))
-        m.addConstr(term == grb.min_(r/max_robustness,stl_milp.variables[stl.variable][t]))
-        return term, r # how to compute term?
+        m.addConstr(term == grb.min_(r, stl_milp.variables[stl][t]))
+        return term, r 
 
     elif stl.op == Operation.EVENT:
         r = m.addVar(name = 'r_{}_{}'.format(stl.identifier, t))
@@ -403,7 +401,7 @@ def partial_robustness(stl, stl_milp, t=0, max_robustness=1000):
         child = stl.child
         term_child, r_child = zip(*[partial_robustness(child, stl_milp, t+tau) for tau in range(a, b+1)])
         m.addConstr(r == grb.max_(r_child))
-        m.addConstr(term == grb.min_(r/max_robustness,stl_milp.variables[stl.variable][t]))
+        m.addConstr(term == grb.min_(r, stl_milp.variables[stl][t]))
         return term + sum(term_child), r
 
     elif stl.op == Operation.ALWAYS:
@@ -413,7 +411,7 @@ def partial_robustness(stl, stl_milp, t=0, max_robustness=1000):
         child = stl.child
         term_child, r_child = zip(*[partial_robustness(child, stl_milp, t+tau) for tau in range(a, b+1)])
         m.addConstr(r == grb.min_(r_child))
-        m.addConstr(term == grb.min_(r/max_robustness,stl_milp.variables[stl.variable][t]))
+        m.addConstr(term == grb.min_(r, stl_milp.variables[stl][t]))
         return term + sum(term_child), r         
 
 
@@ -474,8 +472,9 @@ def route_planning(ts, agents, formula, time_bound=None, variable_bound=None,
                                   variable_bound)
 
     #Counting satisfied sub-formulae
-    #count_satis = nsub_formulae_satisfied(stl, stl_milp)
-    thing = partial_robustness(stl, stl_milp)
+    count_satis = nsub_formulae_satisfied(stl, stl_milp)
+    partial_robust = partial_robustness(stl, stl_milp)
+
     # tentative new objective:
     # m.setObjective(sum_i ((1/rho_p) * stl_milp.rho, satis_tasks_i) + count_satis) )
 
