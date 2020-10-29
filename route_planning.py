@@ -316,44 +316,67 @@ def extract_trajetories(m, ts, agents, time_bound):
 
 
 def nsub_formulae_satisfied(stl, stl_milp, t=0):
+    '''TODO:
+    Returns Gurobi variable 
+    '''
     m = stl_milp.model 
-   # satis = grb.min_(0,0)
+    satis = stl_milp.variables[stl][t]
+    
     if stl.op == Operation.PRED:
-        satis = stl_milp.variables[stl][t]
-        x = m.addVar( name = "partial_satisfaction")
-        m.addConstr(x == satis)
-        return x
+        return satis
     
     elif stl.op == Operation.AND:
         for child in stl.children:
             satis += nsub_formulae_satisfied(child, stl_milp, t)
-        return satis
+   #     n = m.addVar(name="n_{}_{}".format(stl.identifier(), t))
+   #     m.addConstr(n == satis)
+   #     return n
 
     elif stl.op == Operation.OR:
-        return satis + grb.max_([nsub_formulae_satisfied(child, stl_milp, t)for child in stl.children]) 
+        x = m.addVar();
+        m.addConstr(x == grb.max_([nsub_formulae_satisfied(child, stl_milp, t)
+                                   for child in stl.children]))
+   #     n = m.addVar(name="n_{}_{}".format(stl.identifier(), t))
+   #     m.addConstr(n == satis + x)
+   #     return n
 
     elif stl.op == Operation.UNTIL:
         a, b = int(stl.low), int(stl.high)
         satis_until=[]
-        for t_ in range(a,b+1):
-            sum_left = 0
-            for t__ in range(0,t_):
-                sum_left += nsub_formulae_satisfied(stl.left, stl_milp, t+t__)    
-            satis_until.append(nsub_formulae_satisfied(stl.right, stl_milp, t+t_)+sum_left)
-
-        return satis + max(satis_until)
+        sum_left = sum([nsub_formulae_satisfied(stl.left, stl_milp, tau)
+                        for tau in range(t, t+a)])
+        for t_prime in range(a,b+1):
+            sum_left += nsub_formulae_satisfied(stl.left, stl_milp, t + t_prime)
+            aux = m.addVar()
+            m.addConstr(aux == nsub_formulae_satisfied(stl.right, stl_milp, t + t_prime)
+                             + sum_left)
+            satis_until.append(aux)
+        x = m.addVar();
+        m.addConstr(x == grb.max_(satis_until))
+   #     n = m.addVar(name="n_{}_{}".format(stl.identifier(), t))
+   #     m.addConstr(n == satis + x)
+   #     return n
 
     elif stl.op == Operation.EVENT:
         a, b = int(stl.low), int(stl.high)
         child = stl.child
-        satis_event = grb.max_([nsub_formulae_satisfied(child, stl_milp, t+tau) for tau in range(a, b+1)])
-        return satis + satis_event 
+        x = m.addVar()
+        m.addConstr(x == grb.max_([nsub_formulae_satisfied(child, stl_milp, t+tau)
+                                   for tau in range(a, b+1)]))
+    #    n = m.addVar(name="n_{}_{}".format(stl.identifier(), t))
+    #    m.addConstr(n == satis + x)
+    #    return n 
 
     elif stl.op == Operation.ALWAYS:
         a, b = int(stl.low), int(stl.high)
         child = stl.child
-        satis_always = sum([nsub_formulae_satisfied(child, stl_milp, t+tau) for tau in range(a, b+1)])
-        return satis + satis_always 
+        x = m.addVar()
+        m.addConstr(x == sum([nsub_formulae_satisfied(child, stl_milp, t+tau)
+                              for tau in range(a, b+1)]))
+    
+    n = m.addVar(name="n_{}_{}".format(stl.identifier(), t))
+    m.addConstr(n == satis + x)
+    return n 
 
 def partial_robustness(stl, stl_milp, t=0, max_robustness=1000):
  
