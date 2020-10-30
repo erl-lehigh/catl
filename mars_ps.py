@@ -69,13 +69,14 @@ def mars_partial(ts_filename='mars_ps.yaml'):
     
     #Simplest specification to test robustness
     #specification = ('F[0, 5] T(1, green, {(Ma, 1)})')
-    specification = ('F[0,10] T(3, blue, {(Dr,3)}) && F[0,10] T(3, green, {(Dr,1)}) && F[0,10] T(3, pink, {(Dr,1)})')
-    
+    specification = ('F[10, 15] T(3, green, {(Ma, 9)})')
+    #('G[0,10] T(1, blue, {(Dr,3)}) && G[0,10] T(1, green, {(Dr,4)})')
+    #('F[0,10] T(3, blue, {(Dr,3)}) && F[10,20] T(2, green, {(Dr,1)}) && F[10,20] T(2, pink, {(Dr,1)})')
     #specification = ('F[0,10] T(7, blue, {(Dr,3)}) || F[0,10] T(7, green, {(Dr,1)}) || F[0,10] T(6, pink, {(Dr,1)})')
 
                      
 
-    m = route_planning(ts, agents, specification)
+    m, n = route_planning(ts, agents, specification)
     print('final_opti')
     time_bound = len(ts.g.nodes(data=True)[0][1]['vars']) - 1
 
@@ -83,7 +84,7 @@ def mars_partial(ts_filename='mars_ps.yaml'):
 
     check_initial_states(ts, agents)
     check_flow_constraints(ts, agents, time_bound)
-
+    print(n.x)
 if __name__ == '__main__':
     mars_partial()
 

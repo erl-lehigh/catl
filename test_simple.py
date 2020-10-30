@@ -43,8 +43,8 @@ def case_simple(ts_filename='simple.yaml'):
     for u in ts.g:
         logging.debug('State: %s, Data: %s', u, str(ts.g.node[u]))
 
-    agents = [('q1', {'a'}), ('q2', {'a'}), ('q3', {'a'}), ('q1', {'a'}), ('q2', {'a'}), ('q3', {'a'}),
-             ]
+    agents = [('q1', {'a'}), ('q2', {'a'}), ('q3', {'a'}), ('q1', {'a'}), ('q2', {'a'}), ('q3', {'a'}),]
+             
 
     initial_locations, capabilities = zip(*agents)
     agent_classes = set(map(frozenset, capabilities))
@@ -59,14 +59,17 @@ def case_simple(ts_filename='simple.yaml'):
     for state, _ in agents:
         assert state in ts.g, 'State "{}" not in TS!'.format(state)
 
-    specification = ('F[0, 6] T(1, green, {(a, 1)}) || F[0, 6] T(3, blue, {(a, 1)}) && F[6, 12] T(1, blue, {(a, 1)}) || F[7, 12] T(2, orange, {(a, 1)})')
+    specification = ('T(1, green, {(a, 1)})')
+    #('F[0, 6] T(1, green, {(a, 1)}) && F[0, 6] T(3, blue, {(a, 1)}) && F[6, 12] T(1, blue, {(a, 1)}) && F[7, 12] T(2, orange, {(a, 1)})')
+    #('T(1, blue, {(a, 1)}) || T(1, orange, {(a,1)})' )
+    #('F[0, 6] T(1, green, {(a, 1)}) || F[0, 6] T(3, blue, {(a, 1)}) && F[6, 12] T(1, blue, {(a, 1)}) || F[7, 12] T(2, orange, {(a, 1)})')
     #'F[0, 20] T(1, green {(a, 2)}) &&  G[20,40] F[0,10] T(1, blue, {(a, 1)})'
                      # '&& G[1, 4] T(2, green, {(IR, 1), (Vis, 3)})'
                      # '&& F[3, 4] T(3, yellow, {(IR, 3), (Vis, 2), (UV, 3), (Mo, 4)})'
                      
-#formula = 'F[0, 20] T(1, green {(IR, 2), (Vis, 2)}) &&  G[20,40] F[0,10] T(1, blue, {(UV, 1), (Mo, 2)}) && F[5,25] T(2,yellow,{(UV,2),(Vis,2)}) && F[3,18] T(2,orange,{(Vis,2)}) && F[20,30] T(2,orange,{(Vis,2)})'
 
-    m = route_planning(ts, agents, specification)
+
+    m, n = route_planning(ts, agents, specification)
 
     time_bound = len(ts.g.nodes(data=True)[0][1]['vars']) - 1
 
@@ -74,6 +77,6 @@ def case_simple(ts_filename='simple.yaml'):
 
     check_initial_states(ts, agents)
     check_flow_constraints(ts, agents, time_bound)
-    #print(n.x)
+    print(n.x)
 if __name__ == '__main__':
     case_simple()

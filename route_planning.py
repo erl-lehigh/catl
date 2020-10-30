@@ -392,7 +392,7 @@ def partial_robustness(stl, stl_milp, t=0, max_robustness=1000):
     elif stl.op == Operation.AND:
         r = m.addVar(name = 'ro_{}_{}'.format(stl.identifier, t))
         term = m.addVar(name = 'term_{}_{}'.format(stl.identifier, t))
-        term_children, r_children, n_term_children = zip(*[partial_robustness(ch, stl_milp, t) for ch in stl.children])
+        term_children, r_children, n_term_children = zip(*[partial_robustness(ch, stl_milp, t, max_robustness) for ch in stl.children])
         m.addConstr(r == grb.min_(r_children)) 
         m.addConstr(term == grb.min_(r, stl_milp.variables[stl][t]))
         return term + sum(term_children), r, 1 + sum(n_term_children)
@@ -400,7 +400,7 @@ def partial_robustness(stl, stl_milp, t=0, max_robustness=1000):
     elif stl.op == Operation.OR:
         r = m.addVar(name = 'ro_{}_{}'.format(stl.identifier, t))
         term = m.addVar(name = 'term_{}_{}'.format(stl.identifier, t))
-        term_children, r_children, n_term_children = zip(*[partial_robustness(ch, stl_milp, t) for ch in stl.children])
+        term_children, r_children, n_term_children = zip(*[partial_robustness(ch, stl_milp, t, max_robustness) for ch in stl.children])
         m.addConstr(r == grb.max_(r_children))
         m.addConstr(term == grb.min_(r, stl_milp.variables[stl][t]))
         return term + sum(term_children), r, 1 + sum(n_term_children)
@@ -413,7 +413,7 @@ def partial_robustness(stl, stl_milp, t=0, max_robustness=1000):
         n_terms = 0
         terms_children = 0
         for t_ in range(a,b+1):
-            term_left, r_left, n_terms_left =  zip(*[partial_robustness(stl.left, stl_milp, t+t__) for t__ in range(0,t_)])
+            term_left, r_left, n_terms_left =  zip(*[partial_robustness(stl.left, stl_milp, t+t__, max_robustness) for t__ in range(0,t_)])
             term_right, r_right, n_terms_right = partial_robustness(stl.rigth, stl_milp, t+t_)
             terms_children += term_right + sum(term_left)
             r_until.append(grb.min_(r_right, grb.min_(r_left)))
@@ -427,7 +427,7 @@ def partial_robustness(stl, stl_milp, t=0, max_robustness=1000):
         term = m.addVar(name = 'term_{}_{}'.format(stl.identifier, t))
         a, b = int(stl.low), int(stl.high)
         child = stl.child
-        term_child, r_child, n_term_child = zip(*[partial_robustness(child, stl_milp, t+tau) for tau in range(a, b+1)])
+        term_child, r_child, n_term_child = zip(*[partial_robustness(child, stl_milp, t+tau, max_robustness) for tau in range(a, b+1)])
         m.addConstr(r == grb.max_(r_child))
         m.addConstr(term == grb.min_(r, stl_milp.variables[stl][t]))
         return term + sum(term_child), r, 1 + sum(n_term_child)
@@ -437,7 +437,7 @@ def partial_robustness(stl, stl_milp, t=0, max_robustness=1000):
         term = m.addVar(name = 'term_{}_{}'.format(stl.identifier, t))
         a, b = int(stl.low), int(stl.high)
         child = stl.child
-        term_child, r_child, n_term_child = zip(*[partial_robustness(child, stl_milp, t+tau) for tau in range(a, b+1)])
+        term_child, r_child, n_term_child = zip(*[partial_robustness(child, stl_milp, t+tau, max_robustness) for tau in range(a, b+1)])
         m.addConstr(r == grb.min_(r_child))
         m.addConstr(term == grb.min_(r, stl_milp.variables[stl][t]))
         return term + sum(term_child), r, 1 + sum(n_term_child)
@@ -488,7 +488,7 @@ def route_planning(ts, agents, formula, time_bound=None, variable_bound=None,
     ranges = {variable: (0, len(agents)) for variable in stl.variables()}
     stl_milp = stl2milp(stl, ranges=ranges, model=m, robust=robust)
     stl_milp.translate()
-
+    #stl_milp.translate(satisfaction=False) 
     # add proposition constraints
     add_proposition_constraints(m, stl_milp, ts, ast, capabilities,
                                 agent_classes, time_bound, variable_bound)
@@ -500,11 +500,20 @@ def route_planning(ts, agents, formula, time_bound=None, variable_bound=None,
 
     #Counting satisfied sub-formulae
     count_satis = nsub_formulae_satisfied(stl, stl_milp)
-    term, r, nterms = partial_robustness(stl, stl_milp)
+    #term, r, nterms = partial_robustness(stl, stl_milp)
 
-    # tentative new objective:partial_robust
-    m.setObjective((1 / (nterms+1)) * term + count_satis, GRB.MAXIMIZE) 
 
+    #tentative new objective:partial_robust
+    #m.setObjective(count_satis, GRB.MAXIMIZE)
+    m.update()
+    #m.setObjective((1 / (nterms+1)) * term + count_satis, GRB.MAXIMIZE)
+    #m.update()
+    # Obj = m.getObjective()
+    # print Obj
+    
+    
+
+  
     # run optimizer
     m.optimize()    
 
@@ -521,4 +530,4 @@ def route_planning(ts, agents, formula, time_bound=None, variable_bound=None,
         logging.error('Optimization ended with status %s', m.status)
 
 #     return extract_trajetories(m, ts, agents, time_bound) #TODO:
-    return m
+    return m, count_satis
