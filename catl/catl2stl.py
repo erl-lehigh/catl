@@ -46,6 +46,13 @@ def catl2stl(catl_ast):
 
         return STLFormula(STLOperation.ALWAYS, low=0, high=catl_ast.duration,
                           child=child)
+    elif catl_ast.op == CATLOperation.LIMIT:
+        var = catl_ast.proposition + '_{cap}'
+        conjunction_terms = \
+            [STLFormula(STLOperation.PRED, relation=STLRelOperation.LE,
+                        variable=var.format(cap=cap), threshold=th)
+                               for cap, th in catl_ast.capability_requests]
+        return STLFormula(STLOperation.AND, children=conjunction_terms)
     elif catl_ast.op in (CATLOperation.AND, CATLOperation.OR):
         children = [catl2stl(ch) for ch in catl_ast.children]
         if catl_ast.op == CATLOperation.AND:
@@ -75,18 +82,29 @@ def catl2stl(catl_ast):
 
 
 if __name__ == '__main__':
-    lexer = catlLexer(InputStream('F[0, 2] T(4, test, {(a, 2), (b, 3)})'
-                                  '&& G[1, 7] T(2, test, {(a, 1), (c, 4)})'
-                                  '&& F[3, 5] T(3, test2, {(b, 1), (d, 2)})'))
+    formulae = (
+        'F[0, 2] T(4, test, {(a, 2), (b, 3)})'
+        '&& G[1, 7] T(2, test, {(a, 1), (c, 4)})'
+        '&& F[3, 5] T(3, test2, {(b, 1), (d, 2)})'
+        '&& F[3, 5] L(test2, {(b, 1), (d, 2)})',
+        #
+        'F[0,25] T(3,blue,{(C1,1),(C2,1)})'
+        '&& F[0,25] T(2,orange,{(C1,1),(C2,1)})'
+        '&& (L(orange,{(C1,1),(C2,1)}) U[0,25] T(3,blue,{(C1,1),(C2,1)}))'
+    )
 
-    tokens = CommonTokenStream(lexer)
+    for formula in formulae:
+        print('Formula:', formula)
+        lexer = catlLexer(InputStream(formula))
 
-    parser = catlParser(tokens)
-    t = parser.catlProperty()
-    print(t.toStringTree())
+        tokens = CommonTokenStream(lexer)
 
-    ast = CATLAbstractSyntaxTreeExtractor().visit(t)
-    print('CATL:', ast)
+        parser = catlParser(tokens)
+        t = parser.catlProperty()
+        print(t.toStringTree())
 
-    stl = catl2stl(ast)
-    print('STL:', stl)
+        ast = CATLAbstractSyntaxTreeExtractor().visit(t)
+        print('CATL:', ast)
+
+        stl = catl2stl(ast)
+        print('STL:', stl)

@@ -14,6 +14,7 @@ grammar catl;
 catlProperty:
          '(' child=catlProperty ')' #parprop
     |    predicate #catlPredicate
+    |    limit #catlLimit
     |    op=NOT child=catlProperty #formula
     |    op=EVENT '[' low=(RATIONAL | INT) ',' high=(RATIONAL | INT) ']'
          child=catlProperty #formula
@@ -28,7 +29,12 @@ catlProperty:
     ;
 predicate:
          op='T' '(' duration=(RATIONAL | INT) ',' proposition=VARIABLE
-        ',' capabilities ( ',' resources )? ')'
+            ',' capabilities ( ',' resources )? ')'
+    |    op=BOOLEAN
+    ;
+limit:
+         op='L' '(' proposition=VARIABLE ',' ( capabilities | ( '{' '}' ))
+            ( ',' resources )? ')'
     |    op=BOOLEAN
     ;
 capabilities: '{' capabilityRequest ( ',' capabilityRequest )* '}'

@@ -18,10 +18,11 @@ from catlVisitor import catlVisitor
 
 class Operation(object):
     '''CATL operations'''
-    NOP, NOT, OR, AND, IMPLIES, UNTIL, EVENT, ALWAYS, PRED, BOOL = range(10)
-    opnames = [None, '!', '||', '&&', '=>', 'U', 'F', 'G', 'T', 'bool']
+    NOP, NOT, OR, AND, IMPLIES, UNTIL, EVENT, ALWAYS, PRED, LIMIT, BOOL = \
+        range(11)
+    opnames = [None, '!', '||', '&&', '=>', 'U', 'F', 'G', 'T', 'L', 'bool']
     opcodes = {'!': NOT, '&&': AND, '||' : OR, '=>': IMPLIES,
-               'U': UNTIL, 'F': EVENT, 'G': ALWAYS, 'T': PRED}
+               'U': UNTIL, 'F': EVENT, 'G': ALWAYS, 'T': PRED, 'L': LIMIT}
 
     @classmethod
     def getCode(cls, text):
@@ -47,6 +48,10 @@ class CATLFormula(object):
             self.value = kwargs['value']
         elif self.op == Operation.PRED:
             self.duration = kwargs['duration']
+            self.proposition = kwargs['proposition']
+            self.capability_requests = kwargs['capabilities']
+            self.resource_requests = kwargs['resources']
+        elif self.op == Operation.LIMIT:
             self.proposition = kwargs['proposition']
             self.capability_requests = kwargs['capabilities']
             self.resource_requests = kwargs['resources']
@@ -80,6 +85,8 @@ class CATLFormula(object):
             return 0
         elif self.op == Operation.PRED:
             return self.duration
+        elif self.op == Operation.LIMIT:
+            return 0
         elif self.op in (Operation.AND, Operation.OR):
             return max([ch.bound() for ch in self.children])
         elif self.op == Operation.IMPLIES:
@@ -93,7 +100,7 @@ class CATLFormula(object):
 
     def propositions(self):
         '''Computes the set of propositions involved in the CATL formula.'''
-        if self.op == Operation.PRED:
+        if self.op in (Operation.PRED, Operation.LIMIT):
             return {self.proposition}
         elif self.op in (Operation.AND, Operation.OR):
             return set.union(*[child.propositions() for child in self.children])
@@ -104,7 +111,7 @@ class CATLFormula(object):
 
     def capabilities(self):
         '''Computes the set of capabilities involved in the CATL formula.'''
-        if self.op == Operation.PRED:
+        if self.op in (Operation.PRED, Operation.LIMIT):
             return {cr.capability for cr in self.capability_requests}
         elif self.op in (Operation.AND, Operation.OR):
             return set.union(*[child.capabilities() for child in self.children])
@@ -115,7 +122,7 @@ class CATLFormula(object):
 
     def resources(self):
         '''Computes the set of resources involved in the CATL formula.'''
-        if self.op == Operation.PRED:
+        if self.op in (Operation.PRED, Operation.LIMIT):
             return {cr.resource for cr in self.resource_requests}
         elif self.op in (Operation.AND, Operation.OR):
             return set.union(*[child.resources() for child in self.children])
@@ -156,6 +163,10 @@ class CATLFormula(object):
         elif self.op == Operation.PRED:
             s = '({p} {d} {caps} {res})'.format(p=self.proposition,
                                                 d=self.duration,
+                                                caps=self.capability_requests,
+                                                res=self.resource_requests)
+        elif self.op == Operation.LIMIT:
+            s = '(! {p} {caps} {res})'.format(p=self.proposition,
                                                 caps=self.capability_requests,
                                                 res=self.resource_requests)
         elif self.op == Operation.IMPLIES:
@@ -248,6 +259,28 @@ class CATLAbstractSyntaxTreeExtractor(catlVisitor):
                                resources=resources)
         return CATLFormula(Operation.BOOL, value=bool(ctx.op.text))
 
+    def visitCatlLimit(self, ctx):
+        return self.visit(ctx.limit())
+
+    def visitLimit(self, ctx):
+        if Operation.getCode(ctx.op.text) == Operation.LIMIT:
+            if ctx.capabilities():
+                capabilities = self.visit(ctx.capabilities())
+            else:
+                capabilities = set()
+            if ctx.resources():
+                resources = self.visit(ctx.resources())
+            else:
+                resources = set()
+            if not capabilities and not resources:
+                raise Exception('Limit operator must constrain either agents'
+                                ' or resources!')
+            return CATLFormula(Operation.LIMIT,
+                               proposition=ctx.proposition.text,
+                               capabilities=capabilities,
+                               resources=resources)
+        return CATLFormula(Operation.BOOL, value=bool(ctx.op.text))
+
     def visitCapabilities(self, ctx):
         return {self.visit(ch) for ch in ctx.children
                                             if not isinstance(ch, TerminalNode)}
@@ -272,8 +305,11 @@ if __name__ == '__main__':
     ast = CATLFormula.from_formula(
             'F[0, 2] T(4, test, {(a, 2), (b, 3)})'
             '&& G[1, 7] T(2, test, {(a, 1), (c, 4)}, {(h1, 2.3), (h2, 5)})'
-            '&& F[3, 5] T(3, test2, {(b, 1), (d, 2)})')
-    print('AST:', ast)
+            '&& F[3, 5] T(3, test2, {(b, 1), (d, 2)})'
+            '&& F[3, 5] L(test2, {(b, 1), (d, 2)})'
+            '&& F[3, 5] L(test2, {}, {(h1, 2.3), (h2, 5)})'
+            '&& F[3, 5] L(test2, {(b, 1), (d, 2)}, {(h1, 2.3), (h2, 5)})')
+    print('AST:', str(ast))
     print('Propositions:', ast.propositions())
     print('Capabilities:', ast.capabilities())
     print('Resources:', ast.resources())
