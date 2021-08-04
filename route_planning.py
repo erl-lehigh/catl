@@ -125,7 +125,7 @@ def create_system_variables(m, ts, agent_classes, time_bound, variable_bound,
     # edge variables
     for u, v, d in ts.g.edges(data=True):
         d['vars'] = [] # initialize edge variables list
-        for k in range(time_bound+1):
+        for k in range(time_bound):
             name = 'z_{src}_{dest}_{{}}_{time}'.format(src=u, dest=v, time=k)
             d['vars'].append({g: m.addVar(vtype=vtype, name=name.format(enc),
                                           lb=0, ub=variable_bound)
@@ -160,21 +160,26 @@ def add_system_constraints(m, ts, agent_classes, capability_distribution,
     '''
     # edge conservation constraints
     for u, ud in ts.g.nodes(data=True):
-        for k in range(time_bound):
+        for k in range(time_bound+1):
             for g, g_enc in agent_classes.items():
-                conserve = sum([d['vars'][k+d['weight']][g]
+                departing = sum([d['vars'][k][g]
                             for _, _, d in ts.g.out_edges_iter(u, data=True)
                                 if k + d['weight'] <= time_bound])
+                arriving = sum([d['vars'][k - d['weight']][g]
+                            for _, _, d in ts.g.in_edges_iter(u, data=True)
+                                if k - d['weight'] >= 0])
+
+                if 0 < k < time_bound:
+                    # flow balancing constraint
+                    m.addConstr(departing == arriving,
+                                'conserve_{}_{}_{}'.format(u, g_enc, k))
 
                 # node constraint: team state
-                team_state_eq = (ud['vars'][k][g] == conserve)
+                if k < time_bound:
+                    team_state_eq = (ud['vars'][k][g] == departing)
+                else:
+                    team_state_eq = (ud['vars'][k][g] == arriving)
                 m.addConstr(team_state_eq, 'team_{}_{}_{}'.format(u, g_enc, k))
-
-                # flow balancing constraint
-                conserve -= sum([d['vars'][k][g]
-                            for _, _, d in ts.g.in_edges_iter(u, data=True)])
-                conserve = (conserve == 0)
-                m.addConstr(conserve, 'conserve_{}_{}_{}'.format(u, g_enc, k))
 
 #     # initial time constraints - encoding using transition variables
 #     for u in ts.g.nodes():
@@ -188,7 +193,7 @@ def add_system_constraints(m, ts, agent_classes, capability_distribution,
     # initial time constraints - encoding using state variables
     for u, ud in ts.g.nodes(data=True):
         for g, g_enc in agent_classes.items():
-            conserve = (ud['vars'][0][g] == capability_distribution[u][g])
+            conserve = (ud['vars'][0][g] == capability_distribution[u][g_enc])
             m.addConstr(conserve, 'init_distrib_{}_{}'.format(u, g_enc))
 
 def extract_propositions(ts, ast):
@@ -358,13 +363,13 @@ def route_planning(ts, agents, formula, time_bound=None, variable_bound=None,
     # create system variables
     capabilities = compute_capability_bitmap(agents)
     agent_classes = compute_agent_classes(agents, capabilities)
-    create_system_variables(m, ts, agent_classes, time_bound)
+    create_system_variables(m, ts, agent_classes, time_bound, variable_bound)
 
     # add system constraints
     capability_distribution = compute_initial_capability_distribution(ts,
                                                           agents, agent_classes)
     add_system_constraints(m, ts, agent_classes, capability_distribution,
-                           time_bound, variable_bound)
+                           time_bound)
 
     # add CATL formula constraints
     stl = catl2stl(ast)

@@ -115,3 +115,7 @@ venv.bak/
 *Parser.py
 *Visitor.py
 *Listener.py
+
+.vscode/
+science2020.py
+stl/
