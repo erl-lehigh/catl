@@ -9,3 +9,4 @@
 from catl import Operation, CATLFormula, CapabilityRequest
 from catl2stl import catl2stl
 from catl2stl import extract_stl_task_formulae
+from catl2stl import stl_predicate_variables

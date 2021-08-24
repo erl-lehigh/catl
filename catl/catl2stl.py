@@ -84,6 +84,7 @@ def catl2stl(catl_ast):
         return STLFormula(STLOperation.UNTIL, left=left, right=right,
                           low=catl_ast.low, high=catl_ast.high)
 
+
 def extract_stl_task_formulae(stl_ast):
     '''Extract tasks from STL abstract syntax trees obtained from CATL formulae.
 
@@ -117,6 +118,41 @@ def extract_stl_task_formulae(stl_ast):
             stack.append(stl_ast.left)
             stack.append(stl_ast.right)
     return tasks
+
+
+def stl_predicate_variables(catl_ast):
+    '''Returns the sets of agent and resource predicate variables for a CaTL
+    formula.
+
+    TODO:
+    '''
+    stack = [catl_ast]
+    capability_pred_vars = dict()
+    for capability in catl_ast.capabilities():
+        capability_pred_vars[capability] = set()
+    resource_pred_vars = dict()
+    for resource in catl_ast.resources():
+        resource_pred_vars[resource] = set()
+    while stack:
+        formula = stack.pop()
+        if formula.op == CATLOperation.PRED:
+            var = formula.proposition + '_{cap}'
+            for cr in formula.capability_requests:
+                capability_pred_vars[cr.capability].add(
+                                                var.format(cap=cr.capability))
+            var = formula.proposition + '_{res}'
+            for h in formula.resource_requests:
+                resource_pred_vars[h.resource].add(var.format(res=h.resource))
+        elif formula.op in (CATLOperation.AND, CATLOperation.OR):
+            stack.extend(formula.children)
+        elif formula.op in (CATLOperation.IMPLIES, CATLOperation.UNTIL):
+            stack.append(formula.left)
+            stack.append(formula.right)
+        elif formula.op in (CATLOperation.NOT, CATLOperation.ALWAYS,
+                         CATLOperation.EVENT):
+            stack.append(formula.child)
+
+    return capability_pred_vars, resource_pred_vars
 
 
 if __name__ == '__main__':
