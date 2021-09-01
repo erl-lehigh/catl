@@ -49,8 +49,12 @@ def case_simple(ts_filename='simple.yaml'):
                 }
     storage_type = 'comparmental' # choices: comparmental, uniform
     capacities = {
-        frozenset({'a'}): 3
+        frozenset({'a'}): {'r1': 2, 'r2': 2}
     }
+    # storage_type = 'uniform' # choices: comparmental, uniform
+    # capacities = {
+    #     frozenset({'a'}): 2
+    # }
 
     initial_locations, capabilities = zip(*agents)
     agent_classes = set(map(frozenset, capabilities))
