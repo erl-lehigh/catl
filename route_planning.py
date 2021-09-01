@@ -321,7 +321,7 @@ def add_resource_constraints(m, ts, resource_distribution, capacities,
                             for _, _, d in ts.g.out_edges_iter(u, data=True)
                                 if k + d['weight'] <= time_bound])
                 # substract consumption of resources
-                departing += sum([task_var[k] * quantities.get(h, 0)
+                departing += sum([task_var.get(k, 0) * quantities.get(h, 0)
                                  for task_var, quantities in task_stl_vars[u]
                                  if h in quantities])
 
@@ -339,30 +339,30 @@ def add_resource_constraints(m, ts, resource_distribution, capacities,
                     res_state_eq = (ud['res'][k][h] == departing)
                 else:
                     res_state_eq = (ud['res'][k][h] == arriving)
-                m.addConstr(team_state_eq, 'res_{}_{}_{}'.format(u, h, k))
+                m.addConstr(res_state_eq, 'res_{}_{}_{}'.format(u, h, k))
 
     for u, v, d in ts.g.out_edges_iter(data=True):
         if u != v:
-            for k in range(time_bound + 1):
+            for k in range(time_bound):
                 if storage_type == 'comparmental':
                     for h in resource_distribution:
                         resource_capacity = sum(capacities[g][h] * var
-                                              for g, var in d['var'][k].items())
+                                             for g, var in d['vars'][k].items())
                         resource_bound = d['res'][k][h] <= resource_capacity
                         m.addConstr(resource_bound,
                                     'res_bound_{}_{}_{}'.format(u, h, k))
                 elif storage_type == 'uniform':
                     total_resources = sum(d['res'][k][h]
-                                    for h in resource_distribution)
+                                          for h in resource_distribution)
                     total_capacity = sum(capacities[g] * var
-                                         for g, var in d['var'][k].items())
+                                         for g, var in d['vars'][k].items())
                     resource_bound = total_resources <= total_capacity
                     m.addConstr(resource_bound, 'res_bound_{}_{}'.format(u, k))
 
     # initial time constraints - encoding using state variables
     for u, ud in ts.g.nodes(data=True):
         for h in resource_distribution:
-            conserve = (ud['res'][0][h] == resource_distribution[h][u])
+            conserve = (ud['res'][0][h] == resource_distribution[h].get(u, 0))
             m.addConstr(conserve, 'res_init_distrib_{}_{}'.format(u, h))
 
 def extract_propositions(ts, ast):
@@ -640,10 +640,11 @@ def route_planning(ts, agents, formula, time_bound=None, variable_bound=None,
         resource_var_type = resource_variable_types[resource_type]
         create_resource_variables(m, ts, resource_quantities, time_bound,
                                   resource_var_type)
-        task_stl_vars = extract_task_variables(ast, stl, stl_milp)
+        task_stl_vars = extract_task_variables(ts, stl, stl_milp)
         add_resource_constraints(m, ts, resource_distribution, capacities,
                                  time_bound, task_stl_vars, storage_type)
-        add_proposition_resource_constraints(m, stl_milp, ts, ast, resources,
+        add_proposition_resource_constraints(m, stl_milp, ts, ast,
+                                             resource_distribution,
                                              time_bound, resource_quantities,
                                              resource_var_type)
 
