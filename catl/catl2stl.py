@@ -108,7 +108,8 @@ def extract_stl_task_formulae(stl_ast):
         if stl_ast.op == STLOperation.AND:
             if hasattr(stl_ast, 'task'):
                 tasks.append((stl_ast, stl_ast.task))
-            stack.extend(stl_ast.children)
+            else:
+                stack.extend(stl_ast.children)
         elif stl_ast.op == STLOperation.OR:
             stack.extend(stl_ast.children)
         elif stl_ast.op in (STLOperation.ALWAYS, STLOperation.EVENT,
