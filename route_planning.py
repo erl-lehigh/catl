@@ -461,9 +461,8 @@ def add_proposition_constraints(m, stl_milp, ts, ast, capabilities,
                             m.addConstr(min_prop, 'min_prop_{}_{}_{}_{}'.format(
                                                                 prop, c, k, u))
 
-def add_proposition_resource_constraints(m, stl_milp, ts, ast, resources,
-                                         time_bound, variable_bound,
-                                         vtype=GRB.CONTINUOUS):
+def add_proposition_resource_constraints(m, stl_milp, ts, ast, time_bound,
+                                         resource_bounds, vtype=GRB.CONTINUOUS):
     '''Adds the proposition resource constraints. First, the proposition-state
     variables are defined. Second, contraints are added such that proposition
     are satisfied as best as possible. The variables in the MILP encoding of the
@@ -476,9 +475,8 @@ def add_proposition_resource_constraints(m, stl_milp, ts, ast, resources,
     - The MILP encoding of the STL formula obtained from the CaTL specification.
     - The transition system specifying the environment.
     - The AST of the CaTL specification formula.
-    - The resource types available.
     - Time bound.
-    - The upper bound for variables.
+    - The upper bounds for resource variables.
     - Variable type (default: real).
     '''
     props = extract_propositions(ts, ast)
@@ -486,40 +484,40 @@ def add_proposition_resource_constraints(m, stl_milp, ts, ast, resources,
     # add proposition-state variables
     for u, ud in ts.g.nodes(data=True):
         ud['prop_vars'] = dict()
-        for r in resources:
-            ud['prop_vars'][r] = []
+        for h in resource_bounds:
+            ud['prop_vars'][h] = []
             for k in range(time_bound+1):
-                ud['prop_vars'][r].append(dict())
+                ud['prop_vars'][h].append(dict())
                 for prop in ud['prop']:
                     name = 'z_{prop}_{state}_{res}_{time}'.format(
-                        prop=prop, state=u, res=r, time=k)
-                    ud['prop_vars'][r][k][prop] = m.addVar(
-                        vtype=vtype, name=name, lb=0, ub=variable_bound)
+                        prop=prop, state=u, res=h, time=k)
+                    ud['prop_vars'][h][k][prop] = m.addVar(
+                        vtype=vtype, name=name, lb=0, ub=resource_bounds[h])
 
     # constraints for relating (proposition, state) pairs to resource states
     for u, ud in ts.g.nodes(data=True):
-        for r in resources:
+        for h in resource_bounds:
             for k in range(time_bound+1):
-                equality = sum([ud['prop_vars'][r][k][prop]
+                equality = sum([ud['prop_vars'][h][k][prop]
                                                     for prop in ud['prop']])
-                equality -= ud['res'][k][r]
+                equality -= ud['res'][k][h]
                 equality = (equality == 0)
-                m.addConstr(equality, 'prop_state_{}_{}_{}'.format(u, r, k))
+                m.addConstr(equality, 'prop_state_{}_{}_{}'.format(u, h, k))
 
     # add propositions constraints for only those variables appearing in the
     # MILP encoding of the formula
     for prop in props:
-        for r in resources:
+        for h in resource_bounds:
+            variable = '{prop}_{res}'.format(prop=prop, res=h)
             for k in range(time_bound+1):
-                variable = '{prop}_{res}'.format(prop=prop, res=r)
                 if (variable in stl_milp.variables
                                         and k in stl_milp.variables[variable]):
                     for u, ud in ts.g.nodes(data=True):
                         if prop in ud['prop']:
                             min_prop = (stl_milp.variables[variable][k]
-                                                <= ud['prop_vars'][r][k][prop])
+                                                <= ud['prop_vars'][h][k][prop])
                             m.addConstr(min_prop, 'min_prop_{}_{}_{}_{}'.format(
-                                                                prop, r, k, u))
+                                                                prop, h, k, u))
 
 def add_travel_time_objective(m, ts, weight, time_bound, variable_bound):
     '''Adds the total travel time of all agents as an objective.
@@ -644,7 +642,6 @@ def route_planning(ts, agents, formula, time_bound=None, variable_bound=None,
         add_resource_constraints(m, ts, resource_distribution, capacities,
                                  time_bound, task_stl_vars, storage_type)
         add_proposition_resource_constraints(m, stl_milp, ts, ast,
-                                             resource_distribution,
                                              time_bound, resource_quantities,
                                              resource_var_type)
 
