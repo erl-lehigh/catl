@@ -242,7 +242,7 @@ def create_resource_variables(m, ts, resource_quantities, time_bound,
     ----
     Data structure holding the variables is a list of list of variables, e.g.,
 
-        d['res'][k][g] is the y_{q/e}_h_k
+        d['res'][k][h] is the y_{q/e}_h_k
 
     where d is the dictionary of attributes for a node q or an edge e in the TS,
     h is a resource encoded as a string, and k is the time step.

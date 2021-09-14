@@ -37,7 +37,7 @@ def case_simple(ts_filename='simple.yaml'):
     ts = Ts.load(ts_filename)
     for u, v in ts.g.edges():
         assert ts.g.has_edge(v, u)
-    # show_environment(ts)
+    show_environment(ts)
 
     for u in ts.g:
         logging.debug('State: %s, Data: %s', u, str(ts.g.node[u]))

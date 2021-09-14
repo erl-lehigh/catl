@@ -136,6 +136,6 @@ if __name__ == '__main__':
     stl = catl2stl(ast)
     print('STL:', stl)
 
-    stl_tasks = extract_task_variables(stl)
+    stl_tasks = extract_stl_task_formulae(stl)
     for stl_formula, task in stl_tasks:
         print('Task:', task, 'STL formula:', stl_formula)
