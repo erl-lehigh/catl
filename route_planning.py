@@ -18,6 +18,7 @@ from stl.stl2milp import stl2milp
 from catl import CATLFormula
 from catl import catl2stl
 from catl import extract_stl_task_formulae
+from catl import stl_predicate_variables
 from visualization import show_environment
 
 
@@ -98,7 +99,8 @@ def compute_resource_quantities(resource_distribution):
     ------
     Dictionary from resources to total quantities at initial time.
     '''
-    return {h: sum(distrib.values()) for h, distrib in resource_distribution}
+    return {h: sum(distrib.values())
+            for h, distrib in resource_distribution.items()}
 
 def create_system_variables(m, ts, agent_classes, time_bound, variable_bound,
                             vtype=GRB.INTEGER):
@@ -271,7 +273,7 @@ def extract_task_variables(ts, stl, stl_milp):
     task_stl_vars[u][h][k]
 
     '''
-    tasks = extract_stl_task_formuale(stl)
+    tasks = extract_stl_task_formulae(stl)
 
     task_stl_vars = {}
     for u, ud in ts.g.nodes(data=True):
@@ -283,7 +285,8 @@ def extract_task_variables(ts, stl, stl_milp):
     return task_stl_vars
 
 def add_resource_constraints(m, ts, resource_distribution, capacities,
-                             time_bound, task_stl_vars, storage_type='general'):
+                             time_bound, task_stl_vars,
+                             storage_type='comparmental'):
     '''Computes the constraints that capture the resource dynamics.
 
     Input
@@ -318,7 +321,7 @@ def add_resource_constraints(m, ts, resource_distribution, capacities,
                             for _, _, d in ts.g.out_edges_iter(u, data=True)
                                 if k + d['weight'] <= time_bound])
                 # substract consumption of resources
-                departing += sum([task_var[k] * quantities.get(h, 0)
+                departing += sum([task_var.get(k, 0) * quantities.get(h, 0)
                                  for task_var, quantities in task_stl_vars[u]
                                  if h in quantities])
 
@@ -336,30 +339,30 @@ def add_resource_constraints(m, ts, resource_distribution, capacities,
                     res_state_eq = (ud['res'][k][h] == departing)
                 else:
                     res_state_eq = (ud['res'][k][h] == arriving)
-                m.addConstr(team_state_eq, 'res_{}_{}_{}'.format(u, h, k))
+                m.addConstr(res_state_eq, 'res_{}_{}_{}'.format(u, h, k))
 
     for u, v, d in ts.g.out_edges_iter(data=True):
         if u != v:
-            for k in range(time_bound + 1):
-                if storage_type == 'general':
+            for k in range(time_bound):
+                if storage_type == 'comparmental':
                     for h in resource_distribution:
                         resource_capacity = sum(capacities[g][h] * var
-                                              for g, var in d['var'][k].items())
+                                             for g, var in d['vars'][k].items())
                         resource_bound = d['res'][k][h] <= resource_capacity
                         m.addConstr(resource_bound,
                                     'res_bound_{}_{}_{}'.format(u, h, k))
                 elif storage_type == 'uniform':
                     total_resources = sum(d['res'][k][h]
-                                    for h in resource_distribution)
+                                          for h in resource_distribution)
                     total_capacity = sum(capacities[g] * var
-                                         for g, var in d['var'][k].items())
+                                         for g, var in d['vars'][k].items())
                     resource_bound = total_resources <= total_capacity
                     m.addConstr(resource_bound, 'res_bound_{}_{}'.format(u, k))
 
     # initial time constraints - encoding using state variables
     for u, ud in ts.g.nodes(data=True):
         for h in resource_distribution:
-            conserve = (ud['res'][0][h] == resource_distribution[h][u])
+            conserve = (ud['res'][0][h] == resource_distribution[h].get(u, 0))
             m.addConstr(conserve, 'res_init_distrib_{}_{}'.format(u, h))
 
 def extract_propositions(ts, ast):
@@ -380,6 +383,19 @@ def extract_propositions(ts, ast):
     assert formula_propositions <= ts_propositions, \
                                 'There are unknown propositions in the formula!'
     return formula_propositions
+
+def compute_catl_variables_bounds(ast, variable_bound, resource_quantities):
+    '''TODO:
+    '''
+    capability_variables, resource_variables = stl_predicate_variables(ast)
+    ranges = {}
+    for capability, variables in capability_variables.items():
+        ranges.update({variable: (0, variable_bound) for variable in variables})
+    for resource, variables in resource_variables.items():
+        ranges.update({variable: (0, resource_quantities.get(resource,
+                                                             float('inf')))
+                       for variable in variables})
+    return ranges
 
 def add_proposition_constraints(m, stl_milp, ts, ast, capabilities,
                                 agent_classes, time_bound, variable_bound,
@@ -445,9 +461,8 @@ def add_proposition_constraints(m, stl_milp, ts, ast, capabilities,
                             m.addConstr(min_prop, 'min_prop_{}_{}_{}_{}'.format(
                                                                 prop, c, k, u))
 
-def add_proposition_resource_constraints(m, stl_milp, ts, ast, resources,
-                                         time_bound, variable_bound,
-                                         vtype=GRB.CONTINUOUS):
+def add_proposition_resource_constraints(m, stl_milp, ts, ast, time_bound,
+                                         resource_bounds, vtype=GRB.CONTINUOUS):
     '''Adds the proposition resource constraints. First, the proposition-state
     variables are defined. Second, contraints are added such that proposition
     are satisfied as best as possible. The variables in the MILP encoding of the
@@ -460,9 +475,8 @@ def add_proposition_resource_constraints(m, stl_milp, ts, ast, resources,
     - The MILP encoding of the STL formula obtained from the CaTL specification.
     - The transition system specifying the environment.
     - The AST of the CaTL specification formula.
-    - The resource types available.
     - Time bound.
-    - The upper bound for variables.
+    - The upper bounds for resource variables.
     - Variable type (default: real).
     '''
     props = extract_propositions(ts, ast)
@@ -470,40 +484,40 @@ def add_proposition_resource_constraints(m, stl_milp, ts, ast, resources,
     # add proposition-state variables
     for u, ud in ts.g.nodes(data=True):
         ud['prop_vars'] = dict()
-        for r in resources:
-            ud['prop_vars'][r] = []
+        for h in resource_bounds:
+            ud['prop_vars'][h] = []
             for k in range(time_bound+1):
-                ud['prop_vars'][r].append(dict())
+                ud['prop_vars'][h].append(dict())
                 for prop in ud['prop']:
                     name = 'z_{prop}_{state}_{res}_{time}'.format(
-                        prop=prop, state=u, res=r, time=k)
-                    ud['prop_vars'][r][k][prop] = m.addVar(
-                        vtype=vtype, name=name, lb=0, ub=variable_bound)
+                        prop=prop, state=u, res=h, time=k)
+                    ud['prop_vars'][h][k][prop] = m.addVar(
+                        vtype=vtype, name=name, lb=0, ub=resource_bounds[h])
 
     # constraints for relating (proposition, state) pairs to resource states
     for u, ud in ts.g.nodes(data=True):
-        for r in resources:
+        for h in resource_bounds:
             for k in range(time_bound+1):
-                equality = sum([ud['prop_vars'][r][k][prop]
+                equality = sum([ud['prop_vars'][h][k][prop]
                                                     for prop in ud['prop']])
-                equality -= ud['res'][k][r]
+                equality -= ud['res'][k][h]
                 equality = (equality == 0)
-                m.addConstr(equality, 'prop_state_{}_{}_{}'.format(u, c, k))
+                m.addConstr(equality, 'prop_state_{}_{}_{}'.format(u, h, k))
 
     # add propositions constraints for only those variables appearing in the
     # MILP encoding of the formula
     for prop in props:
-        for r in resources:
+        for h in resource_bounds:
+            variable = '{prop}_{res}'.format(prop=prop, res=h)
             for k in range(time_bound+1):
-                variable = '{prop}_{res}'.format(prop=prop, res=r)
                 if (variable in stl_milp.variables
                                         and k in stl_milp.variables[variable]):
                     for u, ud in ts.g.nodes(data=True):
                         if prop in ud['prop']:
                             min_prop = (stl_milp.variables[variable][k]
-                                                <= ud['prop_vars'][r][k][prop])
+                                                <= ud['prop_vars'][h][k][prop])
                             m.addConstr(min_prop, 'min_prop_{}_{}_{}_{}'.format(
-                                                                prop, r, k, u))
+                                                                prop, h, k, u))
 
 def add_travel_time_objective(m, ts, weight, time_bound, variable_bound):
     '''Adds the total travel time of all agents as an objective.
@@ -571,7 +585,7 @@ def route_planning(ts, agents, formula, time_bound=None, variable_bound=None,
     - The CaTL specification formula.
     - The time bound used in the encoding (default: computed from CaTL formula).
     - The upper bound for variables.
-    - The agents' storage type (options: general or uniform).
+    - The agents' storage type (options: comparmental or uniform).
     - The resource carrying capacities of agent classes.
     - The initial distribution of resources over states of the transition
     system.
@@ -606,7 +620,13 @@ def route_planning(ts, agents, formula, time_bound=None, variable_bound=None,
 
     # add CATL formula constraints
     stl = catl2stl(ast)
-    ranges = {variable: (0, variable_bound) for variable in stl.variables()}
+    # bounds for capability and resource variables
+    if storage_type is not None:
+        resource_quantities = compute_resource_quantities(resource_distribution)
+    else:
+        resource_quantities = dict()
+    ranges = compute_catl_variables_bounds(ast, variable_bound,
+                                           resource_quantities)
     stl_milp = stl2milp(stl, ranges=ranges, model=m, robust=robust)
     stl_milp.translate()
 
@@ -616,13 +636,12 @@ def route_planning(ts, agents, formula, time_bound=None, variable_bound=None,
 
     if storage_type is not None:
         resource_var_type = resource_variable_types[resource_type]
-        resource_quantities = compute_resource_quantities(resource_distribution)
         create_resource_variables(m, ts, resource_quantities, time_bound,
                                   resource_var_type)
-        task_stl_vars = extract_task_variables(ast, stl, stl_milp)
+        task_stl_vars = extract_task_variables(ts, stl, stl_milp)
         add_resource_constraints(m, ts, resource_distribution, capacities,
                                  time_bound, task_stl_vars, storage_type)
-        add_proposition_resource_constraints(m, stl_milp, ts, ast, resources,
+        add_proposition_resource_constraints(m, stl_milp, ts, ast,
                                              time_bound, resource_quantities,
                                              resource_var_type)
 

@@ -47,10 +47,14 @@ def case_simple(ts_filename='simple.yaml'):
     resources = {'r1': {'q2': 2.1, 'q4': 1.2},
                  'r2': {'q3': 2.2}
                 }
-    storage_type = 'general' # choices: general, uniform
+    storage_type = 'comparmental' # choices: comparmental, uniform
     capacities = {
-        frozenset({'a'}): 3
+        frozenset({'a'}): {'r1': 2, 'r2': 2}
     }
+    # storage_type = 'uniform' # choices: comparmental, uniform
+    # capacities = {
+    #     frozenset({'a'}): 2
+    # }
 
     initial_locations, capabilities = zip(*agents)
     agent_classes = set(map(frozenset, capabilities))
@@ -71,7 +75,9 @@ def case_simple(ts_filename='simple.yaml'):
                      # '&& F[3, 4] T(3, yellow, {(IR, 3), (Vis, 2), (UV, 3), (Mo, 4)})'
                      )
 
-    m = route_planning(ts, agents, specification)
+    m = route_planning(ts, agents, specification, storage_type=storage_type,
+                       capacities=capacities, resource_distribution=resources,
+                       resource_type='divisible')
     time_bound = len(ts.g.nodes(data=True)[0][1]['vars']) - 1
 
     logging.debug('Planning horizon: %d', time_bound)
