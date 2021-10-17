@@ -16,6 +16,7 @@ import gurobipy as grb
 from lomap import Timer
 
 from stl.stl2milp import stl2milp
+from stl.pstl2milp import pstl2milp
 from stl import Operation
 from catl import CATLFormula
 from catl import catl2stl
@@ -486,8 +487,9 @@ def route_planning(ts, agents, formula, time_bound=None, variable_bound=None,
     # add CATL formula constraints
     stl = catl2stl(ast)
     ranges = {variable: (0, len(agents)) for variable in stl.variables()}
-    stl_milp = stl2milp(stl, ranges=ranges, model=m, robust=robust)
-    stl_milp.translate()
+    stl_milp = pstl2milp(stl, ranges=ranges, model=m, robust=robust)
+    zi = stl_milp.translate()
+
     #stl_milp.translate(satisfaction=False) 
     # add proposition constraints
     add_proposition_constraints(m, stl_milp, ts, ast, capabilities,
@@ -498,28 +500,33 @@ def route_planning(ts, agents, formula, time_bound=None, variable_bound=None,
         add_travel_time_objective(m, ts, travel_time_weight, time_bound,
                                   variable_bound)
 
-    #Counting satisfied sub-formulae
-    count_satis = nsub_formulae_satisfied(stl, stl_milp)
-    #term, r, nterms = partial_robustness(stl, stl_milp)
+    
+    method = 3
 
-
-    #tentative new objective:partial_robust
-    #m.setObjective(count_satis, GRB.MAXIMIZE)
-    m.update()
-    #m.setObjective((1 / (nterms+1)) * term + count_satis, GRB.MAXIMIZE)
-    #m.update()
-    # Obj = m.getObjective()
-    # print Obj
+    if method == 1:
+        d = stl_milp.method_1()
+        obj = [stl_milp.model.getObjective(objectives) for objectives in range(d+1)]
+        print(str(obj), ':', [obj[i].getValue() for i in range(d+1)], "MILP")
+    elif method == 2: 
+        stl_milp.method_2()
+        # print('Objective')
+        obj = stl_milp.model.getObjective()
+        # print(str(obj), obj.getValue(), "MILP")
+    elif method == 3:
+        stl_milp.method_3(zi)
+        # print('Objective')
+        obj = stl_milp.model.getObjective()
+        # print(str(obj), obj.getValue(), "MILP")
     
     
 
-  
+    # stl_milp.pstl2lp(ast)
     # run optimizer
-    m.optimize()    
+    # m.optimize()    
 
 
     if m.status == GRB.Status.OPTIMAL:
-        logging.info('"Optimal objective LP": %f', m.objVal)
+        logging.info('"Optimal objective MILP": %f', m.objVal)
     elif m.status == GRB.Status.INF_OR_UNBD:
         logging.error('Model is infeasible or unbounded')
     elif m.status == GRB.Status.INFEASIBLE:
@@ -530,4 +537,4 @@ def route_planning(ts, agents, formula, time_bound=None, variable_bound=None,
         logging.error('Optimization ended with status %s', m.status)
 
 #     return extract_trajetories(m, ts, agents, time_bound) #TODO:
-    return m, count_satis
+    return m
