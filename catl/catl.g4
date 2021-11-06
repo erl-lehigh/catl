@@ -55,6 +55,6 @@ ALWAYS : 'G' | '[]' ;
 UNTIL : 'U' ;
 BOOLEAN : 'true' | 'True' | 'false' | 'False' ;
 VARIABLE : ( [a-z] | [A-Z] )( [a-z] | [A-Z] | [0-9] | '_' )* ;
-RATIONAL : INT ('.')? [0-9]+ ( 'E' | 'E-' )? [0-9]* ;
 INT : '0' | ('-')? [1-9] [0-9]* ;
+RATIONAL : INT ('.')? [0-9]+ ( 'E' | 'E-' )? [0-9]* ;
 WS : ( ' ' | '\t' | '\r' | '\n' )+ -> skip ;
