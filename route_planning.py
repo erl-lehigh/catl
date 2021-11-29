@@ -6,7 +6,7 @@
  See license.txt file for license information.
 '''
 
-from collections import defaultdict
+from collections import defaultdict, OrderedDict, namedtuple
 import logging
 
 from gurobipy import Model as GRBModel
@@ -627,7 +627,42 @@ def route_planning(ts, agents, formula, time_bound=None, variable_bound=None,
         resource_quantities = dict()
     ranges = compute_catl_variables_bounds(ast, variable_bound,
                                            resource_quantities)
-    stl_milp = stl2milp(stl, ranges=ranges, model=m, robust=robust)
+
+
+    cap_pred, res_pred = stl_predicate_variables(ast)
+    rhos = namedtuple('rhos','set weight id')
+    cap_pred_set = set()
+    res_pred_set = set()
+
+    for predca in cap_pred.values():
+        cap_pred_set = cap_pred_set.union(predca)
+
+    for predre in res_pred.values():
+        res_pred_set = res_pred_set.union(predre)
+
+    for x in res_pred_set:
+        y = str(x)
+        res_pred_set.remove(x)
+        res_pred_set.add(y)
+    
+    for x in cap_pred_set:
+        y = str(x)
+        cap_pred_set.remove(x)
+        cap_pred_set.add(y)
+
+    args1 = [cap_pred_set, 1, 0]
+    args2 = [res_pred_set, 0.5, 1]
+    
+    mrho_dict = {
+        "rho0" : rhos(*args1),
+        "rho1" : rhos(*args2)
+        }
+    # print(type(args1), 'AQUIIIIIIIIIIIIIIIIIIIIIII', args1, args2)
+
+    #CHANGE 1
+    stl_milp = stl2milp(stl, ranges=ranges, model=m, robust=robust, mrho=mrho_dict)
+    # stl_milp = stl2milp(stl, ranges=ranges, model=m, robust=robust)
+
     stl_milp.translate()
 
     # add proposition constraints
@@ -651,7 +686,14 @@ def route_planning(ts, agents, formula, time_bound=None, variable_bound=None,
                                   variable_bound)
 
     # run optimizer
-    m.optimize()
+
+    #CHANGE 2
+    # m.optimize()
+    stl_milp.optimize_multirho()
+
+    print('Objective: HERE------------------------------------------------------------')
+    obj = m.getObjective()
+    print(str(obj), ':', obj.getValue())
 
     if m.status == GRB.Status.OPTIMAL:
         logging.info('"Optimal objective LP": %f', m.objVal)

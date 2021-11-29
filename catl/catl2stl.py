@@ -52,7 +52,6 @@ def catl2stl(catl_ast):
             [STLFormula(STLOperation.PRED, relation=STLRelOperation.GE,
                         variable=var.format(res=res), threshold=th)
                                for res, th in catl_ast.resource_requests]
-
         stl_ast = STLFormula(STLOperation.AND,
                              children=[cap_available] + resource_terms)
         stl_ast.task = catl_ast
@@ -168,11 +167,16 @@ if __name__ == '__main__':
     print(t.toStringTree())
 
     ast = CATLAbstractSyntaxTreeExtractor().visit(t)
-    print('CATL:', ast)
+    # print('CATL:', ast)
 
     stl = catl2stl(ast)
-    print('STL:', stl)
+    # print('STL:', stl)
+
+    cap_pred, res_pred = stl_predicate_variables(ast)
+
+
+    print('HEREEEEEEE', cap_pred, res_pred)
 
     stl_tasks = extract_stl_task_formulae(stl)
-    for stl_formula, task in stl_tasks:
-        print('Task:', task, 'STL formula:', stl_formula)
+    # for stl_formula, task in stl_tasks:
+        # print('Task:', task, 'STL formula:', stl_formula)
