@@ -18,7 +18,7 @@ from check_system_constraints import check_initial_states, check_flow_constraint
 def setup_logging(logfile='test_simple.log', loglevel=logging.DEBUG,
                  fs='%(asctime)s | %(name)s | %(levelname)s | %(message)s',
                  dfs='%m/%d/%Y %I:%M:%S %p'):
- 
+
     if logfile is not None:
         logging.basicConfig(filename=logfile, level=loglevel,
                             format=fs, datefmt=dfs)
@@ -30,7 +30,7 @@ def setup_logging(logfile='test_simple.log', loglevel=logging.DEBUG,
     root.addHandler(ch)
 
 
-def case_simple(ts_filename='simple2.yaml'):
+def case_simple(ts_filename='simple.yaml'):
     '''Simple example of planning with resource constraints.'''
     setup_logging()
 
@@ -42,15 +42,14 @@ def case_simple(ts_filename='simple2.yaml'):
     for u in ts.g:
         logging.debug('State: %s, Data: %s', u, str(ts.g.node[u]))
 
-    agents = [('q1', {'A'}), ('q1', {'a'}), ('q1', {'a'})
+    agents = [('q1', {'a'}), ('q1', {'a'}),
              ]
     resources = {'r1': {'q2': 2.1, 'q4': 1.2},
                  'r2': {'q3': 2.2}
                 }
     storage_type = 'comparmental' # choices: comparmental, uniform
     capacities = {
-        frozenset({'a'}): {'r1': 2, 'r2': 2},
-        frozenset({'A'}): {'r1': 2, 'r2': 2}
+        frozenset({'a'}): {'r1': 2, 'r2': 2}
     }
     # storage_type = 'uniform' # choices: comparmental, uniform
     # capacities = {
@@ -70,22 +69,20 @@ def case_simple(ts_filename='simple2.yaml'):
     for state, _ in agents:
         assert state in ts.g, 'State "{}" not in TS!'.format(state)
 
-    specification = ('F[0, 2] T(2, green, {(a, 1)}, {(r1, 1.5), (r2, 1.5)})')
-    # specification = ('F[0, 2] T(2, green, {(a, 1)})')
+    specification = ('F[0, 2] T(2, green, {(a, 1)}, {(r1, 1.5), (r2, 1.5)})'
                     # 'F[0, 2] T(1, green, {(a, 1), (b, 1)})'
                      # '&& G[1, 4] T(2, green, {(IR, 1), (Vis, 3)})'
                      # '&& F[3, 4] T(3, yellow, {(IR, 3), (Vis, 2), (UV, 3), (Mo, 4)})'
-                     
+                     )
+
+    # m = route_planning(ts, agents, specification, storage_type=storage_type,
+    #                    capacities=capacities, resource_distribution=resources,
+    #                    resource_type='divisible')
 
     m = route_planning(ts, agents, specification, storage_type=storage_type,
                        capacities=capacities, resource_distribution=resources,
-                       resource_type='divisible', travel_time_weight=0.2,
-                       resources_weight=0.1, transportation=True)
-
-    # m.write('model_test.lp') 
-    # m = route_planning(ts, agents, specification) 
-
-    m.write('model_test.lp') 
+                       resource_type='divisible', travel_time_weight=0.2, resources_weight=0.1,
+                       transportation=True)                       
     time_bound = len(ts.g.nodes(data=True)[0][1]['vars']) - 1
 
     logging.debug('Planning horizon: %d', time_bound)

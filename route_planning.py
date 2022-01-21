@@ -368,12 +368,10 @@ def add_resource_constraints(m, ts, resource_distribution, capacities,
 def extract_propositions(ts, ast):
     '''Returns the set of propositions in the formula, and checks that it is
     included in the transitions system.
-
     Input
     -----
     - The transition system specifying the environment.
     - The AST of the CaTL specification formula.
-
     Output
     ------
     Set of propositions in the specification formula.
@@ -384,15 +382,27 @@ def extract_propositions(ts, ast):
                                 'There are unknown propositions in the formula!'
     return formula_propositions
 
-def compute_catl_variables_bounds(ast, variable_bound, resource_quantities):
-    '''TODO:
+def compute_catl_variables_bounds(ast, variable_bound, resource_quantities=None):
+    ''' Computes CaTL variables bounds, it does capabilities by default and
+    resources depending if resources_quantitaties is not None
+    Input
+    -----
+    - The transition system specifying the environment.
+    - Variable bound: Number of agents
+    -reources quantities: Dictionary from resources to total quantities at initial time.
+
+    Output
+    ------
+    set of ranges of variables in the specification.
+    
     '''
     capability_variables, resource_variables = stl_predicate_variables(ast)
     ranges = {}
     for capability, variables in capability_variables.items():
         ranges.update({variable: (0, variable_bound) for variable in variables})
-    for resource, variables in resource_variables.items():
-        ranges.update({variable: (0, resource_quantities.get(resource,
+    if resource_quantities is not None:
+        for resource, variables in resource_variables.items():
+            ranges.update({variable: (0, resource_quantities.get(resource,
                                                              float('inf')))
                        for variable in variables})
     return ranges
@@ -401,7 +411,7 @@ def add_proposition_constraints(m, stl_milp, ts, ast, capabilities,
                                 agent_classes, time_bound, variable_bound,
                                 vtype=GRB.CONTINUOUS):
     '''Adds the proposition constraints. First, the proposition-state variables
-    are defined such that capabilities are not double booked. Second, contraints
+    are defined such that capabilities are not double booked. Second, constraints    
     are added such that proposition are satisfied as best as possible. The
     variables in the MILP encoding of the STL formula are used for the encoding
     as the minimizers of over proposition-state variables.
@@ -530,10 +540,69 @@ def add_travel_time_objective(m, ts, weight, time_bound, variable_bound):
     - Time bound.
     - The upper bound for variables.
     '''
-    travel_time = sum(sum(d['vars'].values()) * d['weight']
-                      for _, _, d in ts.g.edges(data=True))
+
+    travel_time = sum(sum(d['vars'][0].values()) * d['weight']
+                      for u, v, d in ts.g.edges(data=True) if u!= v)
+    
     travel_time /= (time_bound * variable_bound)
     m.setObjectiveN(travel_time, m.NumObj, weight=weight)
+
+def transportationObjective(m, ts, tra_weight, res_weight, time_bound, 
+                            variable_bound, resource_distribution, 
+                            stl_milp, agent_classes, resource_quantities,
+                            flag=True):
+    '''Modifies the objective fucntion of CaTL when transportation feauture
+    is desired. Creating a blended model with weights that ranges in [0,1]
+    Input
+    -----
+    - The Gurobi model variable.
+    - The transition system specifying the environment.
+    - The travel time of agents objective's weight.
+    - The travel time of resources objective's weight.
+    - Time bound. \|K\|.
+    - Number of agents bound \|J\|.
+    - Initial resource distribution b_h(0,q).
+    - stl_milp object to run method of multirho problem, creating one robustness
+    value for capabilites and other for resources. Transportation attribute in True
+    is required for blended model. TODO: disccuss about better modeling.
+    - agent classes to evaluate the set of capabilities.
+    -resources quantities TODO: not needed at the moment, depending on the 
+    capturing of resources bound.
+    
+    - The upper bound for variables.
+    '''
+    travel_time = 0
+    for k in range(time_bound):
+        for c, _ in agent_classes.items():
+            for u, v, d in ts.g.edges(data=True): 
+                if u != v:
+                    travel_time += d['vars'][k][c] * d['weight']
+                else:
+                    pass
+    
+    resources_time = 0
+    for k in range(time_bound):
+        for h in resource_distribution:
+            for u, v, d in ts.g.edges(data=True): 
+                if u != v:
+                    resources_time += d['res'][k][h] * d['weight']
+                else:
+                    pass
+                
+    resource_bound_node = []
+    for u in ts.g.nodes():
+        for h in resource_distribution:
+            resource_bound_node.append(resource_distribution[h].get(u, 0))
+
+    travel_time /= (time_bound * variable_bound)
+    resources_time /= (time_bound * max(resource_bound_node))
+    # resources_time /= (time_bound * max(resource_quantities.values()))
+
+    stl_milp.optimize_multirho(transportation=flag)
+    # m.setObjectiveN(travel_time, 2, weight=tra_weight, name='travel_time_obj')
+    # m.setObjectiveN(resources_time, 3, weight=res_weight, name='res_time_obj')
+    m.update()
+
 
 def extract_trajetories(m, ts, agents, time_bound):
     '''TODO:
@@ -572,7 +641,8 @@ def extract_trajetories(m, ts, agents, time_bound):
 def route_planning(ts, agents, formula, time_bound=None, variable_bound=None,
                    storage_type=None, capacities=None,
                    resource_distribution=None,  resource_type='divisible',
-                   robust=True, travel_time_weight=0):
+                   robust=True, travel_time_weight=0, resources_weight=0, 
+                   transportation=False, flag=True):
     '''Performs route planning for agents `agents' moving in a transition system
     `ts' such that the CaTL specification `formula' is satisfied.
 
@@ -591,7 +661,9 @@ def route_planning(ts, agents, formula, time_bound=None, variable_bound=None,
     system.
     - The resource type (options: divisible, packets or indivisible).
     - Flag indicating whether to solve the robust or feasibility problem.
-    - The weight of the total travel time objective used for regularization.
+    - The weight of the total travel time objective.
+    - The weight of the total travel of resources time objective.
+    - Flag indicating wheter the model needs transportation feature.
 
     Output
     ------
@@ -620,48 +692,50 @@ def route_planning(ts, agents, formula, time_bound=None, variable_bound=None,
 
     # add CATL formula constraints
     stl = catl2stl(ast)
+
     # bounds for capability and resource variables
-    if storage_type is not None:
-        resource_quantities = compute_resource_quantities(resource_distribution)
-    else:
-        resource_quantities = dict()
-    ranges = compute_catl_variables_bounds(ast, variable_bound,
+    if transportation == True:
+        if storage_type is not None:
+            resource_quantities = compute_resource_quantities(resource_distribution)
+        else:
+            resource_quantities = dict()
+        ranges = compute_catl_variables_bounds(ast, variable_bound,
                                            resource_quantities)
+        cap_pred, res_pred = stl_predicate_variables(ast)
+
+        cap_pred_set = set()
+        res_pred_set = set()
+
+        for predca in cap_pred.values():
+            cap_pred_set = cap_pred_set.union(predca)
+
+        for predre in res_pred.values():
+            res_pred_set = res_pred_set.union(predre)
+        
+        for x in res_pred_set:
+            y = str(x)
+            res_pred_set.remove(x)
+            res_pred_set.add(y)
+        
+        for x in cap_pred_set:
+            y = str(x)
+            cap_pred_set.remove(x)
+            cap_pred_set.add(y)
+        
+        rhos = namedtuple('rhos','set weight id')
+        args1 = [cap_pred_set, 1, 0]
+        args2 = [res_pred_set, 0.7, 1]
+        
+        mrho_dict = {
+            "rho0" : rhos(*args1),
+            "rho1" : rhos(*args2)
+            }
+        stl_milp = stl2milp(stl, ranges=ranges, model=m, robust=robust, mrho=mrho_dict)
+    else:
+        ranges = compute_catl_variables_bounds(ast, variable_bound)
+        stl_milp = stl2milp(stl, ranges=ranges, model=m, robust=robust)
 
 
-    cap_pred, res_pred = stl_predicate_variables(ast)
-    rhos = namedtuple('rhos','set weight id')
-    cap_pred_set = set()
-    res_pred_set = set()
-
-    for predca in cap_pred.values():
-        cap_pred_set = cap_pred_set.union(predca)
-
-    for predre in res_pred.values():
-        res_pred_set = res_pred_set.union(predre)
-
-    for x in res_pred_set:
-        y = str(x)
-        res_pred_set.remove(x)
-        res_pred_set.add(y)
-    
-    for x in cap_pred_set:
-        y = str(x)
-        cap_pred_set.remove(x)
-        cap_pred_set.add(y)
-
-    args1 = [cap_pred_set, 1, 0]
-    args2 = [res_pred_set, 0.5, 1]
-    
-    mrho_dict = {
-        "rho0" : rhos(*args1),
-        "rho1" : rhos(*args2)
-        }
-    # print(type(args1), 'AQUIIIIIIIIIIIIIIIIIIIIIII', args1, args2)
-
-    #CHANGE 1
-    stl_milp = stl2milp(stl, ranges=ranges, model=m, robust=robust, mrho=mrho_dict)
-    # stl_milp = stl2milp(stl, ranges=ranges, model=m, robust=robust)
 
     stl_milp.translate()
 
@@ -669,31 +743,40 @@ def route_planning(ts, agents, formula, time_bound=None, variable_bound=None,
     add_proposition_constraints(m, stl_milp, ts, ast, capabilities,
                                 agent_classes, time_bound, variable_bound)
 
-    if storage_type is not None:
-        resource_var_type = resource_variable_types[resource_type]
-        create_resource_variables(m, ts, resource_quantities, time_bound,
-                                  resource_var_type)
-        task_stl_vars = extract_task_variables(ts, stl, stl_milp)
-        add_resource_constraints(m, ts, resource_distribution, capacities,
-                                 time_bound, task_stl_vars, storage_type)
-        add_proposition_resource_constraints(m, stl_milp, ts, ast,
-                                             time_bound, resource_quantities,
-                                             resource_var_type)
-
-    # add travel time regularization
-    if travel_time_weight > 0:
-        add_travel_time_objective(m, ts, travel_time_weight, time_bound,
-                                  variable_bound)
+    if transportation == True:
+        if storage_type is not None:
+            resource_var_type = resource_variable_types[resource_type]
+            create_resource_variables(m, ts, resource_quantities, time_bound,
+                                    resource_var_type)
+            task_stl_vars = extract_task_variables(ts, stl, stl_milp)
+            add_resource_constraints(m, ts, resource_distribution, capacities,
+                                    time_bound, task_stl_vars, storage_type)
+            add_proposition_resource_constraints(m, stl_milp, ts, ast,
+                                                time_bound, resource_quantities,
+                                                resource_var_type)
+                                                
+            transportationObjective(m, ts, travel_time_weight, resources_weight,
+                                time_bound, variable_bound, resource_distribution,
+                                stl_milp, agent_classes, resource_quantities, flag=flag)                
 
     # run optimizer
+    m.optimize()
+    m.write('model_test_multirho.lp') 
+    
+    # if transportation == True:
+    #     n_objectives = m.NumObj
+    #     for o in range(n_objectives):
+    #         # Set which objective we will query
+    #         m.params.ObjNumber = o
+    #         # Query the o-th objective value
+    #         if m.status == GRB.Status.INFEASIBLE:
+    #             print('Model is infeasible')
+    #         else:
+    #             print(m.ObjNName, m.ObjNVal, 'Objectives:')
+    # else:    
+    #     obj = m.getObjective()
+    #     print(str(obj), ':', obj.getValue(), 'Objective')
 
-    #CHANGE 2
-    # m.optimize()
-    stl_milp.optimize_multirho()
-
-    print('Objective: HERE------------------------------------------------------------')
-    obj = m.getObjective()
-    print(str(obj), ':', obj.getValue())
 
     if m.status == GRB.Status.OPTIMAL:
         logging.info('"Optimal objective LP": %f', m.objVal)
