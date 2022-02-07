@@ -5,6 +5,7 @@
  See license.txt file for license information.
 '''
 
+from random import uniform
 import sys
 import logging
 import time
@@ -45,7 +46,7 @@ def generateRandomAgents(stateList,capabilityList,numCapabilitiesPerAgent,
     return agents
 
 
-def baseline_vs_transportation(ts_filename='simple2.yaml'):
+def baseline_vs_transportation(ts_filename='simple2.yaml', storage_type='uniform'): #storage_type uniform or comparmental
 
     '''Simple example of planning with resource constraints.'''
     setup_logging()
@@ -61,27 +62,36 @@ def baseline_vs_transportation(ts_filename='simple2.yaml'):
     agents = [('q1', {'a','b'}), ('q6', {'c', 'd'}), ('q9', {'e','f'}),
               ('q2', {'a','c'}), ('q3', {'a', 'c'}), ('q7', {'d','b'}),
               ('q5', {'a','b'}), ('q4', {'a', 'f'}), ('q8', {'d','b'}),
+              ('q5', {'a','f'}), ('q4', {'c', 'd'}), ('q8', {'e','f'}),
+              ('q2', {'a','c'}), ('q3', {'a', 'c'}), ('q7', {'d','b'}),
+              ('q5', {'a','b'}), ('q4', {'a', 'f'}), ('q8', {'d','b'}),
               ('q5', {'a','f'}), ('q4', {'c', 'd'}), ('q8', {'e','f'})
              ]
-    resources = {'r1': {'q1': 6.1, 'q5': 6.2},
-                 'r2': {'q2': 6.2, 'q6': 6.2},
-                 'r3': {'q3': 6.2, 'q7': 6.2},
-                 'r4': {'q4': 6.2, 'q8': 6.2}
+    resources = {'r1': {'q1': 6., 'q5': 6.},
+                 'r2': {'q2': 6., 'q6': 6.},
+                 'r3': {'q3': 6., 'q7': 6.},
+                 'r4': {'q4': 6., 'q8': 6.}
                 }
-    storage_type = 'comparmental' # choices: comparmental, uniform
-    capacities = {
-        frozenset({'a', 'b'}): {'r1': 2, 'r2': 2, 'r3': 2, 'r4': 2},
-        frozenset({'c', 'd'}): {'r1': 2, 'r2': 2, 'r3': 1, 'r4': 2},
-        frozenset({'e', 'f'}): {'r1': 2, 'r2': 2, 'r3': 1, 'r4': 2},
-        frozenset({'a', 'c'}): {'r1': 2, 'r2': 2, 'r3': 1, 'r4': 2},
-        frozenset({'b', 'd'}): {'r1': 2, 'r2': 2, 'r3': 1, 'r4': 2},
-        frozenset({'a', 'f'}): {'r1': 2, 'r2': 2, 'r3': 1, 'r4': 2},
-        # frozenset({'b'}): {'r1': 1, 'r2': 1, 'r3': 2, 'r4': 2}
-    }
-    # storage_type = 'uniform' # choices: comparmental, uniform
-    # capacities = {
-    #     frozenset({'a'}): 2
-    # }                                                 
+    if storage_type=='uniform':
+        capacities = {
+            frozenset({'a', 'b'}): 10,
+            frozenset({'c', 'd'}): 8,
+            frozenset({'e', 'f'}): 5,
+            frozenset({'a', 'c'}): 7,
+            frozenset({'d', 'b'}): 6,
+            frozenset({'a', 'f'}): 4
+            }
+    elif storage_type=='comparmental':
+        capacities = {
+            frozenset({'a', 'b'}): {'r1': 4, 'r2': 4, 'r3': 4, 'r4': 4},
+            frozenset({'c', 'd'}): {'r1': 1, 'r2': 1, 'r3': 1, 'r4': 1},
+            frozenset({'e', 'f'}): {'r1': 3, 'r2': 2, 'r3': 1, 'r4': 2},
+            frozenset({'a', 'c'}): {'r1': 1, 'r2': 2, 'r3': 3, 'r4': 2},
+            frozenset({'d', 'b'}): {'r1': 2, 'r2': 1, 'r3': 1, 'r4': 2},
+            frozenset({'a', 'f'}): {'r1': 3, 'r2': 2, 'r3': 1, 'r4': 3}
+        }                                                
+    else:
+        raise Exception("Storage type not define, should be uniform or comparmental")
 
     initial_locations, capabilities = zip(*agents)  
     agent_classes = set(map(frozenset, capabilities))
@@ -97,7 +107,7 @@ def baseline_vs_transportation(ts_filename='simple2.yaml'):
         assert state in ts.g, 'State "{}" not in TS!'.format(state)
 
     spec_transportation = ('F[0, 10] T(2, orange, {(a, 2)}, {(r1, 3.5), (r2, 0.5)})')
-    spec_CaTL = ('F[0, 10] T(2, orange, {(a, 1)})')
+    spec_CaTL = ('F[0, 10] T(2, orange, {(a, 2)})')
                     # 'F[0, 2] T(1, green, {(a, 1), (b, 1)})'
                      # '&& G[1, 4] T(2, green, {(IR, 1), (Vis, 3)})'
                      # '&& F[3, 4] T(3, yellow, {(IR, 3), (Vis, 2), (UV, 3), (Mo, 4)})'
@@ -132,6 +142,11 @@ def baseline_vs_transportation(ts_filename='simple2.yaml'):
     end_CaTL = time.time()
     time_CaTL = end_CaTL - start_CaTL
 
+    #CaTL-Baseline with time regularization obejective
+    start_CaTL2 = time.time() 
+    m_CaTL2 = route_planning(ts, agents, spec_CaTL, travel_time_weight=0.5)       
+    end_CaTL2 = time.time()
+    time_CaTL2 = end_CaTL2 - start_CaTL2
 
 
     time_bound = len(ts.g.nodes(data=True)[0][1]['vars']) - 1
@@ -140,13 +155,29 @@ def baseline_vs_transportation(ts_filename='simple2.yaml'):
 
     check_initial_states(ts, agents)
     check_flow_constraints(ts, agents, time_bound)
-    
+
+    #CaTL-Baseline
     print('CaTL')
     print('Time needed for Baseline: ', time_CaTL)
     obj = m_CaTL.getObjective()
     print( 'Objective:', str(obj), ':', -obj.getValue())
     print
 
+    #CaTL-Baseline with time regularization obejective
+    print('CaTL with Time Regularization')
+    print('Time needed for Baseline: ', time_CaTL)
+    n_objectives2 = m_CaTL2.NumObj
+    for o in range(n_objectives2):
+        # Set which objective we will query
+        m_CaTL2.params.ObjNumber = o
+        # Query the o-th objective value
+        if m_CaTL2.status == GRB.Status.INFEASIBLE:
+            print('Model is infeasible')
+        else:
+            print('Objectives:', m_CaTL2.ObjNName, ':', m_CaTL2.ObjNVal)
+    print
+
+    # Transportation_blended method multi-objective
     print('Transportation Blended')
     print('Time needed for Transportation blended method: ', time_transportation)
     n_objectives = m_transportation_blend.NumObj
@@ -159,6 +190,8 @@ def baseline_vs_transportation(ts_filename='simple2.yaml'):
         else:
             print('Objectives:', m_transportation_blend.ObjNName, ':', m_transportation_blend.ObjNVal)
     
+
+    # Transportation reward method single objective
     print
     print('Transportation Single Objective')
     print('Time needed for Transportation single objective: ', time_transportation_so)
@@ -168,10 +201,10 @@ def baseline_vs_transportation(ts_filename='simple2.yaml'):
     else:
         print( 'Objective:', str(obj3), ':', obj3.getValue())
     print
-    
-    print(agentsTrial)
-    # print(agents)
-    print(len(agent_classes), agent_classes, type(capacities))
+
+    # print(agentsTrial)
+    print(agents[0])
+    # print(len(agent_classes), agent_classes, type(capacities))
     
 if __name__ == '__main__':
     baseline_vs_transportation()

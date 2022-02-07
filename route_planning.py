@@ -541,11 +541,15 @@ def add_travel_time_objective(m, ts, weight, time_bound, variable_bound):
     - The upper bound for variables.
     '''
 
-    travel_time = sum(sum(d['vars'][0].values()) * d['weight']
-                      for u, v, d in ts.g.edges(data=True) if u!= v)
+    
+
+    travel_time = sum(sum( sum(d['vars'][k].values()) for k in range(time_bound) )
+                     * d['weight'] for u, v, d in ts.g.edges(data=True) if u!= v)
     
     travel_time /= (time_bound * variable_bound)
     m.setObjectiveN(travel_time, m.NumObj, weight=weight)
+
+
 
 def transportationObjective(m, ts, tra_weight, res_weight, time_bound, 
                             variable_bound, resource_distribution, 
@@ -571,36 +575,28 @@ def transportationObjective(m, ts, tra_weight, res_weight, time_bound,
     
     - The upper bound for variables.
     '''
-    travel_time = 0
-    for k in range(time_bound):
-        for c, _ in agent_classes.items():
-            for u, v, d in ts.g.edges(data=True): 
-                if u != v:
-                    travel_time += d['vars'][k][c] * d['weight']
-                else:
-                    pass
+    travel_time = sum(sum( sum(d['vars'][k].values()) for k in range(time_bound) )
+                     * d['weight'] for u, v, d in ts.g.edges(data=True) if u!= v)
     
-    resources_time = 0
-    for k in range(time_bound):
-        for h in resource_distribution:
-            for u, v, d in ts.g.edges(data=True): 
-                if u != v:
-                    resources_time += d['res'][k][h] * d['weight']
-                else:
-                    pass
-                
-    resource_bound_node = []
-    for u in ts.g.nodes():
-        for h in resource_distribution:
-            resource_bound_node.append(resource_distribution[h].get(u, 0))
-
     travel_time /= (time_bound * variable_bound)
-    resources_time /= (time_bound * max(resource_bound_node))
-    # resources_time /= (time_bound * max(resource_quantities.values()))
+    
+
+    resources_time = sum(sum( sum(d['res'][k].values()) for k in range(time_bound) )
+                     * d['weight'] for u, v, d in ts.g.edges(data=True) if u!= v)
+                
+    
+    
+    resources_bound = max(sum(resource_distribution[h].get(u, 0) for u in ts.g.nodes())
+                         for h in resource_distribution)
+    
+  
+
+    resources_time /= (time_bound * resources_bound)
+    
 
     stl_milp.optimize_multirho(transportation=flag)
-    # m.setObjectiveN(travel_time, 2, weight=tra_weight, name='travel_time_obj')
-    # m.setObjectiveN(resources_time, 3, weight=res_weight, name='res_time_obj')
+    m.setObjectiveN(travel_time, 2, weight=tra_weight, name='travel_time_obj')
+    m.setObjectiveN(resources_time, 3, weight=res_weight, name='res_time_obj')
     m.update()
 
 
@@ -757,7 +753,9 @@ def route_planning(ts, agents, formula, time_bound=None, variable_bound=None,
                                                 
             transportationObjective(m, ts, travel_time_weight, resources_weight,
                                 time_bound, variable_bound, resource_distribution,
-                                stl_milp, agent_classes, resource_quantities, flag=flag)                
+                                stl_milp, agent_classes, resource_quantities, flag=flag)
+    elif travel_time_weight != 0:
+        add_travel_time_objective(m, ts, travel_time_weight, time_bound, variable_bound)                
 
     # run optimizer
     m.optimize()
