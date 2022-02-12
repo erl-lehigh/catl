@@ -1,7 +1,172 @@
 \ Model milp
 \ LP format - for model browsing. Use MPS format to capture full model detail.
-Maximize
-  &&_2bx36709bad237f292b_0
+Minimize multi-objectives
+  OBJ0: Priority=4 Weight=1 AbsTol=1e-06 RelTol=0
+   - &&_2bx36709bad237f292b_0_zi
+  OBJ1: Priority=3 Weight=1 AbsTol=1e-06 RelTol=0
+   - F_2bx5912fa775a1be797_0_zi - F_2dx38c91496929555fe_0_zi
+   - F_2dx32be5c90b5a3f105_0_zi
+  OBJ2: Priority=2 Weight=1 AbsTol=1e-06 RelTol=0
+   - G_2bx9fd083b0aacb041_0_zi - G_2bx9fd083b0aacb041_1_zi
+   - G_2bx9fd083b0aacb041_2_zi - G_2bx9fd083b0aacb041_3_zi
+   - G_2bx9fd083b0aacb041_4_zi - G_2bx9fd083b0aacb041_5_zi
+   - G_2bx9fd083b0aacb041_6_zi - G_2bx9fd083b0aacb041_7_zi
+   - G_2bx9fd083b0aacb041_8_zi - G_2bx9fd083b0aacb041_9_zi
+   - G_2bx9fd083b0aacb041_10_zi - G_2bx9fd083b0aacb041_11_zi
+   - G_2bx9fd083b0aacb041_12_zi - G_2bx9fd083b0aacb041_13_zi
+   - G_2bx9fd083b0aacb041_14_zi - G_2bx9fd083b0aacb041_15_zi
+   - G_2bx9fd083b0aacb041_16_zi - G_2bx9fd083b0aacb041_17_zi
+   - G_2bx9fd083b0aacb041_18_zi - G_2bx9fd083b0aacb041_19_zi
+   - G_2bx9fd083b0aacb041_20_zi - G_2dxf68e7e316550a9e_0_zi
+   - G_2dxf68e7e316550a9e_1_zi - G_2dxf68e7e316550a9e_2_zi
+   - G_2dxf68e7e316550a9e_3_zi - G_2dxf68e7e316550a9e_4_zi
+   - G_2dxf68e7e316550a9e_5_zi - G_2dxf68e7e316550a9e_6_zi
+   - G_2dxf68e7e316550a9e_7_zi - G_2dxf68e7e316550a9e_8_zi
+   - G_2dxf68e7e316550a9e_9_zi - G_2dxf68e7e316550a9e_10_zi
+   - G_2dxf68e7e316550a9e_11_zi - G_2dxf68e7e316550a9e_12_zi
+   - G_2dxf68e7e316550a9e_13_zi - G_2dxf68e7e316550a9e_14_zi
+   - G_2dxf68e7e316550a9e_15_zi - G_2dxf68e7e316550a9e_16_zi
+   - G_2dxf68e7e316550a9e_17_zi - G_2dxf68e7e316550a9e_18_zi
+   - G_2dxf68e7e316550a9e_19_zi - G_2dxf68e7e316550a9e_20_zi
+   - G_2bx738ea321e00a799d_0_zi - G_2bx738ea321e00a799d_1_zi
+   - G_2bx738ea321e00a799d_2_zi - G_2bx738ea321e00a799d_3_zi
+   - G_2bx738ea321e00a799d_4_zi - G_2bx738ea321e00a799d_5_zi
+   - G_2bx738ea321e00a799d_6_zi - G_2bx738ea321e00a799d_7_zi
+   - G_2bx738ea321e00a799d_8_zi - G_2bx738ea321e00a799d_9_zi
+   - G_2bx738ea321e00a799d_10_zi - G_2bx738ea321e00a799d_11_zi
+   - G_2bx738ea321e00a799d_12_zi - G_2bx738ea321e00a799d_13_zi
+   - G_2bx738ea321e00a799d_14_zi - G_2bx738ea321e00a799d_15_zi
+   - G_2bx738ea321e00a799d_16_zi - G_2bx738ea321e00a799d_17_zi
+   - G_2bx738ea321e00a799d_18_zi - G_2bx738ea321e00a799d_19_zi
+   - G_2bx738ea321e00a799d_20_zi
+  OBJ3: Priority=1 Weight=1 AbsTol=1e-06 RelTol=0
+   - &&_2bx25b1daf451274b94_0_zi - &&_2bx25b1daf451274b94_1_zi
+   - &&_2bx25b1daf451274b94_2_zi - &&_2bx25b1daf451274b94_3_zi
+   - &&_2bx25b1daf451274b94_4_zi - &&_2bx25b1daf451274b94_5_zi
+   - &&_2bx25b1daf451274b94_6_zi - &&_2bx25b1daf451274b94_7_zi
+   - &&_2bx25b1daf451274b94_8_zi - &&_2bx25b1daf451274b94_9_zi
+   - &&_2bx25b1daf451274b94_10_zi - &&_2bx25b1daf451274b94_11_zi
+   - &&_2bx25b1daf451274b94_12_zi - &&_2bx25b1daf451274b94_13_zi
+   - &&_2bx25b1daf451274b94_14_zi - &&_2bx25b1daf451274b94_15_zi
+   - &&_2bx25b1daf451274b94_16_zi - &&_2bx25b1daf451274b94_17_zi
+   - &&_2bx25b1daf451274b94_18_zi - &&_2bx25b1daf451274b94_19_zi
+   - &&_2bx25b1daf451274b94_20_zi - &&_2bx25b1daf451274b94_21_zi
+   - &&_2bx25b1daf451274b94_22_zi - &&_2bx25b1daf451274b94_23_zi
+   - &&_2dx2220fea3b95aef80_0_zi - &&_2dx2220fea3b95aef80_1_zi
+   - &&_2dx2220fea3b95aef80_2_zi - &&_2dx2220fea3b95aef80_3_zi
+   - &&_2dx2220fea3b95aef80_4_zi - &&_2dx2220fea3b95aef80_5_zi
+   - &&_2dx2220fea3b95aef80_6_zi - &&_2dx2220fea3b95aef80_7_zi
+   - &&_2dx2220fea3b95aef80_8_zi - &&_2dx2220fea3b95aef80_9_zi
+   - &&_2dx2220fea3b95aef80_10_zi - &&_2dx2220fea3b95aef80_11_zi
+   - &&_2dx2220fea3b95aef80_12_zi - &&_2dx2220fea3b95aef80_13_zi
+   - &&_2dx2220fea3b95aef80_14_zi - &&_2dx2220fea3b95aef80_15_zi
+   - &&_2dx2220fea3b95aef80_16_zi - &&_2dx2220fea3b95aef80_17_zi
+   - &&_2dx2220fea3b95aef80_18_zi - &&_2dx2220fea3b95aef80_19_zi
+   - &&_2dx2220fea3b95aef80_20_zi - &&_2dx2220fea3b95aef80_21_zi
+   - &&_2dx2220fea3b95aef80_22_zi - &&_2dx2220fea3b95aef80_23_zi
+   - &&_2dx2220fea3b95aef80_24_zi - &&_2dx2220fea3b95aef80_25_zi
+   - &&_2dx2220fea3b95aef80_26_zi - &&_2dx6220ec1d7b72ff34_0_zi
+   - &&_2dx6220ec1d7b72ff34_1_zi - &&_2dx6220ec1d7b72ff34_2_zi
+   - &&_2dx6220ec1d7b72ff34_3_zi - &&_2dx6220ec1d7b72ff34_4_zi
+   - &&_2dx6220ec1d7b72ff34_5_zi - &&_2dx6220ec1d7b72ff34_6_zi
+   - &&_2dx6220ec1d7b72ff34_7_zi - &&_2dx6220ec1d7b72ff34_8_zi
+   - &&_2dx6220ec1d7b72ff34_9_zi - &&_2dx6220ec1d7b72ff34_10_zi
+   - &&_2dx6220ec1d7b72ff34_11_zi - &&_2dx6220ec1d7b72ff34_12_zi
+   - &&_2dx6220ec1d7b72ff34_13_zi - &&_2dx6220ec1d7b72ff34_14_zi
+   - &&_2dx6220ec1d7b72ff34_15_zi - &&_2dx6220ec1d7b72ff34_16_zi
+   - &&_2dx6220ec1d7b72ff34_17_zi - &&_2dx6220ec1d7b72ff34_18_zi
+   - &&_2dx6220ec1d7b72ff34_19_zi - &&_2dx6220ec1d7b72ff34_20_zi
+   - &&_2dx6220ec1d7b72ff34_21_zi - &&_2dx6220ec1d7b72ff34_22_zi
+   - &&_2dx6220ec1d7b72ff34_23_zi
+  OBJ4: Priority=0 Weight=1 AbsTol=1e-06 RelTol=0
+   - predicate_2dx72cb6448ee9c5907_0_zi - predicate_2dx72cb6448ee9c5907_1_zi
+   - predicate_2dx72cb6448ee9c5907_2_zi
+   - predicate_2dx72cb6448ee9c5907_3_zi
+   - predicate_2dx72cb6448ee9c5907_4_zi
+   - predicate_2dx72cb6448ee9c5907_5_zi
+   - predicate_2dx72cb6448ee9c5907_6_zi
+   - predicate_2dx72cb6448ee9c5907_7_zi
+   - predicate_2dx72cb6448ee9c5907_8_zi
+   - predicate_2dx72cb6448ee9c5907_9_zi
+   - predicate_2dx72cb6448ee9c5907_10_zi
+   - predicate_2dx72cb6448ee9c5907_11_zi
+   - predicate_2dx72cb6448ee9c5907_12_zi
+   - predicate_2dx72cb6448ee9c5907_13_zi
+   - predicate_2dx72cb6448ee9c5907_14_zi
+   - predicate_2dx72cb6448ee9c5907_15_zi
+   - predicate_2dx72cb6448ee9c5907_16_zi
+   - predicate_2dx72cb6448ee9c5907_17_zi
+   - predicate_2dx72cb6448ee9c5907_18_zi
+   - predicate_2dx72cb6448ee9c5907_19_zi
+   - predicate_2dx72cb6448ee9c5907_20_zi
+   - predicate_2dx72cb6448ee9c5907_21_zi
+   - predicate_2dx72cb6448ee9c5907_22_zi
+   - predicate_2dx72cb6448ee9c5907_23_zi
+   - predicate_2dx143e2edb032bf8bf_0_zi
+   - predicate_2dx143e2edb032bf8bf_1_zi
+   - predicate_2dx143e2edb032bf8bf_2_zi
+   - predicate_2dx143e2edb032bf8bf_3_zi
+   - predicate_2dx143e2edb032bf8bf_4_zi
+   - predicate_2dx143e2edb032bf8bf_5_zi
+   - predicate_2dx143e2edb032bf8bf_6_zi
+   - predicate_2dx143e2edb032bf8bf_7_zi
+   - predicate_2dx143e2edb032bf8bf_8_zi
+   - predicate_2dx143e2edb032bf8bf_9_zi
+   - predicate_2dx143e2edb032bf8bf_10_zi
+   - predicate_2dx143e2edb032bf8bf_11_zi
+   - predicate_2dx143e2edb032bf8bf_12_zi
+   - predicate_2dx143e2edb032bf8bf_13_zi
+   - predicate_2dx143e2edb032bf8bf_14_zi
+   - predicate_2dx143e2edb032bf8bf_15_zi
+   - predicate_2dx143e2edb032bf8bf_16_zi
+   - predicate_2dx143e2edb032bf8bf_17_zi
+   - predicate_2dx143e2edb032bf8bf_18_zi
+   - predicate_2dx143e2edb032bf8bf_19_zi
+   - predicate_2dx143e2edb032bf8bf_20_zi
+   - predicate_2dx143e2edb032bf8bf_21_zi
+   - predicate_2dx143e2edb032bf8bf_22_zi
+   - predicate_2dx143e2edb032bf8bf_23_zi
+   - predicate_2dx143e2edb032bf8bf_24_zi
+   - predicate_2dx143e2edb032bf8bf_25_zi
+   - predicate_2dx143e2edb032bf8bf_26_zi
+   - predicate_2bx43d8618c4d9ba49b_0_zi - predicate_2dxdb499ecafaad7ce_0_zi
+   - predicate_2bx43d8618c4d9ba49b_1_zi - predicate_2dxdb499ecafaad7ce_1_zi
+   - predicate_2bx43d8618c4d9ba49b_2_zi - predicate_2dxdb499ecafaad7ce_2_zi
+   - predicate_2bx43d8618c4d9ba49b_3_zi - predicate_2dxdb499ecafaad7ce_3_zi
+   - predicate_2bx43d8618c4d9ba49b_4_zi - predicate_2dxdb499ecafaad7ce_4_zi
+   - predicate_2bx43d8618c4d9ba49b_5_zi - predicate_2dxdb499ecafaad7ce_5_zi
+   - predicate_2bx43d8618c4d9ba49b_6_zi - predicate_2dxdb499ecafaad7ce_6_zi
+   - predicate_2bx43d8618c4d9ba49b_7_zi - predicate_2dxdb499ecafaad7ce_7_zi
+   - predicate_2bx43d8618c4d9ba49b_8_zi - predicate_2dxdb499ecafaad7ce_8_zi
+   - predicate_2bx43d8618c4d9ba49b_9_zi - predicate_2dxdb499ecafaad7ce_9_zi
+   - predicate_2bx43d8618c4d9ba49b_10_zi
+   - predicate_2dxdb499ecafaad7ce_10_zi
+   - predicate_2bx43d8618c4d9ba49b_11_zi
+   - predicate_2dxdb499ecafaad7ce_11_zi
+   - predicate_2bx43d8618c4d9ba49b_12_zi
+   - predicate_2dxdb499ecafaad7ce_12_zi
+   - predicate_2bx43d8618c4d9ba49b_13_zi
+   - predicate_2dxdb499ecafaad7ce_13_zi
+   - predicate_2bx43d8618c4d9ba49b_14_zi
+   - predicate_2dxdb499ecafaad7ce_14_zi
+   - predicate_2bx43d8618c4d9ba49b_15_zi
+   - predicate_2dxdb499ecafaad7ce_15_zi
+   - predicate_2bx43d8618c4d9ba49b_16_zi
+   - predicate_2dxdb499ecafaad7ce_16_zi
+   - predicate_2bx43d8618c4d9ba49b_17_zi
+   - predicate_2dxdb499ecafaad7ce_17_zi
+   - predicate_2bx43d8618c4d9ba49b_18_zi
+   - predicate_2dxdb499ecafaad7ce_18_zi
+   - predicate_2bx43d8618c4d9ba49b_19_zi
+   - predicate_2dxdb499ecafaad7ce_19_zi
+   - predicate_2bx43d8618c4d9ba49b_20_zi
+   - predicate_2dxdb499ecafaad7ce_20_zi
+   - predicate_2bx43d8618c4d9ba49b_21_zi
+   - predicate_2dxdb499ecafaad7ce_21_zi
+   - predicate_2bx43d8618c4d9ba49b_22_zi
+   - predicate_2dxdb499ecafaad7ce_22_zi
+   - predicate_2bx43d8618c4d9ba49b_23_zi
+   - predicate_2dxdb499ecafaad7ce_23_zi
 Subject To
  team_q1_5_0: z_q1_5_0 - z_q1_q1_5_0 - z_q1_q3_5_0 - z_q1_q2_5_0
    - z_q1_q4_5_0 = 0

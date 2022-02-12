@@ -39,7 +39,7 @@ def mars_partial(ts_filename='m_ps.yaml'):
     ts = Ts.load(ts_filename)
     show_environment(ts)
     for u, v in ts.g.edges():
-        print v,u
+        print (v,u)
         assert ts.g.has_edge(v, u)
     #show_environment(ts)
 
@@ -86,7 +86,7 @@ def mars_partial(ts_filename='m_ps.yaml'):
 
                      
 
-    m = route_planning(ts, agents, specification)
+    m = route_planning(ts, agents, specification, flag=True)
     print('final_opti')
     time_bound = len(ts.g.nodes(data=True)[0][1]['vars']) - 1
 

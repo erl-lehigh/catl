@@ -445,7 +445,7 @@ def partial_robustness(stl, stl_milp, t=0, max_robustness=1000):
 
 
 def route_planning(ts, agents, formula, time_bound=None, variable_bound=None,
-                   robust=True, travel_time_weight=0):
+                   robust=True, travel_time_weight=0, flag=True):
     '''Performs route planning for agents `agents' moving in a transition system
     `ts' such that the CaTL specification `formula' is satisfied.
     Input
@@ -487,10 +487,12 @@ def route_planning(ts, agents, formula, time_bound=None, variable_bound=None,
     # add CATL formula constraints
     stl = catl2stl(ast)
     ranges = {variable: (0, len(agents)) for variable in stl.variables()}
-    stl_milp = pstl2milp(stl, ranges=ranges, model=m, robust=robust)
-    zi = stl_milp.translate()
-
-    #stl_milp.translate(satisfaction=False) 
+    if flag == True:
+        stl_milp = pstl2milp(stl, ranges=ranges, model=m, robust=robust)
+        zi = stl_milp.translate()
+    elif flag==False:
+        stl_milp = stl2milp(stl, ranges=ranges, model=m, robust=robust)
+        stl_milp.translate(satisfaction=True) 
     # add proposition constraints
     add_proposition_constraints(m, stl_milp, ts, ast, capabilities,
                                 agent_classes, time_bound, variable_bound)
@@ -500,23 +502,28 @@ def route_planning(ts, agents, formula, time_bound=None, variable_bound=None,
         add_travel_time_objective(m, ts, travel_time_weight, time_bound,
                                   variable_bound)
 
-    
-    method = 3
+    if flag == True:
+        method = 1
 
-    if method == 1:
-        d = stl_milp.method_1()
-        obj = [stl_milp.model.getObjective(objectives) for objectives in range(d+1)]
-        print(str(obj), ':', [obj[i].getValue() for i in range(d+1)], "MILP")
-    elif method == 2: 
-        stl_milp.method_2()
-        # print('Objective')
-        obj = stl_milp.model.getObjective()
-        # print(str(obj), obj.getValue(), "MILP")
-    elif method == 3:
-        stl_milp.method_3(zi)
-        # print('Objective')
-        obj = stl_milp.model.getObjective()
-        # print(str(obj), obj.getValue(), "MILP")
+        if method == 1:
+            d = stl_milp.method_1()
+            obj = [stl_milp.model.getObjective(objectives) for objectives in range(d+1)]
+            print(str(obj), ':', [obj[i].getValue() for i in range(d+1)], "MILP")
+            # pstlrobust = stl_milp.pstl2lp(stl)
+        elif method == 2: 
+            stl_milp.method_2()
+            # print('Objective')
+            obj = stl_milp.model.getObjective()
+            pstlrobust = stl_milp.pstl2lp(stl)
+            print(str(obj), obj.getValue(), "MILP")
+        elif method == 3:
+            stl_milp.method_3(zi)
+            # print('Objective')
+            obj = stl_milp.model.getObjective()
+            pstlrobust = stl_milp.pstl2lp(stl)
+            print(str(obj), obj.getValue(), "MILP")
+    else:
+        m.optimize() 
     
     
 
