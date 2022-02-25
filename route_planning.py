@@ -25,7 +25,7 @@ from visualization import show_environment
 resource_variable_types = {
     'divisible': GRB.CONTINUOUS,
     'packets': GRB.INTEGER,
-    'indivisible': GRB.BINARY
+    'indivisible': GRB.INTEGER
 }
 
 

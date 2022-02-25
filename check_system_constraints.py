@@ -68,19 +68,20 @@ def check_flow_constraints(ts, agents, time_bound):
                     past = t - edge_data['weight']
                     if past >= 0:
                         arriving += edge_data['vars'][past][agent_class].x
-
-                logger.debug('time: %d, node: %s, agent_class: %s, value: %s',
+                
+                logger.error('"time": %d, "node": "%s", "agent_class": %s, "value": %s',
                              t, node, agent_class,
-                             node_data['vars'][t][agent_class])
+                             node_data['vars'][t][agent_class].x)
                 dep = [(u, v, t, edge_data['vars'][t][agent_class].x)
                        for u, v, edge_data in ts.g.out_edges([node], data=True)
                            if t < time_bound]
-                logger.debug('departing: %d, %s', departing, dep)
+                logger.error('"departing": %d, "info": %s', departing, dep)
                 arv = [(u, v, t - edge_data['weight'],
                         edge_data['vars'][t - edge_data['weight']][agent_class].x)
                        for u, v, edge_data in ts.g.in_edges([node], data=True)
                            if t - edge_data['weight'] >= 0]
-                logger.debug('arriving: %d, %s', arriving, arv)
+                logger.error('"arriving": %d, "info": %s', arriving, arv)
 
                 if 0 < t < time_bound:
                     assert departing == arriving
+   
