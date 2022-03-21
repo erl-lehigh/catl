@@ -15,7 +15,7 @@ from visualization import show_environment
 from check_system_constraints import check_initial_states, check_flow_constraints
 
 
-def setup_logging(logfile='test_simple.log', loglevel=logging.DEBUG,
+def setup_logging(logfile='comp_div.log', loglevel=logging.DEBUG,
                  fs='%(asctime)s | %(name)s | %(levelname)s | {%(message)s}',
                  dfs='%m/%d/%Y %I:%M:%S %p'):
 
@@ -30,7 +30,7 @@ def setup_logging(logfile='test_simple.log', loglevel=logging.DEBUG,
     root.addHandler(ch)
 
 
-def case_simple(ts_filename='simple2.yaml'):
+def case_simple(ts_filename='construction.yaml'):
     '''Simple example of planning with resource constraints.'''
     setup_logging()
 
@@ -42,51 +42,28 @@ def case_simple(ts_filename='simple2.yaml'):
     for u in ts.g:
         logging.debug('State: %s, Data: %s', u, str(ts.g.node[u]))
 
-    # agents = [('q1', {'a'}), ('q1', {'a'}),
-    #          ]
-    # agents = [('q1', {'a','b'}), ('q2', {'a', 'c'}), ('q3', {'d','b'}),
-    #         ('q1', {'a','b'}), ('q1', {'a', 'c'}), ('q4', {'d','b'}),
-    #         ]
-
     agents = [('q1', {'a','b'}), ('q6', {'c', 'd'}), ('q9', {'e','f'}),
-              ('q2', {'a','c'}), ('q3', {'a', 'f'}), ('q7', {'d','b'}),
+              ('q2', {'c','d'}), ('q3', {'a', 'f'}), ('q7', {'d','b'}),
               ('q5', {'a','b'}), ('q4', {'a', 'f'}), ('q8', {'d','b'}),
-              ('q5', {'a','f'}), ('q2', {'c', 'd'}), ('q3', {'e','f'}),
+              ('q5', {'e','f'}), ('q2', {'c', 'd'}), ('q3', {'e','f'}),
               ('q2', {'a','c'}), ('q3', {'a', 'c'}), ('q7', {'d','b'}),
-            #   ('q5', {'a','b'}), ('q1', {'e', 'f'}), ('q8', {'d','b'}),
-            #   ('q5', {'a','f'}), ('q4', {'c', 'd'}), ('q3', {'e','f'}),
-            #   ('q5', {'a','b'}), ('q6', {'e', 'f'}), ('q6', {'d','b'}),
-            #   ('q1', {'d','b'})
               ]
 
-    # resources = {'r1': {'q2': 10, 'q4': 10},
-    #              'r2': {'q3': 10}
-    #             }
+    resources = {'r1': {'q1': 10., 'q5': 10.},
+                 'r2': {'q2': 10., 'q6': 10.},
+                 'r3': {'q3': 10., 'q7': 10.},
+                 'r4': {'q4': 10., 'q8': 10.}
+                }
 
-    resources = {'r1': {'q1': 6., 'q5': 6.},
-                'r2': {'q2': 6., 'q6': 6.},
-                'r3': {'q3': 6., 'q7': 6.},
-                'r4': {'q4': 6., 'q8': 6.}
-            }
-    # storage_type='comparmental'
-    # capacities = {
-    #     frozenset({'a', 'b'}): {'r1': 4, 'r2': 4, 'r3': 4, 'r4': 4},
-    #     frozenset({'c', 'd'}): {'r1': 1, 'r2': 1, 'r3': 1, 'r4': 1},
-    #     frozenset({'e', 'f'}): {'r1': 3, 'r2': 2, 'r3': 1, 'r4': 2},
-    #     frozenset({'a', 'c'}): {'r1': 1, 'r2': 2, 'r3': 3, 'r4': 2},
-    #     frozenset({'d', 'b'}): {'r1': 2, 'r2': 1, 'r3': 1, 'r4': 2},
-    #     frozenset({'a', 'f'}): {'r1': 3, 'r2': 2, 'r3': 1, 'r4': 3}
-    # }       
- 
-    storage_type = 'uniform' # choices: comparmental, uniform
+    storage_type='comparmental'
     capacities = {
-        frozenset({'a', 'b'}): 5,
-        frozenset({'c', 'd'}): 8,
-        frozenset({'e', 'f'}): 5,
-        frozenset({'a', 'c'}): 7,
-        frozenset({'d', 'b'}): 6,
-        frozenset({'a', 'f'}): 4
-    }
+        frozenset({'a', 'b'}): {'r1': 4.2, 'r2': 4.3, 'r3': 4.1, 'r4': 3.2},
+        frozenset({'c', 'd'}): {'r1': 2.1, 'r2': 2.2, 'r3': 2.3, 'r4': 2.4},
+        frozenset({'e', 'f'}): {'r1': 2.2, 'r2': 2.3, 'r3': 2.4, 'r4': 2.1},
+        frozenset({'a', 'c'}): {'r1': 2.1, 'r2': 2.2, 'r3': 2.3, 'r4': 2.2},
+        frozenset({'d', 'b'}): {'r1': 2.2, 'r2': 2.1, 'r3': 2.1, 'r4': 2.2},
+        frozenset({'a', 'f'}): {'r1': 2.3, 'r2': 2.2, 'r3': 2.1, 'r4': 2.3}
+    }       
 
     initial_locations, capabilities = zip(*agents)
     agent_classes = set(map(frozenset, capabilities))
@@ -101,18 +78,17 @@ def case_simple(ts_filename='simple2.yaml'):
     for state, _ in agents:
         assert state in ts.g, 'State "{}" not in TS!'.format(state)
 
-    specification = ('F[0, 5] T(2, green, {(a, 2), (b, 1)}, {(r1, 1), (r2, 1)})'
-                     )
-    specification += ' && G[20, 24] T(2, red, {(c, 1), (d, 1)}, {(r3, 1), (r4, 1)})'
-    specification += ' && G[10, 14] T(2, yellow, {(e, 1), (f, 1)}, {(r1, 1), (r3, 1)})'
-    start = time.time()
-    # m = route_planning(ts, agents, specification, storage_type=storage_type,
-    #                    capacities=capacities, resource_distribution=resources,
-    #                    resource_type='divisible')
+    specification = ('F[0, 5] T(2, green, {(a, 3), (b, 2)}, {(r1, 1.4), (r2, 1.4)})')
+    specification += ' && G[20, 24] T(2, red, {(c, 2), (d, 2)}, {(r3, 0.7), (r2, 1.4)})'
+    specification += ' && G[10, 14] T(2, yellow, {(e, 2), (f, 2)}, {(r2, 1.4), (r3, 1.4)})'
+    specification += ' && F[0, 20] T(2, blue, {(a, 2), (d, 2)}, {(r4, 0.7), (r3, 1.4)})'
+    specification += ' && F[0, 25] T(2, purple, {(c, 2), (f, 2)}, {(r1, 0.7), (r3, 0.7)})'
+    specification += ' && F[0, 25] T(2, orange, {(a, 2), (b, 2)}, {(r1, 0.7), (r2, 0.7)})'
 
+    start = time.time()
     m = route_planning(ts, agents, specification, storage_type=storage_type,
                        capacities=capacities, resource_distribution=resources,
-                       resource_type='divisible', travel_time_weight=0.2, resources_weight=0.2,
+                       resource_type='divisible', travel_time_weight=0.3, resources_weight=0.3,
                        transportation=True)     
     end = time.time()                  
     time_ = end - start
@@ -122,10 +98,11 @@ def case_simple(ts_filename='simple2.yaml'):
 
     check_initial_states(ts, agents)
     check_flow_constraints(ts, agents, time_bound)
-        # Transportation_blended method multiobjective: Uniform-divisible
-    print('Uniform-divisible')
-    print('Time needed for Uniform-divisible method: ', time_)
+
+    print('Compartmental-divisible')
+    print('Time needed for Compartmental-divisible method: ', time_)
     n_objectives = m.NumObj
+
     for o in range(n_objectives):
         # Set which objective we will query
         m.params.ObjNumber = o
@@ -135,5 +112,6 @@ def case_simple(ts_filename='simple2.yaml'):
         else:
             print('Objectives:', m.ObjNName, ':', m.ObjNVal)
     print(specification)
+
 if __name__ == '__main__':
     case_simple()

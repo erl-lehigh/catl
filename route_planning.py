@@ -595,8 +595,8 @@ def transportationObjective(m, ts, tra_weight, res_weight, time_bound,
     
 
     stl_milp.optimize_multirho(transportation=flag)
-    m.setObjectiveN(travel_time, 2, weight=tra_weight, name='travel_time_obj')
-    m.setObjectiveN(resources_time, 3, weight=res_weight, name='res_time_obj')
+    m.setObjectiveN(travel_time, 2, weight=-tra_weight, name='travel_time_obj')
+    m.setObjectiveN(resources_time, 3, weight=-res_weight, name='res_time_obj')
     m.update()
 
 
