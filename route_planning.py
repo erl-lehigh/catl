@@ -14,7 +14,7 @@ from gurobipy import GRB
 
 from lomap import Timer
 
-from stl.stl2milp import stl2milp
+from python_stl.stl2milp import stl2milp
 from catl import CATLFormula
 from catl import catl2stl
 from visualization import show_environment

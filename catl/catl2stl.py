@@ -15,9 +15,9 @@ from catl import CATLAbstractSyntaxTreeExtractor
 from catl.catlLexer import catlLexer
 from catl.catlParser import catlParser
 
-from stl import Operation as STLOperation
-from stl import RelOperation as STLRelOperation
-from stl import STLFormula
+from python_stl import Operation as STLOperation
+from python_stl import RelOperation as STLRelOperation
+from python_stl import STLFormula
 
 
 def catl2stl(catl_ast):
