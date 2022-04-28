@@ -6,5 +6,5 @@
  See license.txt file for license information.
 '''
 
-from catl import Operation, CATLFormula, CapabilityRequest
-from catl2stl import catl2stl
+from .catl import Operation, CATLFormula, CATLAbstractSyntaxTreeExtractor, CapabilityRequest
+from .catl2stl import catl2stl
