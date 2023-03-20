@@ -48,45 +48,42 @@ def case_simple(ts_filename='simple2.yaml'):
     #         ('q1', {'a','b'}), ('q1', {'a', 'c'}), ('q4', {'d','b'}),
     #         ]
 
-    agents = [('q1', {'a','b'}), ('q6', {'c', 'd'}), ('q9', {'e','f'}),
-              ('q2', {'a','c'}), ('q3', {'a', 'f'}), ('q7', {'d','b'}),
-              ('q5', {'a','b'}), ('q4', {'a', 'f'}), ('q8', {'d','b'}),
-              ('q5', {'a','f'}), ('q2', {'c', 'd'}), ('q3', {'e','f'}),
-              ('q2', {'a','c'}), ('q3', {'a', 'c'}), ('q7', {'d','b'}),
-            #   ('q5', {'a','b'}), ('q1', {'e', 'f'}), ('q8', {'d','b'}),
-            #   ('q5', {'a','f'}), ('q4', {'c', 'd'}), ('q3', {'e','f'}),
-            #   ('q5', {'a','b'}), ('q6', {'e', 'f'}), ('q6', {'d','b'}),
-            #   ('q1', {'d','b'})
+    agents = [('q1', {'a','b'}), ('q1', {'c', 'd'}), ('q1', {'e','f'}),
+              ('q1', {'c','d'}), ('q1', {'a', 'f'}), ('q1', {'d','b'}),
+              ('q1', {'a','b'}), ('q1', {'a', 'f'}), ('q1', {'d','b'}),
+              ('q1', {'e','f'}), ('q1', {'c', 'd'}), ('q1', {'e','f'}),
+              ('q1', {'a','c'}), ('q1', {'a', 'c'}), ('q1', {'d','b'}),
+              ('q1', {'e','f'}), ('q1', {'c', 'd'}), ('q1', {'e','f'}),
               ]
 
     # resources = {'r1': {'q2': 10, 'q4': 10},
     #              'r2': {'q3': 10}
     #             }
 
-    resources = {'r1': {'q1': 6., 'q5': 6.},
-                'r2': {'q2': 6., 'q6': 6.},
-                'r3': {'q3': 6., 'q7': 6.},
-                'r4': {'q4': 6., 'q8': 6.}
-            }
-    # storage_type='comparmental'
-    # capacities = {
-    #     frozenset({'a', 'b'}): {'r1': 4, 'r2': 4, 'r3': 4, 'r4': 4},
-    #     frozenset({'c', 'd'}): {'r1': 1, 'r2': 1, 'r3': 1, 'r4': 1},
-    #     frozenset({'e', 'f'}): {'r1': 3, 'r2': 2, 'r3': 1, 'r4': 2},
-    #     frozenset({'a', 'c'}): {'r1': 1, 'r2': 2, 'r3': 3, 'r4': 2},
-    #     frozenset({'d', 'b'}): {'r1': 2, 'r2': 1, 'r3': 1, 'r4': 2},
-    #     frozenset({'a', 'f'}): {'r1': 3, 'r2': 2, 'r3': 1, 'r4': 3}
-    # }       
- 
-    storage_type = 'uniform' # choices: comparmental, uniform
+    resources = {'r1': {'q1': 10, 'q5': 10},
+                 'r2': {'q2': 10, 'q6': 10},
+                 'r3': {'q3': 10, 'q7': 10},
+                 'r4': {'q4': 10, 'q8': 10}
+                }
+    storage_type='comparmental'
     capacities = {
-        frozenset({'a', 'b'}): 5,
-        frozenset({'c', 'd'}): 8,
-        frozenset({'e', 'f'}): 5,
-        frozenset({'a', 'c'}): 7,
-        frozenset({'d', 'b'}): 6,
-        frozenset({'a', 'f'}): 4
-    }
+        frozenset({'a', 'b'}): {'r1': 4, 'r2': 4, 'r3': 4, 'r4': 4},
+        frozenset({'c', 'd'}): {'r1': 1, 'r2': 1, 'r3': 1, 'r4': 1},
+        frozenset({'e', 'f'}): {'r1': 3, 'r2': 2, 'r3': 1, 'r4': 2},
+        frozenset({'a', 'c'}): {'r1': 1, 'r2': 2, 'r3': 3, 'r4': 2},
+        frozenset({'d', 'b'}): {'r1': 2, 'r2': 1, 'r3': 1, 'r4': 2},
+        frozenset({'a', 'f'}): {'r1': 3, 'r2': 2, 'r3': 1, 'r4': 3}
+    }       
+ 
+    # storage_type = 'uniform' # choices: comparmental, uniform
+    # capacities = {
+    #     frozenset({'a', 'b'}): 5,
+    #     frozenset({'c', 'd'}): 8,
+    #     frozenset({'e', 'f'}): 5,
+    #     frozenset({'a', 'c'}): 7,
+    #     frozenset({'d', 'b'}): 6,
+    #     frozenset({'a', 'f'}): 4
+    # }
 
     initial_locations, capabilities = zip(*agents)
     agent_classes = set(map(frozenset, capabilities))
@@ -101,10 +98,12 @@ def case_simple(ts_filename='simple2.yaml'):
     for state, _ in agents:
         assert state in ts.g, 'State "{}" not in TS!'.format(state)
 
-    specification = ('F[0, 5] T(2, green, {(a, 2), (b, 1)}, {(r1, 1), (r2, 1)})'
-                     )
-    specification += ' && G[20, 24] T(2, red, {(c, 1), (d, 1)}, {(r3, 1), (r4, 1)})'
-    specification += ' && G[10, 14] T(2, yellow, {(e, 1), (f, 1)}, {(r1, 1), (r3, 1)})'
+    specification = ('F[0,5] T(1, cyan, {(a, 2), (b, 2)}, {(r1, 1.1), (r2, 1.1)})')
+    specification += ' && G[20, 22] T(1, gray, {(c, 1), (d, 2)}, {(r3, 0.7), (r2, 1.1)})'
+    specification += ' && G[10, 12] T(1, yellow, {(e, 2), (f, 1)}, {(r2, 1.1), (r3, 1.1)})'
+    specification += ' && G[20, 22] T(1, pink, {(e, 6), (f, 1)}, {(r4, 0.7), (r3, 0.7)})'
+    specification += ' && F[10, 14] T(1, purple, {(a, 2), (f, 1)}, {(r1, 1.1), (r3, 0.7)})'
+    specification += ' && F[10, 14] T(1, orange, {(d, 3), (b, 2)}, {(r4, 1.1), (r2, 0.7)})'
     start = time.time()
     # m = route_planning(ts, agents, specification, storage_type=storage_type,
     #                    capacities=capacities, resource_distribution=resources,
@@ -112,7 +111,7 @@ def case_simple(ts_filename='simple2.yaml'):
 
     m = route_planning(ts, agents, specification, storage_type=storage_type,
                        capacities=capacities, resource_distribution=resources,
-                       resource_type='divisible', travel_time_weight=0.2, resources_weight=0.2,
+                       resource_type='divisible', travel_time_weight=0.1, resources_weight=0.1,
                        transportation=True)     
     end = time.time()                  
     time_ = end - start

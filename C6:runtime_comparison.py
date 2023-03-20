@@ -45,40 +45,41 @@ def baseline_vs_transportation(ts_filename='simple2.yaml', storage_type='uniform
     for u in ts.g:
         logging.debug('State: %s, Data: %s', u, str(ts.g.node[u]))
 
-    agents = [('q1', {'a','b'}), ('q6', {'c', 'd'}), ('q9', {'e','f'}),
-              ('q2', {'a','c'}), ('q3', {'a', 'f'}), ('q7', {'d','b'}),
-              ('q5', {'a','b'}), ('q4', {'a', 'f'}), ('q8', {'d','b'}),
-              ('q5', {'a','f'}), ('q2', {'c', 'd'}), ('q3', {'e','f'}),
-              ('q2', {'a','c'}), ('q3', {'a', 'c'}), ('q7', {'d','b'}),
-            #   ('q5', {'a','b'}), ('q1', {'e', 'f'}), ('q8', {'d','b'}),
-            #   ('q5', {'a','f'}), ('q4', {'c', 'd'}), ('q3', {'e','f'}),
-            #   ('q5', {'a','b'}), ('q6', {'e', 'f'}), ('q6', {'d','b'}),
-            #   ('q1', {'d','b'})
-            ]
+    agents = [('q1', {'a','b'}), ('q1', {'c','d'}), ('q1', {'e','f'}),
+              ('q1', {'c','d'}), ('q1', {'a','f'}), ('q1', {'d','b'}),
+              ('q1', {'a','b'}), ('q1', {'a','f'}), ('q1', {'d','b'}),
+              ('q1', {'e','f'}), ('q1', {'c','d'}), ('q1', {'e','f'}),
+              ('q1', {'a','c'}), ('q1', {'a','c'}), ('q1', {'d','b'}),
+              ('q1', {'e','f'}), ('q1', {'c','d'}), ('q1', {'e','f'}),
+              ]
 
-    resources = {'r1': {'q1': 6., 'q5': 6.},
-                 'r2': {'q2': 6., 'q6': 6.},
-                 'r3': {'q3': 6., 'q7': 6.},
-                 'r4': {'q4': 6., 'q8': 6.}
+    resources = {'r1': {'q2': 20., 'q4': 20.},
+                 'r2': {'q2': 20., 'q4': 20.},
+                 'r3': {'q2': 20., 'q4': 20.},
+                 'r4': {'q2': 20., 'q4': 20.}
                 }
-
+    # resources = {'r1': {'q1': 10, 'q5': 10},
+    #              'r2': {'q2': 10, 'q6': 10},
+    #              'r3': {'q3': 10, 'q7': 10}6
+    #              'r4': {'q4': 10, 'q8': 10}
+    #             }
     storage_type_u = 'uniform'
     capacities_u = {
-        frozenset({'a', 'b'}): 5,
-        frozenset({'c', 'd'}): 8,
-        frozenset({'e', 'f'}): 5,
-        frozenset({'a', 'c'}): 7,
-        frozenset({'d', 'b'}): 6,
-        frozenset({'a', 'f'}): 4
+        frozenset({'a', 'b'}): 18,
+        frozenset({'c', 'd'}): 18,
+        frozenset({'e', 'f'}): 18,
+        frozenset({'a', 'c'}): 18,
+        frozenset({'d', 'b'}): 18,
+        frozenset({'a', 'f'}): 18
         }
     storage_type_c='comparmental'
     capacities_c = {
-        frozenset({'a', 'b'}): {'r1': 4, 'r2': 4, 'r3': 4, 'r4': 4},
-        frozenset({'c', 'd'}): {'r1': 1, 'r2': 1, 'r3': 1, 'r4': 1},
-        frozenset({'e', 'f'}): {'r1': 3, 'r2': 2, 'r3': 1, 'r4': 2},
-        frozenset({'a', 'c'}): {'r1': 1, 'r2': 2, 'r3': 3, 'r4': 2},
-        frozenset({'d', 'b'}): {'r1': 2, 'r2': 1, 'r3': 1, 'r4': 2},
-        frozenset({'a', 'f'}): {'r1': 3, 'r2': 2, 'r3': 1, 'r4': 3}
+        frozenset({'a', 'b'}): {'r1': 14, 'r2': 14, 'r3': 14, 'r4': 14},
+        frozenset({'c', 'd'}): {'r1': 14, 'r2': 14, 'r3': 14, 'r4': 14},
+        frozenset({'e', 'f'}): {'r1': 14, 'r2': 14, 'r3': 14, 'r4': 14},
+        frozenset({'a', 'c'}): {'r1': 14, 'r2': 14, 'r3': 14, 'r4': 14},
+        frozenset({'d', 'b'}): {'r1': 14, 'r2': 14, 'r3': 14, 'r4': 14},
+        frozenset({'a', 'f'}): {'r1': 14, 'r2': 14, 'r3': 14, 'r4': 14}
     }                                                
 
 
@@ -95,21 +96,35 @@ def baseline_vs_transportation(ts_filename='simple2.yaml', storage_type='uniform
     for state, _ in agents:
         assert state in ts.g, 'State "{}" not in TS!'.format(state)
 
-    spec_transportation = ('F[0, 5] T(2, green, {(a, 2), (b, 2)}, {(r1, 1), (r2, 1)})')
-    spec_transportation += ' && G[20, 24] T(2, red, {(c, 2), (d, 2)}, {(r3, 1), (r4, 1)})'
-    spec_transportation += ' && G[10, 14] T(2, yellow, {(e, 1), (f, 2)}, {(r1, 1), (r3, 1)})'
-    spec_transportation += ' && G[8, 12] T(2, pink, {(a, 3), (c, 2)}, {(r4, 1), (r2, 1)})'
-    # spec_transportation += (' || F[0, 10] T(2, blue, {(f, 1), (d, 1)}, {(r3, 1)})')
-    spec_CaTL = ('F[0, 5] T(2, green, {(a, 1), (b, 1)})')
-    spec_CaTL += (' && G[20, 24] T(2, red, {(c, 1), (d, 1)})')
+    spec_transportation = ('F[0,5] T(1, cyan, {(a, 2), (b, 2)}, {(r1, 1), (r2, 1)})')
+    spec_transportation += ' && G[10, 12] T(1, yellow, {(e, 2), (f, 1)}, {(r2, 1), (r3, 1)})'
+    spec_transportation += ' && F[10, 14] T(1, purple, {(a, 2), (f, 1)}, {(r1, 1), (r3, 1)})'
+    spec_transportation += ' && F[10, 14] T(1, orange, {(d, 3), (b, 2)}, {(r4, 1), (r2, 1)})'
+    spec_transportation += ' && G[20, 22] T(1, gray, {(c, 1), (d, 2)}, {(r3, 1), (r2, 1)})'
+    spec_transportation += ' && G[20, 22] T(1, red, {(e, 2), (f, 1)}, {(r4, 1), (r3, 1)})'
+    spec_transportation += ' && G[25, 27] T(1, gray, {(c, 1), (d, 2)}, {(r3, 1), (r2, 1)})'
+    spec_transportation += ' && G[25, 27] T(1, red, {(e, 2), (f, 1)}, {(r4, 1), (r3, 1)})'
+    spec_transportation += ' && G[30, 32] T(1, yellow, {(a, 2), (b, 1)}, {(r2, 1), (r3, 1)})'
+    spec_transportation += ' && G[30, 32] T(1, purple, {(c, 2), (d, 1)}, {(r1, 1), (r3, 1)})'
+
+    spec_CaTL = ('F[0, 5] T(2, cyan, {(a, 2), (b, 2)})')
+    spec_CaTL += (' && G[20, 22] T(2, gray, {(c, 1), (d, 2)})')
+    spec_CaTL += ' && G[10, 12] T(1, yellow, {(e, 2), (f, 1)})'
+    spec_CaTL += ' && G[20, 22] T(1, red, {(e, 2), (f, 1)})'
+    spec_CaTL += ' && F[10, 14] T(1, purple, {(a, 2), (f, 1)})'
+    spec_CaTL += ' && F[10, 14] T(1, orange, {(d, 3), (b, 2)})'
+    spec_CaTL += ' && G[25, 27] T(1, gray, {(c, 1), (d, 2)})'
+    spec_CaTL += ' && G[25, 27] T(1, red, {(e, 2), (f, 1)})'
+    spec_CaTL += ' && G[30, 32] T(1, yellow, {(c, 2), (d, 1)})'
+    spec_CaTL += ' && G[30, 32] T(1, purple, {(a, 2), (b, 1)})'
     # agents = agents[0:10]
 
     # Transportation_blended method multiobjective: Uniform-divisible
     start_uniform_divisible = time.time()
     m_uniform_divisible = route_planning(ts, agents, spec_transportation, storage_type=storage_type_u,
                        capacities=capacities_u, resource_distribution=resources,
-                       resource_type='divisible', travel_time_weight=0.2,
-                       resources_weight=0.2, transportation=True)
+                       resource_type='divisible', travel_time_weight=0.1,
+                       resources_weight=0.1, transportation=True)
     end_uniform_divisible = time.time()
     time_uniform_divisible = end_uniform_divisible - start_uniform_divisible 
     
@@ -117,8 +132,8 @@ def baseline_vs_transportation(ts_filename='simple2.yaml', storage_type='uniform
     start_uniform_indivisible = time.time()
     m_uniform_indivisible = route_planning(ts, agents, spec_transportation, storage_type=storage_type_u,
                        capacities=capacities_u, resource_distribution=resources,
-                       resource_type='indivisible', travel_time_weight=0.2,
-                       resources_weight=0.2, transportation=True)
+                       resource_type='indivisible', travel_time_weight=0.1,
+                       resources_weight=0.1, transportation=True)
     end_uniform_indivisible = time.time()
     time_uniform_indivisible = end_uniform_indivisible - start_uniform_indivisible
 
@@ -126,8 +141,8 @@ def baseline_vs_transportation(ts_filename='simple2.yaml', storage_type='uniform
     start_comp_divisible = time.time()
     m_comp_divisible = route_planning(ts, agents, spec_transportation, storage_type=storage_type_c,
                        capacities=capacities_c, resource_distribution=resources,
-                       resource_type='divisible', travel_time_weight=0.2,
-                       resources_weight=0.2, transportation=True)
+                       resource_type='divisible', travel_time_weight=0.1,
+                       resources_weight=0.1, transportation=True)
     end_comp_divisible = time.time()
     time_comp_divisible = end_comp_divisible - start_comp_divisible
 
@@ -135,14 +150,14 @@ def baseline_vs_transportation(ts_filename='simple2.yaml', storage_type='uniform
     start_comp_indivisible = time.time()
     m_comp_indivisible = route_planning(ts, agents, spec_transportation, storage_type=storage_type_c,
                        capacities=capacities_c, resource_distribution=resources,
-                       resource_type='indivisible', travel_time_weight=0.2,
-                       resources_weight=0.2, transportation=True)
+                       resource_type='indivisible', travel_time_weight=0.1,
+                       resources_weight=0.1, transportation=True)
     end_comp_indivisible = time.time()
     time_comp_indivisible = end_comp_indivisible - start_comp_indivisible
 
     #CaTL-Baseline with time regularization obejective
     start_CaTL = time.time() 
-    m_CaTL = route_planning(ts, agents, spec_CaTL, travel_time_weight=0.2)       
+    m_CaTL = route_planning(ts, agents, spec_CaTL, travel_time_weight=0.1)       
     end_CaTL = time.time()
     time_CaTL = end_CaTL - start_CaTL
 
@@ -155,6 +170,31 @@ def baseline_vs_transportation(ts_filename='simple2.yaml', storage_type='uniform
     # check_initial_states(ts, agents)
     # check_flow_constraints(ts, agents, time_bound)
 
+    # Transportation_blended method multiobjective: Comparmental-divisible
+    print('Comparmental-divisible')
+    print('Time needed for  Comparmental-divisible method: ', time_comp_divisible)
+    n_objectives = m_comp_divisible.NumObj
+    for o in range(n_objectives):
+        # Set which objective we will query
+        m_comp_divisible.params.ObjNumber = o
+        # Query the o-th objective value
+        if m_comp_divisible.status == GRB.Status.INFEASIBLE:
+            print('Model is infeasible')
+        else:
+            print('Objectives:', m_comp_divisible.ObjNName, ':', m_comp_divisible.ObjNVal)
+
+    # Transportation_blended method multiobjective: Comparmental-indivisible
+    print('Comparmental-indivisible')
+    print('Time needed for  Comparmental-indivisible method: ', time_comp_indivisible)
+    n_objectives = m_comp_indivisible.NumObj
+    for o in range(n_objectives):
+        # Set which objective we will query
+        m_comp_indivisible.params.ObjNumber = o
+        # Query the o-th objective value
+        if m_comp_indivisible.status == GRB.Status.INFEASIBLE:
+            print('Model is infeasible')
+        else:
+            print('Objectives:', m_comp_indivisible.ObjNName, ':', m_comp_indivisible.ObjNVal) 
 
     # Transportation_blended method multiobjective: Uniform-divisible
     print('Uniform-divisible')
@@ -183,31 +223,9 @@ def baseline_vs_transportation(ts_filename='simple2.yaml', storage_type='uniform
             print('Objectives:', m_uniform_indivisible.ObjNName, ':', m_uniform_indivisible.ObjNVal)
     
 
-    # Transportation_blended method multiobjective: Comparmental-divisible
-    print('Comparmental-divisible')
-    print('Time needed for  Comparmental-divisible method: ', time_comp_divisible)
-    n_objectives = m_comp_divisible.NumObj
-    for o in range(n_objectives):
-        # Set which objective we will query
-        m_comp_divisible.params.ObjNumber = o
-        # Query the o-th objective value
-        if m_comp_divisible.status == GRB.Status.INFEASIBLE:
-            print('Model is infeasible')
-        else:
-            print('Objectives:', m_comp_divisible.ObjNName, ':', m_comp_divisible.ObjNVal)
+    
 
-    # Transportation_blended method multiobjective: Comparmental-indivisible
-    print('Comparmental-indivisible')
-    print('Time needed for  Comparmental-indivisible method: ', time_comp_indivisible)
-    n_objectives = m_comp_indivisible.NumObj
-    for o in range(n_objectives):
-        # Set which objective we will query
-        m_comp_indivisible.params.ObjNumber = o
-        # Query the o-th objective value
-        if m_comp_indivisible.status == GRB.Status.INFEASIBLE:
-            print('Model is infeasible')
-        else:
-            print('Objectives:', m_comp_indivisible.ObjNName, ':', m_comp_indivisible.ObjNVal)        
+          
 
     #CaTL-Baseline
     print('CaTL')
