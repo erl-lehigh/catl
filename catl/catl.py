@@ -11,9 +11,9 @@ from collections import namedtuple
 
 from antlr4 import InputStream, CommonTokenStream, TerminalNode
 
-from catlLexer import catlLexer
-from catlParser import catlParser
-from catlVisitor import catlVisitor
+from catl.catlLexer import catlLexer
+from catl.catlParser import catlParser
+from catl.catlVisitor import catlVisitor
 
 
 class Operation(object):
