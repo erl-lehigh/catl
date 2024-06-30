@@ -12,15 +12,17 @@ import logging
 from gurobipy import Model as GRBModel
 from gurobipy import GRB
 
-from lomap import Timer
-
-from stl.stl2milp import stl2milp
+from stl2milp import stl2milp
 from catl import CATLFormula
-from catl import catl2stl
-from catl import extract_stl_task_formulae
-from catl import stl_predicate_variables
-from visualization import show_environment
+from catl2stl import catl2stl
+from catl2stl import extract_stl_task_formulae
+from catl2stl import stl_predicate_variables
 
+from catl2mtl import catl2mtl
+from catl2mtl import extract_mtl_task_formulae
+from catl2mtl import mtl_predicate_variables
+from visualization import show_environment
+from psmtl2milp import psmtl2milp
 
 resource_variable_types = {
     'divisible': GRB.CONTINUOUS,
@@ -638,7 +640,7 @@ def route_planning(ts, agents, formula, time_bound=None, variable_bound=None,
                    storage_type=None, capacities=None,
                    resource_distribution=None,  resource_type='divisible',
                    robust=True, travel_time_weight=0, resources_weight=0, 
-                   transportation=False, flag=True):
+                   transportation=False, flag=True, mtl=False):
     '''Performs route planning for agents `agents' moving in a transition system
     `ts' such that the CaTL specification `formula' is satisfied.
 
@@ -686,9 +688,11 @@ def route_planning(ts, agents, formula, time_bound=None, variable_bound=None,
     add_system_constraints(m, ts, agent_classes, capability_distribution,
                            time_bound)
 
-    # add CATL formula constraints
-    stl = catl2stl(ast)
-
+    if mtl == False:
+        # add CATL formula constraints
+        stl = catl2stl(ast)
+    elif mtl == True:
+        mtl = catl2mtl(ast)
     # bounds for capability and resource variables
     if transportation == True:
         if storage_type is not None:
@@ -726,14 +730,25 @@ def route_planning(ts, agents, formula, time_bound=None, variable_bound=None,
             "rho0" : rhos(*args1),
             "rho1" : rhos(*args2)
             }
-        stl_milp = stl2milp(stl, ranges=ranges, model=m, robust=robust, mrho=mrho_dict)
+        if mtl == False:
+            stl_milp = stl2milp(stl, ranges=ranges, model=m, robust=robust, 
+                                mrho=mrho_dict)
+            stl_milp.translate()
+        elif mtl == True:
+            mtl_milp = psmtl2milp(mtl, model=m)
+            mtl_milp.translate()
+            stl_milp = mtl_milp
     else:
         ranges = compute_catl_variables_bounds(ast, variable_bound)
-        stl_milp = stl2milp(stl, ranges=ranges, model=m, robust=robust)
+        if mtl == False:
+            stl_milp = stl2milp(stl, ranges=ranges, model=m, robust=robust)
+            stl_milp.translate()
+        elif mtl == True:
+            mtl_milp = psmtl2milp(mtl, model=m)
+            mtl_milp.translate()
+            stl_milp = mtl_milp
 
-
-
-    stl_milp.translate()
+    
 
     # add proposition constraints
     add_proposition_constraints(m, stl_milp, ts, ast, capabilities,

@@ -13,13 +13,12 @@ from catl import CATLAbstractSyntaxTreeExtractor
 from catlLexer import catlLexer
 from catlParser import catlParser
 
-from stl import Operation as STLOperation
-from stl import RelOperation as STLRelOperation
-from stl import STLFormula
+from mtl import Operation as MTLOperation
+from mtl import MTLFormula
 
 
-def catl2stl(catl_ast):
-    '''Translates a CATL abstract syntax tree to an STL one.
+def catl2mtl(catl_ast):
+    '''Translates a CATL abstract syntax tree to an MTL one.
     The set of variables in the STL formula is the Cartesian product between the
     set of atomic propositions and the set of capabilities in the CATL formula.
     The variable labels are in the form "z_{proposition}_{capability}".
@@ -34,55 +33,53 @@ def catl2stl(catl_ast):
         \bigcup \bigcup_{\ell=1}^{r} (z_{\pi, h_\ell} \geq \Delta_\ell)
     '''
     if catl_ast.op == CATLOperation.BOOL:
-        return STLFormula(STLOperation.BOOL, value=catl_ast.value)
+        return MTLFormula(MTLOperation.BOOL, value=catl_ast.value)
     elif catl_ast.op == CATLOperation.PRED:
         var = catl_ast.proposition + '_{cap}'
         capability_terms = \
-            [STLFormula(STLOperation.PRED, relation=STLRelOperation.GE,
-                        variable=var.format(cap=cap), threshold=th)
-                               for cap, th in catl_ast.capability_requests]
-        child = STLFormula(STLOperation.AND, children=capability_terms)
-        cap_available = STLFormula(STLOperation.ALWAYS, low=0,
+            [MTLFormula(MTLOperation.PRED, variable=var.format(cap=cap))
+                               for cap, _ in catl_ast.capability_requests]
+        child = MTLFormula(MTLOperation.AND, children=capability_terms)
+        cap_available = MTLFormula(MTLOperation.ALWAYS, low=0,
                                    high=catl_ast.duration, child=child)
 
         var = catl_ast.proposition + '_{res}'
         resource_terms = \
-            [STLFormula(STLOperation.PRED, relation=STLRelOperation.GE,
-                        variable=var.format(res=res), threshold=th)
-                               for res, th in catl_ast.resource_requests]
-        stl_ast = STLFormula(STLOperation.AND,
+            [MTLFormula(MTLOperation.PRED, variable=var.format(res=res))
+                               for res, _ in catl_ast.resource_requests]
+        mtl_ast = MTLFormula(MTLOperation.AND,
                              children=[cap_available] + resource_terms)
-        stl_ast.task = catl_ast
-        return stl_ast
+        mtl_ast.task = catl_ast
+        return mtl_ast
     elif catl_ast.op in (CATLOperation.AND, CATLOperation.OR):
-        children = [catl2stl(ch) for ch in catl_ast.children]
+        children = [catl2mtl(ch) for ch in catl_ast.children]
         if catl_ast.op == CATLOperation.AND:
-            op = STLOperation.AND
+            op = MTLOperation.AND
         else:
-            op = STLOperation.OR
-        return STLFormula(op, children=children)
+            op = MTLOperation.OR
+        return MTLFormula(op, children=children)
     elif catl_ast.op == CATLOperation.IMPLIES:
-        left = catl2stl(catl_ast.left)
-        right = catl2stl(catl_ast.right)
-        return STLFormula(STLOperation.IMPLIES, left=left, right=right)
+        left = catl2mtl(catl_ast.left)
+        right = catl2mtl(catl_ast.right)
+        return MTLFormula(MTLOperation.IMPLIES, left=left, right=right)
     elif catl_ast.op == CATLOperation.NOT:
-        child = catl2stl(catl_ast.child)
-        return STLFormula(STLOperation.NOT, child=child)
+        child = catl2mtl(catl_ast.child)
+        return MTLFormula(MTLOperation.NOT, child=child)
     elif catl_ast.op in (CATLOperation.ALWAYS, CATLOperation.EVENT):
-        child = catl2stl(catl_ast.child)
+        child = catl2mtl(catl_ast.child)
         if catl_ast.op == CATLOperation.ALWAYS:
-            op = STLOperation.ALWAYS
+            op = MTLOperation.ALWAYS
         else:
-            op = STLOperation.EVENT
-        return STLFormula(op, child=child, low=catl_ast.low, high=catl_ast.high)
+            op = MTLOperation.EVENT
+        return MTLFormula(op, child=child, low=catl_ast.low, high=catl_ast.high)
     elif catl_ast.op == CATLOperation.UNTIL:
-        left = catl2stl(catl_ast.left)
-        right = catl2stl(catl_ast.right)
-        return STLFormula(STLOperation.UNTIL, left=left, right=right,
+        left = catl2mtl(catl_ast.left)
+        right = catl2mtl(catl_ast.right)
+        return MTLFormula(MTLOperation.UNTIL, left=left, right=right,
                           low=catl_ast.low, high=catl_ast.high)
 
 
-def extract_stl_task_formulae(stl_ast):
+def extract_mtl_task_formulae(mtl_ast):
     '''Extract tasks from STL abstract syntax trees obtained from CATL formulae.
 
     Input
@@ -97,28 +94,28 @@ def extract_stl_task_formulae(stl_ast):
         each task.
     '''
     tasks = []
-    stack = [stl_ast]
+    stack = [mtl_ast]
     while stack:
-        stl_ast = stack.pop(0)
-        assert stl_ast.op != STLOperation.PRED
+        mtl_ast = stack.pop(0)
+        assert mtl_ast.op != MTLOperation.PRED
 
-        if stl_ast.op == STLOperation.AND:
-            if hasattr(stl_ast, 'task'):
-                tasks.append((stl_ast, stl_ast.task))
+        if mtl_ast.op == MTLOperation.AND:
+            if hasattr(mtl_ast, 'task'):
+                tasks.append((mtl_ast, mtl_ast.task))
             else:
-                stack.extend(stl_ast.children)
-        elif stl_ast.op == STLOperation.OR:
-            stack.extend(stl_ast.children)
-        elif stl_ast.op in (STLOperation.ALWAYS, STLOperation.EVENT,
-                            STLOperation.NOT):
-            stack.append(stl_ast.child)
-        elif stl_ast.op in (STLOperation.UNTIL, STLOperation.IMPLIES):
-            stack.append(stl_ast.left)
-            stack.append(stl_ast.right)
+                stack.extend(mtl_ast.children)
+        elif mtl_ast.op == MTLOperation.OR:
+            stack.extend(mtl_ast.children)
+        elif mtl_ast.op in (MTLOperation.ALWAYS, MTLOperation.EVENT,
+                            MTLOperation.NOT):
+            stack.append(mtl_ast.child)
+        elif mtl_ast.op in (MTLOperation.UNTIL, MTLOperation.IMPLIES):
+            stack.append(mtl_ast.left)
+            stack.append(mtl_ast.right)
     return tasks
 
 
-def stl_predicate_variables(catl_ast):
+def mtl_predicate_variables(catl_ast):
     '''Returns the sets of agent and resource predicate variables for a CaTL
     formula.
 
@@ -167,14 +164,14 @@ if __name__ == '__main__':
     ast = CATLAbstractSyntaxTreeExtractor().visit(t)
     # print('CATL:', ast)
 
-    stl = catl2stl(ast)
+    stl = catl2mtl(ast)
     # print('STL:', stl)
 
-    cap_pred, res_pred = stl_predicate_variables(ast)
+    cap_pred, res_pred = mtl_predicate_variables(ast)
 
 
     print('HEREEEEEEE', cap_pred, res_pred)
 
-    stl_tasks = extract_stl_task_formulae(stl)
+    stl_tasks = extract_mtl_task_formulae(stl)
     # for stl_formula, task in stl_tasks:
         # print('Task:', task, 'STL formula:', stl_formula)
