@@ -736,7 +736,11 @@ def route_planning(ts, agents, formula, time_bound=None, variable_bound=None,
             stl_milp.translate()
         elif mtl == True:
             mtl_milp = psmtl2milp(mtl, model=m)
-            mtl_milp.translate()
+            z = mtl_milp.translate()
+            mtl_milp.wln(z)
+            print('Objective')
+            obj = mtl_milp.model.getObjective()
+            print(str(obj), obj.getValue(), "MILP")
             stl_milp = mtl_milp
     else:
         ranges = compute_catl_variables_bounds(ast, variable_bound)
@@ -745,7 +749,11 @@ def route_planning(ts, agents, formula, time_bound=None, variable_bound=None,
             stl_milp.translate()
         elif mtl == True:
             mtl_milp = psmtl2milp(mtl, model=m)
-            mtl_milp.translate()
+            z = mtl_milp.translate()
+            mtl_milp.wln(z)
+            print('Objective')
+            obj = mtl_milp.model.getObjective()
+            print(str(obj), obj.getValue(), "MILP")
             stl_milp = mtl_milp
 
     
