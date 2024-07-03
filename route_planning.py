@@ -554,9 +554,8 @@ def add_travel_time_objective(m, ts, weight, time_bound, variable_bound):
 
 
 def transportationObjective(m, ts, tra_weight, res_weight, time_bound, 
-                            variable_bound, resource_distribution, 
-                            stl_milp, agent_classes, resource_quantities,
-                            flag=True):
+                            variable_bound, resource_distribution, stl_milp, 
+                            partial_satis, flag=True):
     '''Modifies the objective fucntion of CaTL when transportation feauture
     is desired. Creating a blended model with weights that ranges in [0,1]
     Input
@@ -594,11 +593,14 @@ def transportationObjective(m, ts, tra_weight, res_weight, time_bound,
   
 
     resources_time /= (time_bound * resources_bound)
-    
+    n_obj = 1
+    if partial_satis == False:
+        stl_milp.optimize_multirho(transportation=flag)
+        n_obj += 1
 
-    stl_milp.optimize_multirho(transportation=flag)
-    m.setObjectiveN(travel_time, 2, weight=-tra_weight, name='travel_time_obj')
-    m.setObjectiveN(resources_time, 3, weight=-res_weight, name='res_time_obj')
+    m.setObjectiveN(travel_time, n_obj, weight=-tra_weight, name='travel_time_obj')
+    n_obj += 1
+    m.setObjectiveN(resources_time, n_obj, weight=-res_weight, name='res_time_obj')
     m.update()
 
 
@@ -640,7 +642,7 @@ def route_planning(ts, agents, formula, time_bound=None, variable_bound=None,
                    storage_type=None, capacities=None,
                    resource_distribution=None,  resource_type='divisible',
                    robust=True, travel_time_weight=0, resources_weight=0, 
-                   transportation=False, flag=True, mtl=False):
+                   transportation=False, flag=True, partial_satis=False):
     '''Performs route planning for agents `agents' moving in a transition system
     `ts' such that the CaTL specification `formula' is satisfied.
 
@@ -688,11 +690,11 @@ def route_planning(ts, agents, formula, time_bound=None, variable_bound=None,
     add_system_constraints(m, ts, agent_classes, capability_distribution,
                            time_bound)
 
-    if mtl == False:
+    if partial_satis == False:
         # add CATL formula constraints
         stl = catl2stl(ast)
-    elif mtl == True:
-        mtl = catl2mtl(ast)
+    elif partial_satis == True:
+        stl = catl2pstl(ast)
     # bounds for capability and resource variables
     if transportation == True:
         if storage_type is not None:
@@ -730,12 +732,12 @@ def route_planning(ts, agents, formula, time_bound=None, variable_bound=None,
             "rho0" : rhos(*args1),
             "rho1" : rhos(*args2)
             }
-        if mtl == False:
+        if partial_satis == False:
             stl_milp = stl2milp(stl, ranges=ranges, model=m, robust=robust, 
                                 mrho=mrho_dict)
             stl_milp.translate()
-        elif mtl == True:
-            mtl_milp = psmtl2milp(mtl, model=m)
+        elif partial_satis == True:
+            mtl_milp = pstl2milp(stl, model=m)
             z = mtl_milp.translate()
             mtl_milp.wln(z)
             print('Objective')
@@ -744,11 +746,11 @@ def route_planning(ts, agents, formula, time_bound=None, variable_bound=None,
             stl_milp = mtl_milp
     else:
         ranges = compute_catl_variables_bounds(ast, variable_bound)
-        if mtl == False:
+        if partial_satis == False:
             stl_milp = stl2milp(stl, ranges=ranges, model=m, robust=robust)
             stl_milp.translate()
-        elif mtl == True:
-            mtl_milp = psmtl2milp(mtl, model=m)
+        elif partial_satis == True:
+            mtl_milp = pstl2milp(stl, model=m)
             z = mtl_milp.translate()
             mtl_milp.wln(z)
             print('Objective')
@@ -776,7 +778,8 @@ def route_planning(ts, agents, formula, time_bound=None, variable_bound=None,
                                                 
             transportationObjective(m, ts, travel_time_weight, resources_weight,
                                 time_bound, variable_bound, resource_distribution,
-                                stl_milp, agent_classes, resource_quantities, flag=flag)
+                                stl_milp, partial_satis, flag=flag)
+                            
     elif travel_time_weight != 0:
         add_travel_time_objective(m, ts, travel_time_weight, time_bound, variable_bound)                
 
