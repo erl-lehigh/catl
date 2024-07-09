@@ -15,6 +15,7 @@ from gurobipy import GRB
 from stl2milp import stl2milp
 from catl import CATLFormula
 from catl2stl import catl2stl
+from catl2pstl import catl2pstl
 from catl2stl import extract_stl_task_formulae
 from catl2stl import stl_predicate_variables
 
@@ -22,7 +23,7 @@ from catl2mtl import catl2mtl
 from catl2mtl import extract_mtl_task_formulae
 from catl2mtl import mtl_predicate_variables
 from visualization import show_environment
-from psmtl2milp import psmtl2milp
+from pstl2milp import pstl2milp
 
 resource_variable_types = {
     'divisible': GRB.CONTINUOUS,
@@ -589,10 +590,8 @@ def transportationObjective(m, ts, tra_weight, res_weight, time_bound,
     
     resources_bound = max(sum(resource_distribution[h].get(u, 0) for u in ts.g.nodes())
                          for h in resource_distribution)
-    
-  
-
     resources_time /= (time_bound * resources_bound)
+
     n_obj = 1
     if partial_satis == False:
         stl_milp.optimize_multirho(transportation=flag)
@@ -737,26 +736,26 @@ def route_planning(ts, agents, formula, time_bound=None, variable_bound=None,
                                 mrho=mrho_dict)
             stl_milp.translate()
         elif partial_satis == True:
-            mtl_milp = pstl2milp(stl, model=m)
-            z = mtl_milp.translate()
-            mtl_milp.wln(z)
+            stl_milp = pstl2milp(stl, model=m, ranges=ranges)
+            z = stl_milp.translate()
+            stl_milp.wln(z)
             print('Objective')
-            obj = mtl_milp.model.getObjective()
-            print(str(obj), obj.getValue(), "MILP")
-            stl_milp = mtl_milp
+            # obj = stl_milp.model.getObjective()
+            # print(str(obj), obj.getValue(), "MILP")
+            
     else:
         ranges = compute_catl_variables_bounds(ast, variable_bound)
         if partial_satis == False:
             stl_milp = stl2milp(stl, ranges=ranges, model=m, robust=robust)
             stl_milp.translate()
         elif partial_satis == True:
-            mtl_milp = pstl2milp(stl, model=m)
-            z = mtl_milp.translate()
-            mtl_milp.wln(z)
+            stl_milp = pstl2milp(stl, model=m, ranges=ranges)
+            z = stl_milp.translate()
+            stl_milp.wln(z)
             print('Objective')
-            obj = mtl_milp.model.getObjective()
-            print(str(obj), obj.getValue(), "MILP")
-            stl_milp = mtl_milp
+            # obj = stl_milp.model.getObjective()
+            # print(str(obj), obj.getValue(), "MILP")
+            
 
     
 

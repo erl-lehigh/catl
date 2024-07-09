@@ -18,7 +18,7 @@ from stl import RelOperation as STLRelOperation
 from stl import STLFormula
 
 
-def catl2stl(catl_ast):
+def catl2pstl(catl_ast):
     '''Translates a CATL abstract syntax tree to an STL one.
     The set of variables in the STL formula is the Cartesian product between the
     set of atomic propositions and the set of capabilities in the CATL formula.
@@ -55,29 +55,29 @@ def catl2stl(catl_ast):
         stl_ast.task = catl_ast
         return stl_ast
     elif catl_ast.op in (CATLOperation.AND, CATLOperation.OR):
-        children = [catl2stl(ch) for ch in catl_ast.children]
+        children = [catl2pstl(ch) for ch in catl_ast.children]
         if catl_ast.op == CATLOperation.AND:
             op = STLOperation.AND
         else:
             op = STLOperation.OR
         return STLFormula(op, children=children)
     elif catl_ast.op == CATLOperation.IMPLIES:
-        left = catl2stl(catl_ast.left)
-        right = catl2stl(catl_ast.right)
+        left = catl2pstl(catl_ast.left)
+        right = catl2pstl(catl_ast.right)
         return STLFormula(STLOperation.IMPLIES, left=left, right=right)
     elif catl_ast.op == CATLOperation.NOT:
-        child = catl2stl(catl_ast.child)
+        child = catl2pstl(catl_ast.child)
         return STLFormula(STLOperation.NOT, child=child)
     elif catl_ast.op in (CATLOperation.ALWAYS, CATLOperation.EVENT):
-        child = catl2stl(catl_ast.child)
+        child = catl2pstl(catl_ast.child)
         if catl_ast.op == CATLOperation.ALWAYS:
             op = STLOperation.ALWAYS
         else:
             op = STLOperation.EVENT
         return STLFormula(op, child=child, low=catl_ast.low, high=catl_ast.high)
     elif catl_ast.op == CATLOperation.UNTIL:
-        left = catl2stl(catl_ast.left)
-        right = catl2stl(catl_ast.right)
+        left = catl2pstl(catl_ast.left)
+        right = catl2pstl(catl_ast.right)
         return STLFormula(STLOperation.UNTIL, left=left, right=right,
                           low=catl_ast.low, high=catl_ast.high)
 
@@ -167,7 +167,7 @@ if __name__ == '__main__':
     ast = CATLAbstractSyntaxTreeExtractor().visit(t)
     # print('CATL:', ast)
 
-    stl = catl2stl(ast)
+    stl = catl2pstl(ast)
     # print('STL:', stl)
 
     cap_pred, res_pred = stl_predicate_variables(ast)

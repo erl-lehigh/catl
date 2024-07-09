@@ -28,7 +28,9 @@ class Operation(object):
     # negation closure of operations
     negop = (NOP, NOP, AND, OR, AND, NOP, ALWAYS, EVENT, NOP, PRED, BOOL, EAND,
             EOR, EALWAYS, EEVENT)
-
+    opstrnames = [None, 'not', 'or', 'and', 'imply', 'until', 'event', 'always',
+                  'release', 'predicate', 'bool', 'eand', 'eor', 'eevent', 
+                  'ealways']
     @classmethod
     def getCode(cls, text):
         ''' Gets the code corresponding to the string representation.'''
@@ -39,6 +41,10 @@ class Operation(object):
         '''Gets custom string representation for each operation.'''
         return cls.opnames[op]
 
+    @classmethod
+    def getName(cls, op):
+        '''Gets custom long string name for each operation.'''
+        return cls.opstrnames[op]
 
 class RelOperation(object):
     '''Predicate relationship operations'''
@@ -57,7 +63,8 @@ class RelOperation(object):
     def getString(cls, rop):
         '''Gets custom string representation for each operation.'''
         return cls.opnames[rop]
-
+    
+    
 
 class STLFormula(object):
     '''Abstract Syntax Tree representation of an STL formula'''
