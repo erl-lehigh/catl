@@ -11,7 +11,7 @@ import logging
 
 from gurobipy import Model as GRBModel
 from gurobipy import GRB
-
+import gurobipy as grb
 from stl2milp import stl2milp
 from catl import CATLFormula
 from catl2stl import catl2stl
@@ -540,11 +540,11 @@ def add_travel_time_objective(m, ts, weight, time_bound, variable_bound,
     - Time bound.
     - The upper bound for variables.
     '''
-
+    m.ModelSense = grb.GRB.MAXIMIZE
     n_obj = 0
     if partial_satis == True:
         z = stl_milp.translate()
-        m.setObjectiveN(z, n_obj, weight=-1, name='satisfaction_percentage')
+        m.setObjectiveN(z, n_obj, weight=1, name='satisfaction_percentage')
         n_obj += 1
 
     travel_time = sum(sum( sum(d['vars'][k].values()) for k in range(time_bound) )
@@ -578,6 +578,7 @@ def transportationObjective(m, ts, tra_weight, res_weight, time_bound,
     
     - The upper bound for variables.
     '''
+    m.ModelSense = grb.GRB.MAXIMIZE
     travel_time = sum(sum( sum(d['vars'][k].values()) for k in range(time_bound) )
                      * d['weight'] for u, v, d in ts.g.edges(data=True) if u!= v)
     
@@ -599,7 +600,7 @@ def transportationObjective(m, ts, tra_weight, res_weight, time_bound,
         n_obj += 2
     elif partial_satis == True:
         z = stl_milp.translate()
-        m.setObjectiveN(z, n_obj, weight=-1, name='satisfaction_percentage')
+        m.setObjectiveN(z, n_obj, weight=1, name='satisfaction_percentage')
         n_obj += 1
     m.setObjectiveN(travel_time, n_obj, weight=-tra_weight, name='travel_time_obj')
     n_obj += 1
