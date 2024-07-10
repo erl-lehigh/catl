@@ -154,9 +154,9 @@ def stl_predicate_variables(catl_ast):
 
 
 if __name__ == '__main__':
-    lexer = catlLexer(InputStream('F[0, 2] T(4, test, {(a, 2), (b, 3)})'
-                                  '&& G[1, 7] T(2, test, {(a, 1), (c, 4)})'
-                                  '&& F[3, 5] T(3, test2, {(b, 1), (d, 2)})'))
+    lexer = catlLexer(InputStream('F[0, 2] T(4, test, {(a, 2), (b, 3)}, {(r1,1), (r2,4)})'))
+                                #   '&& G[1, 7] T(2, test, {(a, 1), (c, 4)})'
+                                #   '&& F[3, 5] T(3, test2, {(b, 1), (d, 2)})'))
 
     tokens = CommonTokenStream(lexer)
 
@@ -165,15 +165,15 @@ if __name__ == '__main__':
     print(t.toStringTree())
 
     ast = CATLAbstractSyntaxTreeExtractor().visit(t)
-    # print('CATL:', ast)
+    print('CATL:', ast)
 
     stl = catl2pstl(ast)
-    # print('STL:', stl)
+    print('STL:', stl)
 
     cap_pred, res_pred = stl_predicate_variables(ast)
 
 
-    print('HEREEEEEEE', cap_pred, res_pred)
+    # print('HEREEEEEEE', cap_pred, res_pred)
 
     stl_tasks = extract_stl_task_formulae(stl)
     # for stl_formula, task in stl_tasks:

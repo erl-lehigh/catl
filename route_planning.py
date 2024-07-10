@@ -18,10 +18,6 @@ from catl2stl import catl2stl
 from catl2pstl import catl2pstl
 from catl2stl import extract_stl_task_formulae
 from catl2stl import stl_predicate_variables
-
-from catl2mtl import catl2mtl
-from catl2mtl import extract_mtl_task_formulae
-from catl2mtl import mtl_predicate_variables
 from visualization import show_environment
 from pstl2milp import pstl2milp
 
@@ -211,7 +207,7 @@ def add_system_constraints(m, ts, agent_classes, capability_distribution,
 #     for u in ts.g.nodes():
 #         for g, g_enc in agent_classes.items():
 #             conserve = sum([d['vars'][d['weight']][g]
-#                             for _, _, d in ts.g.out_edges_iter(u, data=True)
+#                             for _, _, d in ts.g.out_edges(u, data=True)
 #                                 if d['weight'] <= time_bound])
 #             conserve = (conserve == capability_distribution[u][g])
 #             m.addConstr(conserve, 'init_distrib_{}_{}'.format(u, g_enc))
@@ -532,7 +528,8 @@ def add_proposition_resource_constraints(m, stl_milp, ts, ast, time_bound,
                             m.addConstr(min_prop, 'min_prop_{}_{}_{}_{}'.format(
                                                                 prop, h, k, u))
 
-def add_travel_time_objective(m, ts, weight, time_bound, variable_bound):
+def add_travel_time_objective(m, ts, weight, time_bound, variable_bound, 
+                              partial_satis, stl_milp):
     '''Adds the total travel time of all agents as an objective.
 
     Input
@@ -544,13 +541,17 @@ def add_travel_time_objective(m, ts, weight, time_bound, variable_bound):
     - The upper bound for variables.
     '''
 
-    
+    n_obj = 0
+    if partial_satis == True:
+        z = stl_milp.translate()
+        m.setObjectiveN(z, n_obj, weight=-1, name='satisfaction_percentage')
+        n_obj += 1
 
     travel_time = sum(sum( sum(d['vars'][k].values()) for k in range(time_bound) )
                      * d['weight'] for u, v, d in ts.g.edges(data=True) if u!= v)
     
     travel_time /= (time_bound * variable_bound)
-    m.setObjectiveN(travel_time, m.NumObj, weight=weight)
+    m.setObjectiveN(travel_time, n_obj, weight=weight, name='travel_time_obj')
 
 
 
@@ -592,11 +593,14 @@ def transportationObjective(m, ts, tra_weight, res_weight, time_bound,
                          for h in resource_distribution)
     resources_time /= (time_bound * resources_bound)
 
-    n_obj = 1
+    n_obj = 0
     if partial_satis == False:
         stl_milp.optimize_multirho(transportation=flag)
+        n_obj += 2
+    elif partial_satis == True:
+        z = stl_milp.translate()
+        m.setObjectiveN(z, n_obj, weight=-1, name='satisfaction_percentage')
         n_obj += 1
-
     m.setObjectiveN(travel_time, n_obj, weight=-tra_weight, name='travel_time_obj')
     n_obj += 1
     m.setObjectiveN(resources_time, n_obj, weight=-res_weight, name='res_time_obj')
@@ -623,7 +627,7 @@ def extract_trajetories(m, ts, agents, time_bound):
                 agent_class = agents[a][1] # extract agent class
                 # loop over outgoing transitions that have agents of the given
                 # class traversing them; add outgoing neighbors
-                for _, next_state, d in ts.g.out_edges_iter(state, data=True):
+                for _, next_state, d in ts.g.out_edges(state, data=True):
                     if d['vars'][time+d['weight']][agent_class] > 0:
                         matching[prev].append((next_state, time+d['weight']))
                         constraints.add((state, next_state, time+d['weight']))
@@ -693,7 +697,10 @@ def route_planning(ts, agents, formula, time_bound=None, variable_bound=None,
         # add CATL formula constraints
         stl = catl2stl(ast)
     elif partial_satis == True:
-        stl = catl2pstl(ast)
+        if transportation == True:
+            stl = catl2pstl(ast)
+        else:
+            stl = catl2stl(ast)
     # bounds for capability and resource variables
     if transportation == True:
         if storage_type is not None:
@@ -737,11 +744,6 @@ def route_planning(ts, agents, formula, time_bound=None, variable_bound=None,
             stl_milp.translate()
         elif partial_satis == True:
             stl_milp = pstl2milp(stl, model=m, ranges=ranges)
-            z = stl_milp.translate()
-            stl_milp.wln(z)
-            print('Objective')
-            # obj = stl_milp.model.getObjective()
-            # print(str(obj), obj.getValue(), "MILP")
             
     else:
         ranges = compute_catl_variables_bounds(ast, variable_bound)
@@ -750,11 +752,7 @@ def route_planning(ts, agents, formula, time_bound=None, variable_bound=None,
             stl_milp.translate()
         elif partial_satis == True:
             stl_milp = pstl2milp(stl, model=m, ranges=ranges)
-            z = stl_milp.translate()
-            stl_milp.wln(z)
-            print('Objective')
-            # obj = stl_milp.model.getObjective()
-            # print(str(obj), obj.getValue(), "MILP")
+
             
 
     
@@ -780,7 +778,8 @@ def route_planning(ts, agents, formula, time_bound=None, variable_bound=None,
                                 stl_milp, partial_satis, flag=flag)
                             
     elif travel_time_weight != 0:
-        add_travel_time_objective(m, ts, travel_time_weight, time_bound, variable_bound)                
+        add_travel_time_objective(m, ts, travel_time_weight, time_bound, 
+                                  variable_bound, partial_satis, stl_milp)                
 
     # run optimizer
     m.optimize()

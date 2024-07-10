@@ -56,8 +56,8 @@ def case_simple(ts_filename='construction.yaml'):
               ('q1', {'e','f'}), ('q1', {'c', 'd'}), ('q1', {'e','f'}),
               ]
 
-    resources = {'r1': {'q1': 10, 'q5': 10},
-                 'r2': {'q2': 10, 'q6': 10},
+    resources = {'r1': {'q1': 10, 'q5': 10, 'q3':20},
+                 'r2': {'q2': 10, 'q6': 10, 'q3':20},
                  'r3': {'q3': 10, 'q7': 10},
                  'r4': {'q4': 10, 'q8': 10}
                 }    
@@ -91,18 +91,18 @@ def case_simple(ts_filename='construction.yaml'):
     # specification += ' && F[0, 20] T(2, blue, {(a, 2), (d, 2)}, {(r4, 0.7), (r3, 1.4)})'
     # specification += ' && F[0, 25] T(2, purple, {(c, 2), (f, 2)}, {(r1, 0.7), (r3, 0.7)})'
     # specification += ' && F[0, 25] T(2, orange, {(a, 2), (b, 2)}, {(r1, 0.7), (r2, 0.7)})'
-    specification = ('F[0,5] T(1, cyan, {(a, 2), (b, 2)}, {(r1, 1.1), (r2, 1.1)})')
-    specification += ' && G[20, 22] T(1, gray, {(c, 1), (d, 2)}, {(r3, 0.7), (r2, 1.1)})'
-    specification += ' && G[10, 12] T(1, yellow, {(e, 2), (f, 1)}, {(r2, 1.1), (r3, 1.1)})'
-    specification += ' && G[20, 22] T(1, pink, {(e, 2), (f, 1)}, {(r4, 0.7), (r3, 0.7)})'
-    specification += ' && F[10, 14] T(1, purple, {(a, 2), (f, 1)}, {(r1, 1.1), (r3, 0.7)})'
-    specification += ' && F[10, 14] T(1, orange, {(d, 3), (b, 2)}, {(r4, 1.1), (r2, 0.7)})'
+    specification = ('F[0,10] T(1, cyan, {(a, 1), (b, 1)})')
+    # specification += ' && G[20, 22] T(1, gray, {(c, 1), (d, 2)}, {(r3, 0.7), (r2, 1.1)})'
+    # specification += ' && G[10, 12] T(1, yellow, {(e, 2), (f, 1)}, {(r2, 1.1), (r3, 1.1)})'
+    # specification += ' && G[20, 22] T(1, pink, {(e, 2), (f, 1)}, {(r4, 0.7), (r3, 0.7)})'
+    # specification += ' && F[10, 14] T(1, purple, {(a, 2), (f, 1)}, {(r1, 1.1), (r3, 0.7)})'
+    # specification += ' && F[10, 14] T(1, orange, {(d, 3), (b, 2)}, {(r4, 1.1), (r2, 0.7)})'
     start = time.time()
 
     m = route_planning(ts, agents, specification, storage_type=storage_type,
                        capacities=capacities, resource_distribution=resources,
                        resource_type='divisible', travel_time_weight=0.1, resources_weight=0.1,
-                       transportation=True, partial_satis=True)     
+                       transportation=False, partial_satis=False)     
     end = time.time()                  
     time_ = end - start
     # time_bound = len(ts.g.nodes(data=True)[0][1]['vars']) - 1
