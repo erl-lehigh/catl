@@ -41,7 +41,7 @@ def catl2pstl(catl_ast):
             [STLFormula(STLOperation.PRED, relation=STLRelOperation.GE,
                         variable=var.format(cap=cap), threshold=th)
                                for cap, th in catl_ast.capability_requests]
-        child = STLFormula(STLOperation.EAND, children=capability_terms)
+        child = STLFormula(STLOperation.AND, children=capability_terms)
         cap_available = STLFormula(STLOperation.ALWAYS, low=0,
                                    high=catl_ast.duration, child=child)
 
@@ -50,7 +50,7 @@ def catl2pstl(catl_ast):
             [STLFormula(STLOperation.PRED, relation=STLRelOperation.GE,
                         variable=var.format(res=res), threshold=th)
                                for res, th in catl_ast.resource_requests]
-        stl_ast = STLFormula(STLOperation.EAND,
+        stl_ast = STLFormula(STLOperation.AND,
                              children=[cap_available] + resource_terms)
         stl_ast.task = catl_ast
         return stl_ast
@@ -82,7 +82,7 @@ def catl2pstl(catl_ast):
                           low=catl_ast.low, high=catl_ast.high)
 
 
-def extract_stl_task_formulae(stl_ast):
+def extract_pstl_task_formulae(stl_ast):
     '''Extract tasks from STL abstract syntax trees obtained from CATL formulae.
 
     Input
@@ -118,7 +118,7 @@ def extract_stl_task_formulae(stl_ast):
     return tasks
 
 
-def stl_predicate_variables(catl_ast):
+def pstl_predicate_variables(catl_ast):
     '''Returns the sets of agent and resource predicate variables for a CaTL
     formula.
 
@@ -170,11 +170,11 @@ if __name__ == '__main__':
     stl = catl2pstl(ast)
     print('STL:', stl)
 
-    cap_pred, res_pred = stl_predicate_variables(ast)
+    cap_pred, res_pred = pstl_predicate_variables(ast)
 
 
     # print('HEREEEEEEE', cap_pred, res_pred)
 
-    stl_tasks = extract_stl_task_formulae(stl)
-    # for stl_formula, task in stl_tasks:
-        # print('Task:', task, 'STL formula:', stl_formula)
+    stl_tasks = extract_pstl_task_formulae(stl)
+    for stl_formula, task in stl_tasks:
+        print('Task:', task, 'STL formula:', stl_formula)

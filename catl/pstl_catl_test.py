@@ -89,8 +89,8 @@ def case_simple(ts_filename='construction.yaml'):
     for state, _ in agents:
         assert state in ts.g, 'State "{}" not in TS!'.format(state)
 
-    specification = ('F[0,5] T(1, cyan, {(a, 2), (b, 2)}, {(r1, 1.1), (r2, 1.1)})')
-    # specification += ' && G[20, 22] T(1, gray, {(c, 1), (d, 2)}, {(r3, 0.7), (r2, 1.1)})'
+    specification = ('F[0,5] (T(1, cyan, {(a, 2), (b, 2)}, {(r1, 30), (r2, 1)}))')
+    specification += ' && G[20, 22] T(1, gray, {(c, 1), (d, 2)}, {(r3, 0.7), (r2, 1.1)})'
     # specification += ' && G[10, 12] T(1, yellow, {(e, 2), (f, 1)}, {(r2, 1.1), (r3, 1.1)})'
     # specification += ' && G[20, 22] T(1, pink, {(e, 2), (f, 1)}, {(r4, 0.7), (r3, 0.7)})'
     # specification += ' && F[10, 14] T(1, purple, {(a, 2), (f, 1)}, {(r1, 1.1), (r3, 0.7)})'

@@ -1,0 +1,216 @@
+!Ts
+name: 5x5 grid
+directed: true
+multi: false
+init: []
+final: []
+hyperparameters:
+  color: &color white
+graph:
+  nodes:
+    q1:
+      prop: !!set {white: null}
+      shape: [[0, 0], [2, 0], [2, 2], [0, 2]]
+      color: *color
+    q2:
+      prop: !!set {white: null}
+      shape: [[2, 0], [4, 0], [4, 2], [2, 2]]
+      color: *color
+    q3:
+      prop: !!set {white: null}
+      shape: [[4, 0], [6, 0], [6, 2], [4, 2]]
+      color: *color
+    q4:
+      prop: !!set {white: null}
+      shape: [[6, 0], [8, 0], [8, 2], [6, 2]]
+      color: *color
+    q5:
+      prop: !!set {white: null}
+      shape: [[8, 0], [10, 0], [10, 2], [8, 2]]
+      color: *color
+    q6:
+      prop: !!set {white: null}
+      shape: [[0, 2], [2, 2], [2, 4], [0, 4]]
+      color: *color
+    q7:
+      prop: !!set {white: null}
+      shape: [[2, 2], [4, 2], [4, 4], [2, 4]]
+      color: *color
+    q8:
+      prop: !!set {white: null}
+      shape: [[4, 2], [6, 2], [6, 4], [4, 4]]
+      color: *color
+    q9:
+      prop: !!set {white: null}
+      shape: [[6, 2], [8, 2], [8, 4], [6, 4]]
+      color: *color
+    q10:
+      prop: !!set {white: null}
+      shape: [[8, 2], [10, 2], [10, 4], [8, 4]]
+      color: *color
+    q11:
+      prop: !!set {white: null}
+      shape: [[0, 4], [2, 4], [2, 6], [0, 6]]
+      color: *color
+    q12:
+      prop: !!set {white: null}
+      shape: [[2, 4], [4, 4], [4, 6], [2, 6]]
+      color: *color
+    q13:
+      prop: !!set {white: null}
+      shape: [[4, 4], [6, 4], [6, 6], [4, 6]]
+      color: *color
+    q14:
+      prop: !!set {white: null}
+      shape: [[6, 4], [8, 4], [8, 6], [6, 6]]
+      color: *color
+    q15:
+      prop: !!set {white: null}
+      shape: [[8, 4], [10, 4], [10, 6], [8, 6]]
+      color: *color
+    q16:
+      prop: !!set {white: null}
+      shape: [[0, 6], [2, 6], [2, 8], [0, 8]]
+      color: *color
+    q17:
+      prop: !!set {white: null}
+      shape: [[2, 6], [4, 6], [4, 8], [2, 8]]
+      color: *color
+    q18:
+      prop: !!set {white: null}
+      shape: [[4, 6], [6, 6], [6, 8], [4, 8]]
+      color: *color
+    q19:
+      prop: !!set {white: null}
+      shape: [[6, 6], [8, 6], [8, 8], [6, 8]]
+      color: *color
+    q20:
+      prop: !!set {white: null}
+      shape: [[8, 6], [10, 6], [10, 8], [8, 8]]
+      color: *color
+    q21:
+      prop: !!set {yellow: null}
+      shape: [[0, 8], [2, 8], [2, 10], [0, 10]]
+      color: yellow
+    q22:
+      prop: !!set {white: null}
+      shape: [[2, 8], [4, 8], [4, 10], [2, 10]]
+      color: *color
+    q23:
+      prop: !!set {white: null}
+      shape: [[4, 8], [6, 8], [6, 10], [4, 10]]
+      color: *color
+    q24:
+      prop: !!set {white: null}
+      shape: [[6, 8], [8, 8], [8, 10], [6, 10]]
+      color: *color
+    q25:
+      prop: !!set {red: null}
+      shape: [[8, 8], [10, 8], [10, 10], [8, 10]]
+      color: red
+  edges:
+  - [ q1, q1, { weight: 1, prob: 1, code: 'q1_q1' } ]
+  - [ q1, q2, { weight: 2, prob: 1, code: 'q1_q2' } ]
+  - [ q2, q1, { weight: 2, prob: 1, code: 'q2_q1' } ]
+  - [ q1, q6, { weight: 2, prob: 1, code: 'q1_q6' } ]
+  - [ q6, q1, { weight: 2, prob: 1, code: 'q6_q1' } ]
+  - [ q2, q2, { weight: 1, prob: 1, code: 'q2_q2' } ]
+  - [ q2, q3, { weight: 2, prob: 1, code: 'q2_q3' } ]
+  - [ q3, q2, { weight: 2, prob: 1, code: 'q3_q2' } ]
+  - [ q2, q7, { weight: 2, prob: 1, code: 'q2_q7' } ]
+  - [ q7, q2, { weight: 2, prob: 1, code: 'q7_q2' } ]
+  - [ q3, q3, { weight: 1, prob: 1, code: 'q3_q3' } ]
+  - [ q3, q4, { weight: 2, prob: 1, code: 'q3_q4' } ]
+  - [ q4, q3, { weight: 2, prob: 1, code: 'q4_q3' } ]
+  - [ q3, q8, { weight: 2, prob: 1, code: 'q3_q8' } ]
+  - [ q8, q3, { weight: 2, prob: 1, code: 'q8_q3' } ]
+  - [ q4, q4, { weight: 1, prob: 1, code: 'q4_q4' } ]
+  - [ q4, q5, { weight: 2, prob: 1, code: 'q4_q5' } ]
+  - [ q5, q4, { weight: 2, prob: 1, code: 'q5_q4' } ]
+  - [ q4, q9, { weight: 2, prob: 1, code: 'q4_q9' } ]
+  - [ q9, q4, { weight: 2, prob: 1, code: 'q9_q4' } ]
+  - [ q5, q5, { weight: 1, prob: 1, code: 'q5_q5' } ]
+  - [ q5, q10, { weight: 2, prob: 1, code: 'q5_q10' } ]
+  - [ q10, q5, { weight: 2, prob: 1, code: 'q10_q5' } ]
+  - [ q6, q6, { weight: 1, prob: 1, code: 'q6_q6' } ]
+  - [ q6, q7, { weight: 2, prob: 1, code: 'q6_q7' } ]
+  - [ q7, q6, { weight: 2, prob: 1, code: 'q7_q6' } ]
+  - [ q6, q11, { weight: 2, prob: 1, code: 'q6_q11' } ]
+  - [ q11, q6, { weight: 2, prob: 1, code: 'q11_q6' } ]
+  - [ q7, q7, { weight: 1, prob: 1, code: 'q7_q7' } ]
+  - [ q7, q8, { weight: 2, prob: 1, code: 'q7_q8' } ]
+  - [ q8, q7, { weight: 2, prob: 1, code: 'q8_q7' } ]
+  - [ q7, q12, { weight: 2, prob: 1, code: 'q7_q12' } ]
+  - [ q12, q7, { weight: 2, prob: 1, code: 'q12_q7' } ]
+  - [ q8, q8, { weight: 1, prob: 1, code: 'q8_q8' } ]
+  - [ q8, q9, { weight: 2, prob: 1, code: 'q8_q9' } ]
+  - [ q9, q8, { weight: 2, prob: 1, code: 'q9_q8' } ]
+  - [ q8, q13, { weight: 2, prob: 1, code: 'q8_q13' } ]
+  - [ q13, q8, { weight: 2, prob: 1, code: 'q13_q8' } ]
+  - [ q9, q9, { weight: 1, prob: 1, code: 'q9_q9' } ]
+  - [ q9, q10, { weight: 2, prob: 1, code: 'q9_q10' } ]
+  - [ q10, q9, { weight: 2, prob: 1, code: 'q10_q9' } ]
+  - [ q9, q14, { weight: 2, prob: 1, code: 'q9_q14' } ]
+  - [ q14, q9, { weight: 2, prob: 1, code: 'q14_q9' } ]
+  - [ q10, q10, { weight: 1, prob: 1, code: 'q10_q10' } ]
+  - [ q10, q15, { weight: 2, prob: 1, code: 'q10_q15' } ]
+  - [ q15, q10, { weight: 2, prob: 1, code: 'q15_q10' } ]
+  - [ q11, q11, { weight: 1, prob: 1, code: 'q11_q11' } ]
+  - [ q11, q12, { weight: 2, prob: 1, code: 'q11_q12' } ]
+  - [ q12, q11, { weight: 2, prob: 1, code: 'q12_q11' } ]
+  - [ q11, q16, { weight: 2, prob: 1, code: 'q11_q16' } ]
+  - [ q16, q11, { weight: 2, prob: 1, code: 'q16_q11' } ]
+  - [ q12, q12, { weight: 1, prob: 1, code: 'q12_q12' } ]
+  - [ q12, q13, { weight: 2, prob: 1, code: 'q12_q13' } ]
+  - [ q13, q12, { weight: 2, prob: 1, code: 'q13_q12' } ]
+  - [ q12, q17, { weight: 2, prob: 1, code: 'q12_q17' } ]
+  - [ q17, q12, { weight: 2, prob: 1, code: 'q17_q12' } ]
+  - [ q13, q13, { weight: 1, prob: 1, code: 'q13_q13' } ]
+  - [ q13, q14, { weight: 2, prob: 1, code: 'q13_q14' } ]
+  - [ q14, q13, { weight: 2, prob: 1, code: 'q14_q13' } ]
+  - [ q13, q18, { weight: 2, prob: 1, code: 'q13_q18' } ]
+  - [ q18, q13, { weight: 2, prob: 1, code: 'q18_q13' } ]
+  - [ q14, q14, { weight: 1, prob: 1, code: 'q14_q14' } ]
+  - [ q14, q15, { weight: 2, prob: 1, code: 'q14_q15' } ]
+  - [ q15, q14, { weight: 2, prob: 1, code: 'q15_q14' } ]
+  - [ q14, q19, { weight: 2, prob: 1, code: 'q14_q19' } ]
+  - [ q19, q14, { weight: 2, prob: 1, code: 'q19_q14' } ]
+  - [ q15, q15, { weight: 1, prob: 1, code: 'q15_q15' } ]
+  - [ q15, q20, { weight: 2, prob: 1, code: 'q15_q20' } ]
+  - [ q20, q15, { weight: 2, prob: 1, code: 'q20_q15' } ]
+  - [ q16, q16, { weight: 1, prob: 1, code: 'q16_q16' } ]
+  - [ q16, q17, { weight: 2, prob: 1, code: 'q16_q17' } ]
+  - [ q17, q16, { weight: 2, prob: 1, code: 'q17_q16' } ]
+  - [ q16, q21, { weight: 2, prob: 1, code: 'q16_q21' } ]
+  - [ q21, q16, { weight: 2, prob: 1, code: 'q21_q16' } ]
+  - [ q17, q17, { weight: 1, prob: 1, code: 'q17_q17' } ]
+  - [ q17, q18, { weight: 2, prob: 1, code: 'q17_q18' } ]
+  - [ q18, q17, { weight: 2, prob: 1, code: 'q18_q17' } ]
+  - [ q17, q22, { weight: 2, prob: 1, code: 'q17_q22' } ]
+  - [ q22, q17, { weight: 2, prob: 1, code: 'q22_q17' } ]
+  - [ q18, q18, { weight: 1, prob: 1, code: 'q18_q18' } ]
+  - [ q18, q19, { weight: 2, prob: 1, code: 'q18_q19' } ]
+  - [ q19, q18, { weight: 2, prob: 1, code: 'q19_q18' } ]
+  - [ q18, q23, { weight: 2, prob: 1, code: 'q18_q23' } ]
+  - [ q23, q18, { weight: 2, prob: 1, code: 'q23_q18' } ]
+  - [ q19, q19, { weight: 1, prob: 1, code: 'q19_q19' } ]
+  - [ q19, q20, { weight: 2, prob: 1, code: 'q19_q20' } ]
+  - [ q20, q19, { weight: 2, prob: 1, code: 'q20_q19' } ]
+  - [ q19, q24, { weight: 2, prob: 1, code: 'q19_q24' } ]
+  - [ q24, q19, { weight: 2, prob: 1, code: 'q24_q19' } ]
+  - [ q20, q20, { weight: 1, prob: 1, code: 'q20_q20' } ]
+  - [ q20, q25, { weight: 2, prob: 1, code: 'q20_q25' } ]
+  - [ q25, q20, { weight: 2, prob: 1, code: 'q25_q20' } ]
+  - [ q21, q21, { weight: 1, prob: 1, code: 'q21_q21' } ]
+  - [ q21, q22, { weight: 2, prob: 1, code: 'q21_q22' } ]
+  - [ q22, q21, { weight: 2, prob: 1, code: 'q22_q21' } ]
+  - [ q22, q22, { weight: 1, prob: 1, code: 'q22_q22' } ]
+  - [ q22, q23, { weight: 2, prob: 1, code: 'q22_q23' } ]
+  - [ q23, q22, { weight: 2, prob: 1, code: 'q23_q22' } ]
+  - [ q23, q23, { weight: 1, prob: 1, code: 'q23_q23' } ]
+  - [ q23, q24, { weight: 2, prob: 1, code: 'q23_q24' } ]
+  - [ q24, q23, { weight: 2, prob: 1, code: 'q24_q23' } ]
+  - [ q24, q24, { weight: 1, prob: 1, code: 'q24_q24' } ]
+  - [ q24, q25, { weight: 2, prob: 1, code: 'q24_q25' } ]
+  - [ q25, q24, { weight: 2, prob: 1, code: 'q25_q24' } ]
+  - [ q25, q25, { weight: 1, prob: 1, code: 'q25_q25' } ]

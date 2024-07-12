@@ -15,9 +15,10 @@ import gurobipy as grb
 from stl2milp import stl2milp
 from catl import CATLFormula
 from catl2stl import catl2stl
-from catl2pstl import catl2pstl
 from catl2stl import extract_stl_task_formulae
 from catl2stl import stl_predicate_variables
+
+from catl2pstl import catl2pstl
 from visualization import show_environment
 from pstl2milp import pstl2milp
 
@@ -185,7 +186,7 @@ def add_system_constraints(m, ts, agent_classes, capability_distribution,
         for k in range(time_bound+1):
             for g, g_enc in agent_classes.items():
                 departing = sum([d['vars'][k][g]
-                            for _, _, d in ts.g.out_edges_iter(u, data=True)
+                            for _, _, d in ts.g._iter(u, data=True)
                                 if k + d['weight'] <= time_bound])
                 arriving = sum([d['vars'][k - d['weight']][g]
                             for _, _, d in ts.g.in_edges_iter(u, data=True)
@@ -463,8 +464,10 @@ def add_proposition_constraints(m, stl_milp, ts, ast, capabilities,
                 variable = '{prop}_{cap}'.format(prop=prop, cap=c)
                 if (variable in stl_milp.variables
                                         and k in stl_milp.variables[variable]):
+                    
                     for u, ud in ts.g.nodes(data=True):
                         if prop in ud['prop']:
+                            print('VARIABLE:', stl_milp.variables[variable][k])
                             min_prop = (stl_milp.variables[variable][k]
                                                 <= ud['prop_vars'][c][k][prop])
                             m.addConstr(min_prop, 'min_prop_{}_{}_{}_{}'.format(
@@ -529,7 +532,7 @@ def add_proposition_resource_constraints(m, stl_milp, ts, ast, time_bound,
                                                                 prop, h, k, u))
 
 def add_travel_time_objective(m, ts, weight, time_bound, variable_bound, 
-                              partial_satis, stl_milp):
+                              partial_satis, stl_milp, transportation, z_ps):
     '''Adds the total travel time of all agents as an objective.
 
     Input
@@ -540,24 +543,27 @@ def add_travel_time_objective(m, ts, weight, time_bound, variable_bound,
     - Time bound.
     - The upper bound for variables.
     '''
-    m.ModelSense = grb.GRB.MAXIMIZE
+    
     n_obj = 0
     if partial_satis == True:
+        m.ModelSense = grb.GRB.MAXIMIZE
         z = stl_milp.translate()
-        m.setObjectiveN(z, n_obj, weight=1, name='satisfaction_percentage')
+        m.setObjectiveN(z_ps, n_obj, weight=1, name='satisfaction_percentage')
         n_obj += 1
 
     travel_time = sum(sum( sum(d['vars'][k].values()) for k in range(time_bound) )
                      * d['weight'] for u, v, d in ts.g.edges(data=True) if u!= v)
     
     travel_time /= (time_bound * variable_bound)
-    m.setObjectiveN(travel_time, n_obj, weight=weight, name='travel_time_obj')
-
+    if transportation == True:
+        m.setObjectiveN(travel_time, n_obj, weight=weight, name='travel_time_obj')
+    elif transportation ==False:
+        m.setObjectiveN(travel_time, n_obj, weight=-weight, name='travel_time_obj')
 
 
 def transportationObjective(m, ts, tra_weight, res_weight, time_bound, 
                             variable_bound, resource_distribution, stl_milp, 
-                            partial_satis, flag=True):
+                            partial_satis, transportation, z_ps):
     '''Modifies the objective fucntion of CaTL when transportation feauture
     is desired. Creating a blended model with weights that ranges in [0,1]
     Input
@@ -596,11 +602,10 @@ def transportationObjective(m, ts, tra_weight, res_weight, time_bound,
 
     n_obj = 0
     if partial_satis == False:
-        stl_milp.optimize_multirho(transportation=flag)
+        stl_milp.optimize_multirho(transportation=transportation)
         n_obj += 2
     elif partial_satis == True:
-        z = stl_milp.translate()
-        m.setObjectiveN(z, n_obj, weight=1, name='satisfaction_percentage')
+        m.setObjectiveN(z_ps, n_obj, weight=1, name='satisfaction_percentage')
         n_obj += 1
     m.setObjectiveN(travel_time, n_obj, weight=-tra_weight, name='travel_time_obj')
     n_obj += 1
@@ -697,11 +702,11 @@ def route_planning(ts, agents, formula, time_bound=None, variable_bound=None,
     if partial_satis == False:
         # add CATL formula constraints
         stl = catl2stl(ast)
+        print(f'STL: {stl}')
     elif partial_satis == True:
-        if transportation == True:
-            stl = catl2pstl(ast)
-        else:
-            stl = catl2stl(ast)
+        stl = catl2pstl(ast)
+        print(f'PSTL: {stl}')
+       
     # bounds for capability and resource variables
     if transportation == True:
         if storage_type is not None:
@@ -743,17 +748,18 @@ def route_planning(ts, agents, formula, time_bound=None, variable_bound=None,
             stl_milp = stl2milp(stl, ranges=ranges, model=m, robust=robust, 
                                 mrho=mrho_dict)
             stl_milp.translate()
+            z_ps = None
         elif partial_satis == True:
             stl_milp = pstl2milp(stl, model=m, ranges=ranges)
-            
+            z_ps = stl_milp.translate()
     else:
         ranges = compute_catl_variables_bounds(ast, variable_bound)
         if partial_satis == False:
             stl_milp = stl2milp(stl, ranges=ranges, model=m, robust=robust)
-            stl_milp.translate()
+            stl_milp.translate()     
         elif partial_satis == True:
             stl_milp = pstl2milp(stl, model=m, ranges=ranges)
-
+            z_ps = stl_milp.translate()
             
 
     
@@ -776,11 +782,12 @@ def route_planning(ts, agents, formula, time_bound=None, variable_bound=None,
                                                 
             transportationObjective(m, ts, travel_time_weight, resources_weight,
                                 time_bound, variable_bound, resource_distribution,
-                                stl_milp, partial_satis, flag=flag)
+                                stl_milp, partial_satis, transportation, z_ps)
                             
-    elif travel_time_weight != 0:
+    elif travel_time_weight != 0 and transportation==False:
         add_travel_time_objective(m, ts, travel_time_weight, time_bound, 
-                                  variable_bound, partial_satis, stl_milp)                
+                                  variable_bound, partial_satis, stl_milp, 
+                                  transportation, z_ps)                
 
     # run optimizer
     m.optimize()

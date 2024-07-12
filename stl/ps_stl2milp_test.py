@@ -67,4 +67,5 @@ print('Objective')
 obj = stl_milp.model.getObjective()
 print(str(obj), ':', obj.getValue())
 
-stl_milp.model.write('stl2milp.lp')
+# stl_milp.model.write('stl2milp.lp')
+print('stl.variables',stl_milp.variables)
