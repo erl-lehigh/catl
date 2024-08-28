@@ -1,0 +1,1463 @@
+!Ts
+name: 10x15 grid
+directed: true
+multi: false
+init: []
+final: []
+hyperparameters:
+  color: &color white
+graph:
+  nodes:
+    q1:
+      prop: !!set {white: null}
+      shape: [[0, 0], [2, 0], [2, 2], [0, 2]]
+      color: *color
+      coordinate: (1, 1)
+#    q2:
+#      prop: !!set {white: null}
+#      shape: [[2, 0], [4, 0], [4, 2], [2, 2]]
+#      color: *color
+#      coordinate: (2, 1)
+    q3:
+      prop: !!set {white: null}
+      shape: [[4, 0], [6, 0], [6, 2], [4, 2]]
+      color: *color
+      coordinate: (3, 1)
+    q4:
+      prop: !!set {white: null}
+      shape: [[10, 0], [12, 0], [12, 2], [10, 2]]
+      color: *color
+      coordinate: (4, 1)
+#    q5:
+#      prop: !!set {white: null}
+#      shape: [[8, 0], [10, 0], [10, 2], [8, 2]]
+#      color: *color
+#      coordinate: (5, 1)
+#    q6:
+#      prop: !!set {white: null}
+#      shape: [[10, 0], [12, 0], [12, 2], [10, 2]]
+#      color: *color
+#      coordinate: (6, 1)
+#    q7:
+#      prop: !!set {white: null}
+#      shape: [[12, 0], [14, 0], [14, 2], [12, 2]]
+#      color: *color
+#      coordinate: (7, 1)
+#    q8:
+#      prop: !!set {white: null}
+#      shape: [[14, 0], [16, 0], [16, 2], [14, 2]]
+#      color: *color
+#      coordinate: (8, 1)
+    q9:
+      prop: !!set {white: null}
+      shape: [[16, 0], [18, 0], [18, 2], [16, 2]]
+      color: *color
+      coordinate: (9, 1)
+    q10:
+      prop: !!set {white: null}
+      shape: [[18, 0], [20, 0], [20, 2], [18, 2]]
+      color: *color
+      coordinate: (10, 1)
+#    q11:
+#      prop: !!set {white: null}
+#      shape: [[20, 0], [22, 0], [22, 2], [20, 2]]
+#      color: *color
+#      coordinate: (11, 1)
+    q12:
+      prop: !!set {white: null}
+      shape: [[22, 0], [24, 0], [24, 2], [22, 2]]
+      color: *color
+      coordinate: (12, 1)
+    q13:
+      prop: !!set {white: null}
+      shape: [[24, 0], [26, 0], [26, 2], [24, 2]]
+      color: *color
+      coordinate: (13, 1)
+#    q14:
+#      prop: !!set {white: null}
+#      shape: [[26, 0], [28, 0], [28, 2], [26, 2]]
+#      color: *color
+#      coordinate: (14, 1)
+    q15:
+      prop: !!set {white: null}
+      shape: [[28, 0], [30, 0], [30, 2], [28, 2]]
+      color: *color
+      coordinate: (15, 1)
+#    q16:
+#      prop: !!set {white: null}
+#      shape: [[0, 2], [2, 2], [2, 4], [0, 4]]
+#      color: *color
+#      coordinate: (1, 2)
+    q17:
+      prop: !!set {white: null}
+      shape: [[2, 2], [4, 2], [4, 4], [2, 4]]
+      color: brown
+      coordinate: (2, 2)
+#    q18:
+#      prop: !!set {white: null}
+#      shape: [[4, 2], [6, 2], [6, 4], [4, 4]]
+#      color: *color
+#      coordinate: (3, 2)
+    q19:
+      prop: !!set {white: null}
+      shape: [[6, 2], [8, 2], [8, 4], [6, 4]]
+      color: brown
+      coordinate: (4, 2)
+    q20:
+      prop: !!set {white: null}
+      shape: [[8, 2], [10, 2], [10, 4], [8, 4]]
+      color: brown
+      coordinate: (5, 2)
+    q21:
+      prop: !!set {white: null}
+      shape: [[10, 2], [12, 2], [12, 4], [10, 4]]
+      color: brown
+      coordinate: (6, 2)
+    q22:
+      prop: !!set {white: null}
+      shape: [[12, 2], [14, 2], [14, 4], [12, 4]]
+      color: brown
+      coordinate: (7, 2)
+    q23:
+      prop: !!set {white: null}
+      shape: [[14, 2], [16, 2], [16, 4], [14, 4]]
+      color: brown
+      coordinate: (8, 2)
+    q24:
+      prop: !!set {white: null}
+      shape: [[16, 2], [18, 2], [18, 4], [16, 4]]
+      color: *color
+      coordinate: (9, 2)
+    q25:
+      prop: !!set {white: null}
+      shape: [[18, 2], [20, 2], [20, 4], [18, 4]]
+      color: *color
+      coordinate: (10, 2)
+    q26:
+      prop: !!set {white: null}
+      shape: [[20, 2], [22, 2], [22, 4], [20, 4]]
+      color: brown
+      coordinate: (11, 2)
+#    q27:
+#      prop: !!set {white: null}
+#      shape: [[22, 2], [24, 2], [24, 4], [22, 4]]
+#      color: *color
+#      coordinate: (12, 2)
+#    q28:
+#      prop: !!set {white: null}
+#      shape: [[24, 2], [26, 2], [26, 4], [24, 4]]
+#      color: *color
+#      coordinate: (13, 2)
+    q29:
+      prop: !!set {white: null}
+      shape: [[26, 2], [28, 2], [28, 4], [26, 4]]
+      color: brown
+      coordinate: (14, 2)
+#    q30:
+#      prop: !!set {white: null}
+#      shape: [[28, 2], [30, 2], [30, 4], [28, 4]]
+#      color: *color
+#      coordinate: (15, 2)
+#    q31:
+#      prop: !!set {white: null}
+#      shape: [[0, 4], [2, 4], [2, 6], [0, 6]]
+#      color: *color
+#      coordinate: (1, 3)
+    q32:
+      prop: !!set {white: null}
+      shape: [[2, 4], [4, 4], [4, 6], [2, 6]]
+      color: brown
+      coordinate: (2, 3)
+#    q33:
+#      prop: !!set {white: null}
+#      shape: [[4, 4], [6, 4], [6, 6], [4, 6]]
+#      color: *color
+#      coordinate: (3, 3)
+    q34:
+      prop: !!set {white: null}
+      shape: [[6, 4], [8, 4], [8, 6], [6, 6]]
+      color: brown
+      coordinate: (4, 3)
+    q35:
+      prop: !!set {white: null}
+      shape: [[8, 4], [10, 4], [10, 6], [8, 6]]
+      color: brown
+      coordinate: (5, 3)
+    q36:
+      prop: !!set {white: null}
+      shape: [[10, 4], [12, 4], [12, 6], [10, 6]]
+      color: brown
+      coordinate: (6, 3)
+    q37:
+      prop: !!set {white: null}
+      shape: [[12, 4], [14, 4], [14, 6], [12, 6]]
+      color: brown
+      coordinate: (7, 3)
+    q38:
+      prop: !!set {white: null}
+      shape: [[14, 4], [16, 4], [16, 6], [14, 6]]
+      color: *color
+      coordinate: (8, 3)
+    q39:
+      prop: !!set {white: null}
+      shape: [[16, 4], [18, 4], [18, 6], [16, 6]]
+      color: *color
+      coordinate: (9, 3)
+    q40:
+      prop: !!set {white: null}
+      shape: [[18, 4], [20, 4], [20, 6], [18, 6]]
+      color: brown
+      coordinate: (10, 3)
+    q41:
+      prop: !!set {white: null}
+      shape: [[20, 4], [22, 4], [22, 6], [20, 6]]
+      color: brown
+      coordinate: (11, 3)
+#    q42:
+#      prop: !!set {white: null}
+#      shape: [[22, 4], [24, 4], [24, 6], [22, 6]]
+#      color: *color
+#      coordinate: (12, 3)
+#    q43:
+#      prop: !!set {white: null}
+#      shape: [[24, 4], [26, 4], [26, 6], [24, 6]]
+#      color: *color
+#      coordinate: (13, 3)
+    q44:
+      prop: !!set {white: null}
+      shape: [[26, 4], [28, 4], [28, 6], [26, 6]]
+      color: brown
+      coordinate: (14, 3)
+#    q45:
+#      prop: !!set {white: null}
+#      shape: [[28, 4], [30, 4], [30, 6], [28, 6]]
+#      color: *color
+#      coordinate: (15, 3)
+    q46:
+      prop: !!set {white: null}
+      shape: [[0, 6], [2, 6], [2, 8], [0, 8]]
+      color: *color
+      coordinate: (1, 4)
+    q47:
+      prop: !!set {white: null}
+      shape: [[2, 6], [4, 6], [4, 8], [2, 8]]
+      color: *color
+      coordinate: (2, 4)
+    q48:
+      prop: !!set {white: null}
+      shape: [[4, 6], [6, 6], [6, 8], [4, 8]]
+      color: *color
+      coordinate: (3, 4)
+    q49:
+      prop: !!set {white: null}
+      shape: [[6, 6], [8, 6], [8, 8], [6, 8]]
+      color: brown
+      coordinate: (4, 4)
+    q50:
+      prop: !!set {white: null}
+      shape: [[8, 6], [10, 6], [10, 8], [8, 8]]
+      color: brown
+      coordinate: (5, 4)
+    q51:
+      prop: !!set {white: null}
+      shape: [[10, 6], [12, 6], [12, 8], [10, 8]]
+      color: brown
+      coordinate: (6, 4)
+    q52:
+      prop: !!set {yellow: null}
+      shape: [[12, 6], [14, 6], [14, 8], [12, 8]]
+      color: yellow
+      coordinate: (7, 4)
+    q53:
+      prop: !!set {white: null}
+      shape: [[14, 6], [16, 6], [16, 8], [14, 8]]
+      color: *color
+      coordinate: (8, 4)
+    q54:
+      prop: !!set {white: null}
+      shape: [[16, 6], [18, 6], [18, 8], [16, 8]]
+      color: brown
+      coordinate: (9, 4)
+    q55:
+      prop: !!set {white: null}
+      shape: [[18, 6], [20, 6], [20, 8], [18, 8]]
+      color: brown
+      coordinate: (10, 4)
+    q56:
+      prop: !!set {white: null}
+      shape: [[20, 6], [22, 6], [22, 8], [20, 8]]
+      color: brown
+      coordinate: (11, 4)
+#    q57:
+#      prop: !!set {white: null}
+#      shape: [[22, 6], [24, 6], [24, 8], [22, 8]]
+#      color: *color
+#      coordinate: (12, 4)
+#    q58:
+#      prop: !!set {white: null}
+#      shape: [[24, 6], [26, 6], [26, 8], [24, 8]]
+#      color: *color
+#      coordinate: (13, 4)
+    q59:
+      prop: !!set {white: null}
+      shape: [[26, 6], [28, 6], [28, 8], [26, 8]]
+      color: brown
+      coordinate: (14, 4)
+#    q60:
+#      prop: !!set {white: null}
+#      shape: [[28, 6], [30, 6], [30, 8], [28, 8]]
+#      color: *color
+#      coordinate: (15, 4)
+    q61:
+      prop: !!set {white: null}
+      shape: [[0, 8], [2, 8], [2, 10], [0, 10]]
+      color: *color
+      coordinate: (1, 5)
+    q62:
+      prop: !!set {white: null}
+      shape: [[2, 8], [4, 8], [4, 10], [2, 10]]
+      color: *color
+      coordinate: (2, 5)
+    q63:
+      prop: !!set {white: null}
+      shape: [[4, 8], [6, 8], [6, 10], [4, 10]]
+      color: *color
+      coordinate: (3, 5)
+#    q64:
+#      prop: !!set {white: null}
+#      shape: [[6, 8], [8, 8], [8, 10], [6, 10]]
+#      color: *color
+#      coordinate: (4, 5)
+#    q65:
+#      prop: !!set {white: null}
+#      shape: [[8, 8], [10, 8], [10, 10], [8, 10]]
+#      color: *color
+#      coordinate: (5, 5)
+#    q66:
+#      prop: !!set {white: null}
+#      shape: [[10, 8], [12, 8], [12, 10], [10, 10]]
+#      color: *color
+#      coordinate: (6, 5)
+#    q67:
+#      prop: !!set {white: null}
+#      shape: [[12, 8], [14, 8], [14, 10], [12, 10]]
+#      color: *color
+#      coordinate: (7, 5)
+    q68:
+      prop: !!set {white: null}
+      shape: [[14, 8], [16, 8], [16, 10], [14, 10]]
+      color: *color
+      coordinate: (8, 5)
+#    q69:
+#      prop: !!set {white: null}
+#      shape: [[16, 8], [18, 8], [18, 10], [16, 10]]
+#      color: *color
+#      coordinate: (9, 5)
+#    q70:
+#      prop: !!set {white: null}
+#      shape: [[18, 8], [20, 8], [20, 10], [18, 10]]
+#      color: *color
+#      coordinate: (10, 5)
+#    q71:
+#      prop: !!set {white: null}
+#      shape: [[20, 8], [22, 8], [22, 10], [20, 10]]
+#      color: *color
+#      coordinate: (11, 5)
+    q72:
+      prop: !!set {white: null}
+      shape: [[22, 8], [24, 8], [24, 10], [22, 10]]
+      color: *color
+      coordinate: (12, 5)
+    q73:
+      prop: !!set {white: null}
+      shape: [[24, 8], [26, 8], [26, 10], [24, 10]]
+      color: *color
+      coordinate: (13, 5)
+#    q74:
+#      prop: !!set {white: null}
+#      shape: [[26, 8], [28, 8], [28, 10], [26, 10]]
+#      color: *color
+#      coordinate: (14, 5)
+    q75:
+      prop: !!set {white: null}
+      shape: [[28, 8], [30, 8], [30, 10], [28, 10]]
+      color: *color
+      coordinate: (15, 5)
+    q76:
+      prop: !!set {white: null}
+      shape: [[0, 10], [2, 10], [2, 12], [0, 12]]
+      color: *color
+      coordinate: (1, 6)
+    q77:
+      prop: !!set {white: null}
+      shape: [[2, 10], [4, 10], [4, 12], [2, 12]]
+      color: *color
+      coordinate: (2, 6)
+#    q78:
+#      prop: !!set {white: null}
+#      shape: [[4, 10], [6, 10], [6, 12], [4, 12]]
+#      color: *color
+#      coordinate: (3, 6)
+#    q79:
+#      prop: !!set {white: null}
+#      shape: [[6, 10], [8, 10], [8, 12], [6, 12]]
+#      color: *color
+#      coordinate: (4, 6)
+    q80:
+      prop: !!set {white: null}
+      shape: [[8, 10], [10, 10], [10, 12], [8, 12]]
+      color: *color
+      coordinate: (5, 6)
+#    q81:
+#      prop: !!set {white: null}
+#      shape: [[10, 10], [12, 10], [12, 12], [10, 12]]
+#      color: *color
+#      coordinate: (6, 6)
+#    q82:
+#      prop: !!set {white: null}
+#      shape: [[12, 10], [14, 10], [14, 12], [12, 12]]
+#      color: *color
+#      coordinate: (7, 6)
+    q83:
+      prop: !!set {white: null}
+      shape: [[14, 10], [16, 10], [16, 12], [14, 12]]
+      color: *color
+      coordinate: (8, 6)
+#    q84:
+#      prop: !!set {white: null}
+#      shape: [[16, 10], [18, 10], [18, 12], [16, 12]]
+#      color: *color
+#      coordinate: (9, 6)
+#    q85:
+#      prop: !!set {white: null}
+#      shape: [[18, 10], [20, 10], [20, 12], [18, 12]]
+#      color: *color
+#      coordinate: (10, 6)
+#    q86:
+#      prop: !!set {white: null}
+#      shape: [[20, 10], [22, 10], [22, 12], [20, 12]]
+#      color: *color
+#      coordinate: (11, 6)
+    q87:
+      prop: !!set {white: null}
+      shape: [[22, 10], [24, 10], [24, 12], [22, 12]]
+      color: *color
+      coordinate: (12, 6)
+    q88:
+      prop: !!set {white: null}
+      shape: [[24, 10], [26, 10], [26, 12], [24, 12]]
+      color: *color
+      coordinate: (13, 6)
+#    q89:
+#      prop: !!set {white: null}
+#      shape: [[26, 10], [28, 10], [28, 12], [26, 12]]
+#      color: *color
+#      coordinate: (14, 6)
+    q90:
+      prop: !!set {green: null}
+      shape: [[28, 10], [30, 10], [30, 12], [28, 12]]
+      color: green
+      coordinate: (15, 6)
+#    q91:
+#      prop: !!set {white: null}
+#      shape: [[0, 12], [2, 12], [2, 14], [0, 14]]
+#      color: *color
+#      coordinate: (1, 7)
+    q92:
+      prop: !!set {white: null}
+      shape: [[2, 12], [4, 12], [4, 14], [2, 14]]
+      color: brown
+      coordinate: (2, 7)
+    q93:
+      prop: !!set {white: null}
+      shape: [[4, 12], [6, 12], [6, 14], [4, 14]]
+      color: brown
+      coordinate: (3, 7)
+    q94:
+      prop: !!set {white: null}
+      shape: [[6, 12], [8, 12], [8, 14], [6, 14]]
+      color: brown
+      coordinate: (4, 7)
+#    q95:
+#      prop: !!set {white: null}
+#      shape: [[8, 12], [10, 12], [10, 14], [8, 14]]
+#      color: *color
+#      coordinate: (5, 7)
+    q96:
+      prop: !!set {white: null}
+      shape: [[10, 12], [12, 12], [12, 14], [10, 14]]
+      color: brown
+      coordinate: (6, 7)
+    q97:
+      prop: !!set {white: null}
+      shape: [[12, 12], [14, 12], [14, 14], [12, 14]]
+      color: brown
+      coordinate: (7, 7)
+    q98:
+      prop: !!set {white: null}
+      shape: [[14, 12], [16, 12], [16, 14], [14, 14]]
+      color: *color
+      coordinate: (8, 7)
+    q99:
+      prop: !!set {white: null}
+      shape: [[16, 12], [18, 12], [18, 14], [16, 14]]
+      color: brown
+      coordinate: (9, 7)
+    q100:
+      prop: !!set {white: null}
+      shape: [[18, 12], [20, 12], [20, 14], [18, 14]]
+      color: brown
+      coordinate: (10, 7)
+    q101:
+      prop: !!set {white: null}
+      shape: [[20, 12], [22, 12], [22, 14], [20, 14]]
+      color: brown
+      coordinate: (11, 7)
+#    q102:
+#      prop: !!set {white: null}
+#      shape: [[22, 12], [24, 12], [24, 14], [22, 14]]
+#      color: *color
+#      coordinate: (12, 7)
+    q103:
+      prop: !!set {white: null}
+      shape: [[24, 12], [26, 12], [26, 14], [24, 14]]
+      color: brown
+      coordinate: (13, 7)
+    q104:
+      prop: !!set {white: null}
+      shape: [[26, 12], [28, 12], [28, 14], [26, 14]]
+      color: brown
+      coordinate: (14, 7)
+#    q105:
+#      prop: !!set {white: null}
+#      shape: [[28, 12], [30, 12], [30, 14], [28, 14]]
+#      color: *color
+#      coordinate: (15, 7)
+#    q106:
+#      prop: !!set {white: null}
+#      shape: [[0, 14], [2, 14], [2, 16], [0, 16]]
+#      color: *color
+#      coordinate: (1, 8)
+    q107:
+      prop: !!set {white: null}
+      shape: [[2, 14], [4, 14], [4, 16], [2, 16]]
+      color: brown
+      coordinate: (2, 8)
+    q108:
+      prop: !!set {white: null}
+      shape: [[4, 14], [6, 14], [6, 16], [4, 16]]
+      color: brown
+      coordinate: (3, 8)
+    q109:
+      prop: !!set {white: null}
+      shape: [[6, 14], [8, 14], [8, 16], [6, 16]]
+      color: brown
+      coordinate: (4, 8)
+    q110:
+      prop: !!set {white: null}
+      shape: [[8, 14], [10, 14], [10, 16], [8, 16]]
+      color: *color
+      coordinate: (5, 8)
+    q111:
+      prop: !!set {white: null}
+      shape: [[10, 14], [12, 14], [12, 16], [10, 16]]
+      color: *color
+      coordinate: (6, 8)
+    q112:
+      prop: !!set {white: null}
+      shape: [[12, 14], [14, 14], [14, 16], [12, 16]]
+      color: *color
+      coordinate: (7, 8)
+    q113:
+      prop: !!set {white: null}
+      shape: [[14, 14], [16, 14], [16, 16], [14, 16]]
+      color: *color
+      coordinate: (8, 8)
+    q114:
+      prop: !!set {white: null}
+      shape: [[16, 14], [18, 14], [18, 16], [16, 16]]
+      color: *color
+      coordinate: (9, 8)
+#    q115:
+#      prop: !!set {white: null}
+#      shape: [[18, 14], [20, 14], [20, 16], [18, 16]]
+#      color: *color
+#      coordinate: (10, 8)
+#    q116:
+#      prop: !!set {white: null}
+#      shape: [[20, 14], [22, 14], [22, 16], [20, 16]]
+#      color: *color
+#      coordinate: (11, 8)
+    q117:
+      prop: !!set {white: null}
+      shape: [[22, 14], [24, 14], [24, 16], [22, 16]]
+      color: *color
+      coordinate: (12, 8)
+    q118:
+      prop: !!set {white: null}
+      shape: [[24, 14], [26, 14], [26, 16], [24, 16]]
+      color: brown
+      coordinate: (13, 8)
+    q119:
+      prop: !!set {white: null}
+      shape: [[26, 14], [28, 14], [28, 16], [26, 16]]
+      color: brown
+      coordinate: (14, 8)
+#    q120:
+#      prop: !!set {white: null}
+#      shape: [[28, 14], [30, 14], [30, 16], [28, 16]]
+#      color: *color
+#      coordinate: (15, 8)
+#    q121:
+#      prop: !!set {white: null}
+#      shape: [[0, 16], [2, 16], [2, 18], [0, 18]]
+#      color: *color
+#      coordinate: (1, 9)
+    q122:
+      prop: !!set {white: null}
+      shape: [[2, 16], [4, 16], [4, 18], [2, 18]]
+      color: brown
+      coordinate: (2, 9)
+    q123:
+      prop: !!set {white: null}
+      shape: [[4, 16], [6, 16], [6, 18], [4, 18]]
+      color: brown
+      coordinate: (3, 9)
+    q124:
+      prop: !!set {white: null}
+      shape: [[6, 16], [8, 16], [8, 18], [6, 18]]
+      color: brown
+      coordinate: (4, 9)
+    q125:
+      prop: !!set {white: null}
+      shape: [[8, 16], [10, 16], [10, 18], [8, 18]]
+      color: *color
+      coordinate: (5, 9)
+    q126:
+      prop: !!set {white: null}
+      shape: [[10, 16], [12, 16], [12, 18], [10, 18]]
+      color: *color
+      coordinate: (6, 9)
+    q127:
+      prop: !!set {white: null}
+      shape: [[12, 16], [14, 16], [14, 18], [12, 18]]
+      color: *color
+      coordinate: (7, 9)
+    q128:
+      prop: !!set {red: null}
+      shape: [[14, 16], [16, 16], [16, 18], [14, 18]]
+      color: red
+      coordinate: (8, 9)
+    q129:
+      prop: !!set {white: null}
+      shape: [[16, 16], [18, 16], [18, 18], [16, 18]]
+      color: *color
+      coordinate: (9, 9)
+    q130:
+      prop: !!set {white: null}
+      shape: [[18, 16], [20, 16], [20, 18], [18, 18]]
+      color: *color
+      coordinate: (10, 9)
+    q131:
+      prop: !!set {white: null}
+      shape: [[20, 16], [22, 16], [22, 18], [20, 18]]
+      color: brown
+      coordinate: (11, 9)
+#    q132:
+#      prop: !!set {white: null}
+#      shape: [[22, 16], [24, 16], [24, 18], [22, 18]]
+#      color: *color
+#      coordinate: (12, 9)
+    q133:
+      prop: !!set {white: null}
+      shape: [[24, 16], [26, 16], [26, 18], [24, 18]]
+      color: brown
+      coordinate: (13, 9)
+    q134:
+      prop: !!set {white: null}
+      shape: [[26, 16], [28, 16], [28, 18], [26, 18]]
+      color: brown
+      coordinate: (14, 9)
+#    q135:
+#      prop: !!set {white: null}
+#      shape: [[28, 16], [30, 16], [30, 18], [28, 18]]
+#      color: *color
+#      coordinate: (15, 9)
+    q136:
+      prop: !!set {white: null}
+      shape: [[0, 18], [2, 18], [2, 20], [0, 20]]
+      color: *color
+      coordinate: (1, 10)
+#    q137:
+#      prop: !!set {white: null}
+#      shape: [[2, 18], [4, 18], [4, 20], [2, 20]]
+#      color: *color
+#      coordinate: (2, 10)
+#    q138:
+#      prop: !!set {white: null}
+#      shape: [[4, 18], [6, 18], [6, 20], [4, 20]]
+#      color: *color
+#      coordinate: (3, 10)
+#    q139:
+#      prop: !!set {white: null}
+#      shape: [[6, 18], [8, 18], [8, 20], [6, 20]]
+#      color: *color
+#      coordinate: (4, 10)
+    q140:
+      prop: !!set {white: null}
+      shape: [[8, 18], [10, 18], [10, 20], [8, 20]]
+      color: *color
+      coordinate: (5, 10)
+    q141:
+      prop: !!set {white: null}
+      shape: [[10, 18], [12, 18], [12, 20], [10, 20]]
+      color: *color
+      coordinate: (6, 10)
+    q142:
+      prop: !!set {white: null}
+      shape: [[12, 18], [14, 18], [14, 20], [12, 20]]
+      color: *color
+      coordinate: (7, 10)
+    q143:
+      prop: !!set {white: null}
+      shape: [[14, 18], [16, 18], [16, 20], [14, 20]]
+      color: *color
+      coordinate: (8, 10)
+    q144:
+      prop: !!set {white: null}
+      shape: [[16, 18], [18, 18], [18, 20], [16, 20]]
+      color: *color
+      coordinate: (9, 10)
+    q145:
+      prop: !!set {white: null}
+      shape: [[18, 18], [20, 18], [20, 20], [18, 20]]
+      color: *color
+      coordinate: (10, 10)
+#    q146:
+#      prop: !!set {white: null}
+#      shape: [[20, 18], [22, 18], [22, 20], [20, 20]]
+#      color: *color
+#      coordinate: (11, 10)
+    q147:
+      prop: !!set {white: null}
+      shape: [[22, 18], [24, 18], [24, 20], [22, 20]]
+      color: *color
+      coordinate: (12, 10)
+#    q148:
+#      prop: !!set {white: null}
+#      shape: [[24, 18], [26, 18], [26, 20], [24, 20]]
+#      color: *color
+#      coordinate: (13, 10)
+#    q149:
+#      prop: !!set {white: null}
+#      shape: [[26, 18], [28, 18], [28, 20], [26, 20]]
+#      color: *color
+#      coordinate: (14, 10)
+    q150:
+      prop: !!set {white: null}
+      shape: [[28, 18], [30, 18], [30, 20], [28, 20]]
+      color: *color
+      coordinate: (15, 10)
+  edges:
+  - [ q1, q1, { weight: 1, prob: 1, code: 'q1_q1' } ]
+#  - [ q1, q2, { weight: 1, prob: 1, code: 'q1_q2' } ]
+#  - [ q2, q1, { weight: 1, prob: 1, code: 'q2_q1' } ]
+  - [ q1, q46, { weight: 3, prob: 1, code: 'q1_q46' } ]
+  - [ q46, q1, { weight: 3, prob: 1, code: 'q46_q1' } ]
+#  - [ q2, q2, { weight: 1, prob: 1, code: 'q2_q2' } ]
+  - [ q1, q3, { weight: 2, prob: 1, code: 'q2_q3' } ]
+  - [ q3, q1, { weight: 2, prob: 1, code: 'q3_q2' } ]
+#  - [ q2, q17, { weight: 1, prob: 1, code: 'q2_q17' } ]
+#  - [ q17, q2, { weight: 1, prob: 1, code: 'q17_q2' } ]
+  - [ q3, q3, { weight: 1, prob: 1, code: 'q3_q3' } ]
+  - [ q3, q4, { weight: 2, prob: 1, code: 'q3_q4' } ]
+  - [ q4, q3, { weight: 2, prob: 1, code: 'q4_q3' } ]
+  - [ q3, q48, { weight: 3, prob: 1, code: 'q3_q48' } ]
+  - [ q48, q3, { weight: 3, prob: 1, code: 'q48_q3' } ]
+  - [ q4, q4, { weight: 1, prob: 1, code: 'q4_q4' } ]
+#  - [ q4, q5, { weight: 1, prob: 1, code: 'q4_q5' } ]
+#  - [ q5, q4, { weight: 1, prob: 1, code: 'q5_q4' } ]
+#  - [ q4, q19, { weight: 1, prob: 1, code: 'q4_q19' } ]
+#  - [ q19, q4, { weight: 1, prob: 1, code: 'q19_q4' } ]
+#  - [ q5, q5, { weight: 1, prob: 1, code: 'q5_q5' } ]
+#  - [ q5, q6, { weight: 1, prob: 1, code: 'q5_q6' } ]
+#  - [ q6, q5, { weight: 1, prob: 1, code: 'q6_q5' } ]
+#  - [ q5, q20, { weight: 1, prob: 1, code: 'q5_q20' } ]
+#  - [ q20, q5, { weight: 1, prob: 1, code: 'q20_q5' } ]
+#  - [ q6, q6, { weight: 1, prob: 1, code: 'q6_q6' } ]
+#  - [ q6, q7, { weight: 1, prob: 1, code: 'q6_q7' } ]
+#  - [ q7, q6, { weight: 1, prob: 1, code: 'q7_q6' } ]
+#  - [ q6, q21, { weight: 1, prob: 1, code: 'q6_q21' } ]
+#  - [ q21, q6, { weight: 1, prob: 1, code: 'q21_q6' } ]
+#  - [ q7, q7, { weight: 1, prob: 1, code: 'q7_q7' } ]
+#  - [ q7, q8, { weight: 1, prob: 1, code: 'q7_q8' } ]
+#  - [ q8, q7, { weight: 1, prob: 1, code: 'q8_q7' } ]
+#  - [ q7, q22, { weight: 1, prob: 1, code: 'q7_q22' } ]
+#  - [ q22, q7, { weight: 1, prob: 1, code: 'q22_q7' } ]
+#  - [ q8, q8, { weight: 1, prob: 1, code: 'q8_q8' } ]
+  - [ q4, q9, { weight: 2, prob: 1, code: 'q4_q9' } ]
+  - [ q9, q4, { weight: 2, prob: 1, code: 'q9_q4' } ]
+#  - [ q8, q23, { weight: 1, prob: 1, code: 'q8_q23' } ]
+#  - [ q23, q8, { weight: 1, prob: 1, code: 'q23_q8' } ]
+  - [ q9, q9, { weight: 1, prob: 1, code: 'q9_q9' } ]
+  - [ q9, q10, { weight: 1, prob: 1, code: 'q9_q10' } ]
+  - [ q10, q9, { weight: 1, prob: 1, code: 'q10_q9' } ]
+  - [ q9, q24, { weight: 1, prob: 1, code: 'q9_q24' } ]
+  - [ q24, q9, { weight: 1, prob: 1, code: 'q24_q9' } ]
+  - [ q10, q10, { weight: 1, prob: 1, code: 'q10_q10' } ]
+  - [ q10, q12, { weight: 2, prob: 1, code: 'q10_q12' } ]
+  - [ q12, q10, { weight: 2, prob: 1, code: 'q12_q10' } ]
+  - [ q10, q25, { weight: 1, prob: 1, code: 'q10_q25' } ]
+  - [ q25, q10, { weight: 1, prob: 1, code: 'q25_q10' } ]
+#  - [ q11, q11, { weight: 1, prob: 1, code: 'q11_q11' } ]
+#  - [ q11, q12, { weight: 1, prob: 1, code: 'q11_q12' } ]
+#  - [ q12, q11, { weight: 1, prob: 1, code: 'q12_q11' } ]
+#  - [ q11, q26, { weight: 1, prob: 1, code: 'q11_q26' } ]
+#  - [ q26, q11, { weight: 1, prob: 1, code: 'q26_q11' } ]
+  - [ q12, q12, { weight: 1, prob: 1, code: 'q12_q12' } ]
+  - [ q12, q13, { weight: 1, prob: 1, code: 'q12_q13' } ]
+  - [ q13, q12, { weight: 1, prob: 1, code: 'q13_q12' } ]
+  - [ q12, q72, { weight: 4, prob: 1, code: 'q12_q72' } ]
+  - [ q72, q12, { weight: 4, prob: 1, code: 'q72_q12' } ]
+  - [ q13, q13, { weight: 1, prob: 1, code: 'q13_q13' } ]
+  - [ q13, q15, { weight: 1, prob: 1, code: 'q13_q15' } ]
+  - [ q15, q13, { weight: 1, prob: 1, code: 'q15_q13' } ]
+  - [ q13, q73, { weight: 4, prob: 1, code: 'q13_q73' } ]
+  - [ q73, q13, { weight: 4, prob: 1, code: 'q73_q13' } ]
+#  - [ q14, q14, { weight: 1, prob: 1, code: 'q14_q14' } ]
+#  - [ q14, q15, { weight: 1, prob: 1, code: 'q14_q15' } ]
+#  - [ q15, q14, { weight: 1, prob: 1, code: 'q15_q14' } ]
+#  - [ q14, q29, { weight: 1, prob: 1, code: 'q14_q29' } ]
+#  - [ q29, q14, { weight: 1, prob: 1, code: 'q29_q14' } ]
+  - [ q15, q15, { weight: 1, prob: 1, code: 'q15_q15' } ]
+#  - [ q15, q30, { weight: 1, prob: 1, code: 'q15_q30' } ]
+#  - [ q30, q15, { weight: 1, prob: 1, code: 'q30_q15' } ]
+#  - [ q16, q16, { weight: 1, prob: 1, code: 'q16_q16' } ]
+#  - [ q16, q17, { weight: 1, prob: 1, code: 'q16_q17' } ]
+#  - [ q17, q16, { weight: 1, prob: 1, code: 'q17_q16' } ]
+#  - [ q16, q31, { weight: 1, prob: 1, code: 'q16_q31' } ]
+#  - [ q31, q16, { weight: 1, prob: 1, code: 'q31_q16' } ]
+#  - [ q17, q17, { weight: 1, prob: 1, code: 'q17_q17' } ]
+#  - [ q17, q18, { weight: 1, prob: 1, code: 'q17_q18' } ]
+#  - [ q18, q17, { weight: 1, prob: 1, code: 'q18_q17' } ]
+#  - [ q17, q32, { weight: 1, prob: 1, code: 'q17_q32' } ]
+#  - [ q32, q17, { weight: 1, prob: 1, code: 'q32_q17' } ]
+#  - [ q18, q18, { weight: 1, prob: 1, code: 'q18_q18' } ]
+#  - [ q18, q19, { weight: 1, prob: 1, code: 'q18_q19' } ]
+#  - [ q19, q18, { weight: 1, prob: 1, code: 'q19_q18' } ]
+#  - [ q18, q33, { weight: 1, prob: 1, code: 'q18_q33' } ]
+#  - [ q33, q18, { weight: 1, prob: 1, code: 'q33_q18' } ]
+#  - [ q19, q19, { weight: 1, prob: 1, code: 'q19_q19' } ]
+#  - [ q19, q20, { weight: 1, prob: 1, code: 'q19_q20' } ]
+#  - [ q20, q19, { weight: 1, prob: 1, code: 'q20_q19' } ]
+#  - [ q19, q34, { weight: 1, prob: 1, code: 'q19_q34' } ]
+#  - [ q34, q19, { weight: 1, prob: 1, code: 'q34_q19' } ]
+#  - [ q20, q20, { weight: 1, prob: 1, code: 'q20_q20' } ]
+#  - [ q20, q21, { weight: 1, prob: 1, code: 'q20_q21' } ]
+#  - [ q21, q20, { weight: 1, prob: 1, code: 'q21_q20' } ]
+#  - [ q20, q35, { weight: 1, prob: 1, code: 'q20_q35' } ]
+#  - [ q35, q20, { weight: 1, prob: 1, code: 'q35_q20' } ]
+#  - [ q21, q21, { weight: 1, prob: 1, code: 'q21_q21' } ]
+#  - [ q21, q22, { weight: 1, prob: 1, code: 'q21_q22' } ]
+#  - [ q22, q21, { weight: 1, prob: 1, code: 'q22_q21' } ]
+#  - [ q21, q36, { weight: 1, prob: 1, code: 'q21_q36' } ]
+#  - [ q36, q21, { weight: 1, prob: 1, code: 'q36_q21' } ]
+#  - [ q22, q22, { weight: 1, prob: 1, code: 'q22_q22' } ]
+#  - [ q22, q23, { weight: 1, prob: 1, code: 'q22_q23' } ]
+#  - [ q23, q22, { weight: 1, prob: 1, code: 'q23_q22' } ]
+#  - [ q22, q37, { weight: 1, prob: 1, code: 'q22_q37' } ]
+#  - [ q37, q22, { weight: 1, prob: 1, code: 'q37_q22' } ]
+#  - [ q23, q23, { weight: 1, prob: 1, code: 'q23_q23' } ]
+#  - [ q23, q24, { weight: 1, prob: 1, code: 'q23_q24' } ]
+#  - [ q24, q23, { weight: 1, prob: 1, code: 'q24_q23' } ]
+#  - [ q23, q38, { weight: 1, prob: 1, code: 'q23_q38' } ]
+#  - [ q38, q23, { weight: 1, prob: 1, code: 'q38_q23' } ]
+  - [ q24, q24, { weight: 1, prob: 1, code: 'q24_q24' } ]
+  - [ q24, q25, { weight: 1, prob: 1, code: 'q24_q25' } ]
+  - [ q25, q24, { weight: 1, prob: 1, code: 'q25_q24' } ]
+  - [ q24, q39, { weight: 1, prob: 1, code: 'q24_q39' } ]
+  - [ q39, q24, { weight: 1, prob: 1, code: 'q39_q24' } ]
+  - [ q25, q25, { weight: 1, prob: 1, code: 'q25_q25' } ]
+#  - [ q25, q26, { weight: 1, prob: 1, code: 'q25_q26' } ]
+#  - [ q26, q25, { weight: 1, prob: 1, code: 'q26_q25' } ]
+#  - [ q25, q40, { weight: 1, prob: 1, code: 'q25_q40' } ]
+#  - [ q40, q25, { weight: 1, prob: 1, code: 'q40_q25' } ]
+#  - [ q26, q26, { weight: 1, prob: 1, code: 'q26_q26' } ]
+#  - [ q26, q27, { weight: 1, prob: 1, code: 'q26_q27' } ]
+#  - [ q27, q26, { weight: 1, prob: 1, code: 'q27_q26' } ]
+#  - [ q26, q41, { weight: 1, prob: 1, code: 'q26_q41' } ]
+#  - [ q41, q26, { weight: 1, prob: 1, code: 'q41_q26' } ]
+#  - [ q27, q27, { weight: 1, prob: 1, code: 'q27_q27' } ]
+#  - [ q27, q28, { weight: 1, prob: 1, code: 'q27_q28' } ]
+#  - [ q28, q27, { weight: 1, prob: 1, code: 'q28_q27' } ]
+#  - [ q27, q42, { weight: 1, prob: 1, code: 'q27_q42' } ]
+#  - [ q42, q27, { weight: 1, prob: 1, code: 'q42_q27' } ]
+#  - [ q28, q28, { weight: 1, prob: 1, code: 'q28_q28' } ]
+#  - [ q28, q29, { weight: 1, prob: 1, code: 'q28_q29' } ]
+#  - [ q29, q28, { weight: 1, prob: 1, code: 'q29_q28' } ]
+#  - [ q28, q43, { weight: 1, prob: 1, code: 'q28_q43' } ]
+#  - [ q43, q28, { weight: 1, prob: 1, code: 'q43_q28' } ]
+#  - [ q29, q29, { weight: 1, prob: 1, code: 'q29_q29' } ]
+#  - [ q29, q30, { weight: 1, prob: 1, code: 'q29_q30' } ]
+#  - [ q30, q29, { weight: 1, prob: 1, code: 'q30_q29' } ]
+#  - [ q29, q44, { weight: 1, prob: 1, code: 'q29_q44' } ]
+#  - [ q44, q29, { weight: 1, prob: 1, code: 'q44_q29' } ]
+#  - [ q30, q30, { weight: 1, prob: 1, code: 'q30_q30' } ]
+#  - [ q30, q45, { weight: 1, prob: 1, code: 'q30_q45' } ]
+#  - [ q45, q30, { weight: 1, prob: 1, code: 'q45_q30' } ]
+#  - [ q31, q31, { weight: 1, prob: 1, code: 'q31_q31' } ]
+#  - [ q31, q32, { weight: 1, prob: 1, code: 'q31_q32' } ]
+#  - [ q32, q31, { weight: 1, prob: 1, code: 'q32_q31' } ]
+#  - [ q31, q46, { weight: 1, prob: 1, code: 'q31_q46' } ]
+#  - [ q46, q31, { weight: 1, prob: 1, code: 'q46_q31' } ]
+#  - [ q32, q32, { weight: 1, prob: 1, code: 'q32_q32' } ]
+#  - [ q32, q33, { weight: 1, prob: 1, code: 'q32_q33' } ]
+#  - [ q33, q32, { weight: 1, prob: 1, code: 'q33_q32' } ]
+#  - [ q32, q47, { weight: 1, prob: 1, code: 'q32_q47' } ]
+#  - [ q47, q32, { weight: 1, prob: 1, code: 'q47_q32' } ]
+#  - [ q33, q33, { weight: 1, prob: 1, code: 'q33_q33' } ]
+#  - [ q33, q34, { weight: 1, prob: 1, code: 'q33_q34' } ]
+#  - [ q34, q33, { weight: 1, prob: 1, code: 'q34_q33' } ]
+#  - [ q33, q48, { weight: 1, prob: 1, code: 'q33_q48' } ]
+#  - [ q48, q33, { weight: 1, prob: 1, code: 'q48_q33' } ]
+#  - [ q34, q34, { weight: 1, prob: 1, code: 'q34_q34' } ]
+#  - [ q34, q35, { weight: 1, prob: 1, code: 'q34_q35' } ]
+#  - [ q35, q34, { weight: 1, prob: 1, code: 'q35_q34' } ]
+#  - [ q34, q49, { weight: 1, prob: 1, code: 'q34_q49' } ]
+#  - [ q49, q34, { weight: 1, prob: 1, code: 'q49_q34' } ]
+#  - [ q35, q35, { weight: 1, prob: 1, code: 'q35_q35' } ]
+#  - [ q35, q36, { weight: 1, prob: 1, code: 'q35_q36' } ]
+#  - [ q36, q35, { weight: 1, prob: 1, code: 'q36_q35' } ]
+#  - [ q35, q50, { weight: 1, prob: 1, code: 'q35_q50' } ]
+#  - [ q50, q35, { weight: 1, prob: 1, code: 'q50_q35' } ]
+#  - [ q36, q36, { weight: 1, prob: 1, code: 'q36_q36' } ]
+#  - [ q36, q37, { weight: 1, prob: 1, code: 'q36_q37' } ]
+#  - [ q37, q36, { weight: 1, prob: 1, code: 'q37_q36' } ]
+#  - [ q36, q51, { weight: 1, prob: 1, code: 'q36_q51' } ]
+#  - [ q51, q36, { weight: 1, prob: 1, code: 'q51_q36' } ]
+#  - [ q37, q37, { weight: 1, prob: 1, code: 'q37_q37' } ]
+#  - [ q37, q38, { weight: 1, prob: 1, code: 'q37_q38' } ]
+#  - [ q38, q37, { weight: 1, prob: 1, code: 'q38_q37' } ]
+#  - [ q37, q52, { weight: 1, prob: 1, code: 'q37_q52' } ]
+#  - [ q52, q37, { weight: 1, prob: 1, code: 'q52_q37' } ]
+  - [ q38, q38, { weight: 1, prob: 1, code: 'q38_q38' } ]
+  - [ q38, q39, { weight: 1, prob: 1, code: 'q38_q39' } ]
+  - [ q39, q38, { weight: 1, prob: 1, code: 'q39_q38' } ]
+  - [ q38, q53, { weight: 1, prob: 1, code: 'q38_q53' } ]
+  - [ q53, q38, { weight: 1, prob: 1, code: 'q53_q38' } ]
+  - [ q39, q39, { weight: 1, prob: 1, code: 'q39_q39' } ]
+#  - [ q39, q40, { weight: 1, prob: 1, code: 'q39_q40' } ]
+#  - [ q40, q39, { weight: 1, prob: 1, code: 'q40_q39' } ]
+#  - [ q39, q54, { weight: 1, prob: 1, code: 'q39_q54' } ]
+#  - [ q54, q39, { weight: 1, prob: 1, code: 'q54_q39' } ]
+#  - [ q40, q40, { weight: 1, prob: 1, code: 'q40_q40' } ]
+#  - [ q40, q41, { weight: 1, prob: 1, code: 'q40_q41' } ]
+#  - [ q41, q40, { weight: 1, prob: 1, code: 'q41_q40' } ]
+#  - [ q40, q55, { weight: 1, prob: 1, code: 'q40_q55' } ]
+#  - [ q55, q40, { weight: 1, prob: 1, code: 'q55_q40' } ]
+#  - [ q41, q41, { weight: 1, prob: 1, code: 'q41_q41' } ]
+#  - [ q41, q42, { weight: 1, prob: 1, code: 'q41_q42' } ]
+#  - [ q42, q41, { weight: 1, prob: 1, code: 'q42_q41' } ]
+#  - [ q41, q56, { weight: 1, prob: 1, code: 'q41_q56' } ]
+#  - [ q56, q41, { weight: 1, prob: 1, code: 'q56_q41' } ]
+#  - [ q42, q42, { weight: 1, prob: 1, code: 'q42_q42' } ]
+#  - [ q42, q43, { weight: 1, prob: 1, code: 'q42_q43' } ]
+#  - [ q43, q42, { weight: 1, prob: 1, code: 'q43_q42' } ]
+#  - [ q42, q57, { weight: 1, prob: 1, code: 'q42_q57' } ]
+#  - [ q57, q42, { weight: 1, prob: 1, code: 'q57_q42' } ]
+#  - [ q43, q43, { weight: 1, prob: 1, code: 'q43_q43' } ]
+#  - [ q43, q44, { weight: 1, prob: 1, code: 'q43_q44' } ]
+#  - [ q44, q43, { weight: 1, prob: 1, code: 'q44_q43' } ]
+#  - [ q43, q58, { weight: 1, prob: 1, code: 'q43_q58' } ]
+#  - [ q58, q43, { weight: 1, prob: 1, code: 'q58_q43' } ]
+#  - [ q44, q44, { weight: 1, prob: 1, code: 'q44_q44' } ]
+#  - [ q44, q45, { weight: 1, prob: 1, code: 'q44_q45' } ]
+#  - [ q45, q44, { weight: 1, prob: 1, code: 'q45_q44' } ]
+#  - [ q44, q59, { weight: 1, prob: 1, code: 'q44_q59' } ]
+#  - [ q59, q44, { weight: 1, prob: 1, code: 'q59_q44' } ]
+#  - [ q45, q45, { weight: 1, prob: 1, code: 'q45_q45' } ]
+#  - [ q45, q60, { weight: 1, prob: 1, code: 'q45_q60' } ]
+#  - [ q60, q45, { weight: 1, prob: 1, code: 'q60_q45' } ]
+  - [ q46, q46, { weight: 1, prob: 1, code: 'q46_q46' } ]
+  - [ q46, q47, { weight: 1, prob: 1, code: 'q46_q47' } ]
+  - [ q47, q46, { weight: 1, prob: 1, code: 'q47_q46' } ]
+  - [ q46, q61, { weight: 1, prob: 1, code: 'q46_q61' } ]
+  - [ q61, q46, { weight: 1, prob: 1, code: 'q61_q46' } ]
+  - [ q47, q47, { weight: 1, prob: 1, code: 'q47_q47' } ]
+  - [ q47, q48, { weight: 1, prob: 1, code: 'q47_q48' } ]
+  - [ q48, q47, { weight: 1, prob: 1, code: 'q48_q47' } ]
+  - [ q47, q62, { weight: 1, prob: 1, code: 'q47_q62' } ]
+  - [ q62, q47, { weight: 1, prob: 1, code: 'q62_q47' } ]
+  - [ q48, q48, { weight: 1, prob: 1, code: 'q48_q48' } ]
+#  - [ q48, q49, { weight: 1, prob: 1, code: 'q48_q49' } ]
+#  - [ q49, q48, { weight: 1, prob: 1, code: 'q49_q48' } ]
+  - [ q48, q63, { weight: 1, prob: 1, code: 'q48_q63' } ]
+  - [ q63, q48, { weight: 1, prob: 1, code: 'q63_q48' } ]
+#  - [ q49, q49, { weight: 1, prob: 1, code: 'q49_q49' } ]
+#  - [ q49, q50, { weight: 1, prob: 1, code: 'q49_q50' } ]
+#  - [ q50, q49, { weight: 1, prob: 1, code: 'q50_q49' } ]
+#  - [ q49, q64, { weight: 1, prob: 1, code: 'q49_q64' } ]
+#  - [ q64, q49, { weight: 1, prob: 1, code: 'q64_q49' } ]
+#  - [ q50, q50, { weight: 1, prob: 1, code: 'q50_q50' } ]
+#  - [ q50, q51, { weight: 1, prob: 1, code: 'q50_q51' } ]
+#  - [ q51, q50, { weight: 1, prob: 1, code: 'q51_q50' } ]
+#  - [ q50, q65, { weight: 1, prob: 1, code: 'q50_q65' } ]
+#  - [ q65, q50, { weight: 1, prob: 1, code: 'q65_q50' } ]
+#  - [ q51, q51, { weight: 1, prob: 1, code: 'q51_q51' } ]
+#  - [ q51, q52, { weight: 1, prob: 1, code: 'q51_q52' } ]
+#  - [ q52, q51, { weight: 1, prob: 1, code: 'q52_q51' } ]
+#  - [ q51, q66, { weight: 1, prob: 1, code: 'q51_q66' } ]
+#  - [ q66, q51, { weight: 1, prob: 1, code: 'q66_q51' } ]
+  - [ q52, q52, { weight: 1, prob: 1, code: 'q52_q52' } ]
+  - [ q52, q53, { weight: 1, prob: 1, code: 'q52_q53' } ]
+  - [ q53, q52, { weight: 1, prob: 1, code: 'q53_q52' } ]
+#  - [ q52, q67, { weight: 1, prob: 1, code: 'q52_q67' } ]
+#  - [ q67, q52, { weight: 1, prob: 1, code: 'q67_q52' } ]
+  - [ q53, q53, { weight: 1, prob: 1, code: 'q53_q53' } ]
+#  - [ q53, q54, { weight: 1, prob: 1, code: 'q53_q54' } ]
+#  - [ q54, q53, { weight: 1, prob: 1, code: 'q54_q53' } ]
+  - [ q53, q68, { weight: 1, prob: 1, code: 'q53_q68' } ]
+  - [ q68, q53, { weight: 1, prob: 1, code: 'q68_q53' } ]
+#  - [ q54, q54, { weight: 1, prob: 1, code: 'q54_q54' } ]
+#  - [ q54, q55, { weight: 1, prob: 1, code: 'q54_q55' } ]
+#  - [ q55, q54, { weight: 1, prob: 1, code: 'q55_q54' } ]
+#  - [ q54, q69, { weight: 1, prob: 1, code: 'q54_q69' } ]
+#  - [ q69, q54, { weight: 1, prob: 1, code: 'q69_q54' } ]
+#  - [ q55, q55, { weight: 1, prob: 1, code: 'q55_q55' } ]
+#  - [ q55, q56, { weight: 1, prob: 1, code: 'q55_q56' } ]
+#  - [ q56, q55, { weight: 1, prob: 1, code: 'q56_q55' } ]
+#  - [ q55, q70, { weight: 1, prob: 1, code: 'q55_q70' } ]
+#  - [ q70, q55, { weight: 1, prob: 1, code: 'q70_q55' } ]
+#  - [ q56, q56, { weight: 1, prob: 1, code: 'q56_q56' } ]
+#  - [ q56, q57, { weight: 1, prob: 1, code: 'q56_q57' } ]
+#  - [ q57, q56, { weight: 1, prob: 1, code: 'q57_q56' } ]
+#  - [ q56, q71, { weight: 1, prob: 1, code: 'q56_q71' } ]
+#  - [ q71, q56, { weight: 1, prob: 1, code: 'q71_q56' } ]
+#  - [ q57, q57, { weight: 1, prob: 1, code: 'q57_q57' } ]
+#  - [ q57, q58, { weight: 1, prob: 1, code: 'q57_q58' } ]
+#  - [ q58, q57, { weight: 1, prob: 1, code: 'q58_q57' } ]
+#  - [ q57, q72, { weight: 1, prob: 1, code: 'q57_q72' } ]
+#  - [ q72, q57, { weight: 1, prob: 1, code: 'q72_q57' } ]
+#  - [ q58, q58, { weight: 1, prob: 1, code: 'q58_q58' } ]
+#  - [ q58, q59, { weight: 1, prob: 1, code: 'q58_q59' } ]
+#  - [ q59, q58, { weight: 1, prob: 1, code: 'q59_q58' } ]
+#  - [ q58, q73, { weight: 1, prob: 1, code: 'q58_q73' } ]
+#  - [ q73, q58, { weight: 1, prob: 1, code: 'q73_q58' } ]
+#  - [ q59, q59, { weight: 1, prob: 1, code: 'q59_q59' } ]
+#  - [ q59, q60, { weight: 1, prob: 1, code: 'q59_q60' } ]
+#  - [ q60, q59, { weight: 1, prob: 1, code: 'q60_q59' } ]
+#  - [ q59, q74, { weight: 1, prob: 1, code: 'q59_q74' } ]
+#  - [ q74, q59, { weight: 1, prob: 1, code: 'q74_q59' } ]
+#  - [ q60, q60, { weight: 1, prob: 1, code: 'q60_q60' } ]
+  - [ q15, q75, { weight: 4, prob: 1, code: 'q15_q75' } ]
+  - [ q75, q15, { weight: 4, prob: 1, code: 'q75_q15' } ]
+  - [ q61, q61, { weight: 1, prob: 1, code: 'q61_q61' } ]
+  - [ q61, q62, { weight: 1, prob: 1, code: 'q61_q62' } ]
+  - [ q62, q61, { weight: 1, prob: 1, code: 'q62_q61' } ]
+  - [ q61, q76, { weight: 1, prob: 1, code: 'q61_q76' } ]
+  - [ q76, q61, { weight: 1, prob: 1, code: 'q76_q61' } ]
+  - [ q62, q62, { weight: 1, prob: 1, code: 'q62_q62' } ]
+  - [ q62, q63, { weight: 1, prob: 1, code: 'q62_q63' } ]
+  - [ q63, q62, { weight: 1, prob: 1, code: 'q63_q62' } ]
+  - [ q62, q77, { weight: 1, prob: 1, code: 'q62_q77' } ]
+  - [ q77, q62, { weight: 1, prob: 1, code: 'q77_q62' } ]
+  - [ q63, q63, { weight: 1, prob: 1, code: 'q63_q63' } ]
+  - [ q63, q68, { weight: 5, prob: 1, code: 'q63_q68' } ]
+  - [ q68, q63, { weight: 5, prob: 1, code: 'q68_q63' } ]
+#  - [ q63, q78, { weight: 1, prob: 1, code: 'q63_q78' } ]
+#  - [ q78, q63, { weight: 1, prob: 1, code: 'q78_q63' } ]
+#  - [ q64, q64, { weight: 1, prob: 1, code: 'q64_q64' } ]
+#  - [ q64, q65, { weight: 1, prob: 1, code: 'q64_q65' } ]
+#  - [ q65, q64, { weight: 1, prob: 1, code: 'q65_q64' } ]
+#  - [ q64, q79, { weight: 1, prob: 1, code: 'q64_q79' } ]
+#  - [ q79, q64, { weight: 1, prob: 1, code: 'q79_q64' } ]
+#  - [ q65, q65, { weight: 1, prob: 1, code: 'q65_q65' } ]
+#  - [ q65, q66, { weight: 1, prob: 1, code: 'q65_q66' } ]
+#  - [ q66, q65, { weight: 1, prob: 1, code: 'q66_q65' } ]
+#  - [ q65, q80, { weight: 1, prob: 1, code: 'q65_q80' } ]
+#  - [ q80, q65, { weight: 1, prob: 1, code: 'q80_q65' } ]
+#  - [ q66, q66, { weight: 1, prob: 1, code: 'q66_q66' } ]
+#  - [ q66, q67, { weight: 1, prob: 1, code: 'q66_q67' } ]
+#  - [ q67, q66, { weight: 1, prob: 1, code: 'q67_q66' } ]
+#  - [ q66, q81, { weight: 1, prob: 1, code: 'q66_q81' } ]
+#  - [ q81, q66, { weight: 1, prob: 1, code: 'q81_q66' } ]
+#  - [ q67, q67, { weight: 1, prob: 1, code: 'q67_q67' } ]
+#  - [ q67, q68, { weight: 1, prob: 1, code: 'q67_q68' } ]
+#  - [ q68, q67, { weight: 1, prob: 1, code: 'q68_q67' } ]
+#  - [ q67, q82, { weight: 1, prob: 1, code: 'q67_q82' } ]
+#  - [ q82, q67, { weight: 1, prob: 1, code: 'q82_q67' } ]
+  - [ q68, q68, { weight: 1, prob: 1, code: 'q68_q68' } ]
+  - [ q68, q72, { weight: 4, prob: 1, code: 'q68_q72' } ]
+  - [ q72, q68, { weight: 4, prob: 1, code: 'q72_q68' } ]
+  - [ q68, q83, { weight: 1, prob: 1, code: 'q83_q68' } ]
+  - [ q83, q68, { weight: 1, prob: 1, code: 'q68_q83' } ]
+#  - [ q68, q83, { weight: 1, prob: 1, code: 'q68_q83' } ]
+#  - [ q83, q68, { weight: 1, prob: 1, code: 'q83_q68' } ]
+#  - [ q69, q69, { weight: 1, prob: 1, code: 'q69_q69' } ]
+#  - [ q69, q70, { weight: 1, prob: 1, code: 'q69_q70' } ]
+#  - [ q70, q69, { weight: 1, prob: 1, code: 'q70_q69' } ]
+#  - [ q69, q84, { weight: 1, prob: 1, code: 'q69_q84' } ]
+#  - [ q84, q69, { weight: 1, prob: 1, code: 'q84_q69' } ]
+#  - [ q70, q70, { weight: 1, prob: 1, code: 'q70_q70' } ]
+#  - [ q70, q71, { weight: 1, prob: 1, code: 'q70_q71' } ]
+#  - [ q71, q70, { weight: 1, prob: 1, code: 'q71_q70' } ]
+#  - [ q70, q85, { weight: 1, prob: 1, code: 'q70_q85' } ]
+#  - [ q85, q70, { weight: 1, prob: 1, code: 'q85_q70' } ]
+#  - [ q71, q71, { weight: 1, prob: 1, code: 'q71_q71' } ]
+#  - [ q71, q72, { weight: 1, prob: 1, code: 'q71_q72' } ]
+#  - [ q72, q71, { weight: 1, prob: 1, code: 'q72_q71' } ]
+#  - [ q71, q86, { weight: 1, prob: 1, code: 'q71_q86' } ]
+#  - [ q86, q71, { weight: 1, prob: 1, code: 'q86_q71' } ]
+  - [ q72, q72, { weight: 1, prob: 1, code: 'q72_q72' } ]
+  - [ q72, q73, { weight: 1, prob: 1, code: 'q72_q73' } ]
+  - [ q73, q72, { weight: 1, prob: 1, code: 'q73_q72' } ]
+  - [ q72, q87, { weight: 1, prob: 1, code: 'q72_q87' } ]
+  - [ q87, q72, { weight: 1, prob: 1, code: 'q87_q72' } ]
+  - [ q73, q73, { weight: 1, prob: 1, code: 'q73_q73' } ]
+  - [ q73, q75, { weight: 2, prob: 1, code: 'q73_q75' } ]
+  - [ q75, q73, { weight: 2, prob: 1, code: 'q75_q73' } ]
+  - [ q73, q88, { weight: 1, prob: 1, code: 'q73_q88' } ]
+  - [ q88, q73, { weight: 1, prob: 1, code: 'q88_q73' } ]
+#  - [ q74, q74, { weight: 1, prob: 1, code: 'q74_q74' } ]
+#  - [ q74, q75, { weight: 1, prob: 1, code: 'q74_q75' } ]
+#  - [ q75, q74, { weight: 1, prob: 1, code: 'q75_q74' } ]
+#  - [ q74, q89, { weight: 1, prob: 1, code: 'q74_q89' } ]
+#  - [ q89, q74, { weight: 1, prob: 1, code: 'q89_q74' } ]
+  - [ q75, q75, { weight: 1, prob: 1, code: 'q75_q75' } ]
+  - [ q75, q90, { weight: 1, prob: 1, code: 'q75_q90' } ]
+  - [ q90, q75, { weight: 1, prob: 1, code: 'q90_q75' } ]
+  - [ q76, q76, { weight: 1, prob: 1, code: 'q76_q76' } ]
+  - [ q76, q77, { weight: 1, prob: 1, code: 'q76_q77' } ]
+  - [ q77, q76, { weight: 1, prob: 1, code: 'q77_q76' } ]
+  - [ q76, q136, { weight: 4, prob: 1, code: 'q76_q136' } ]
+  - [ q136, q76, { weight: 4, prob: 1, code: 'q136_q76' } ]
+  - [ q77, q77, { weight: 1, prob: 1, code: 'q77_q77' } ]
+  - [ q77, q80, { weight: 3, prob: 1, code: 'q77_q80' } ]
+  - [ q80, q77, { weight: 3, prob: 1, code: 'q80_q77' } ]
+#  - [ q77, q92, { weight: 1, prob: 1, code: 'q77_q92' } ]
+#  - [ q92, q77, { weight: 1, prob: 1, code: 'q92_q77' } ]
+#  - [ q78, q78, { weight: 1, prob: 1, code: 'q78_q78' } ]
+#  - [ q78, q79, { weight: 1, prob: 1, code: 'q78_q79' } ]
+#  - [ q79, q78, { weight: 1, prob: 1, code: 'q79_q78' } ]
+#  - [ q78, q93, { weight: 1, prob: 1, code: 'q78_q93' } ]
+#  - [ q93, q78, { weight: 1, prob: 1, code: 'q93_q78' } ]
+#  - [ q79, q79, { weight: 1, prob: 1, code: 'q79_q79' } ]
+#  - [ q79, q80, { weight: 1, prob: 1, code: 'q79_q80' } ]
+#  - [ q80, q79, { weight: 1, prob: 1, code: 'q80_q79' } ]
+#  - [ q79, q94, { weight: 1, prob: 1, code: 'q79_q94' } ]
+#  - [ q94, q79, { weight: 1, prob: 1, code: 'q94_q79' } ]
+  - [ q80, q80, { weight: 1, prob: 1, code: 'q80_q80' } ]
+  - [ q80, q83, { weight: 3, prob: 1, code: 'q80_q83' } ]
+  - [ q83, q80, { weight: 3, prob: 1, code: 'q83_q80' } ]
+  - [ q80, q110, { weight: 2, prob: 1, code: 'q80_q110' } ]
+  - [ q110, q80, { weight: 2, prob: 1, code: 'q110_q80' } ]
+#  - [ q81, q81, { weight: 1, prob: 1, code: 'q81_q81' } ]
+#  - [ q81, q82, { weight: 1, prob: 1, code: 'q81_q82' } ]
+#  - [ q82, q81, { weight: 1, prob: 1, code: 'q82_q81' } ]
+#  - [ q81, q96, { weight: 1, prob: 1, code: 'q81_q96' } ]
+#  - [ q96, q81, { weight: 1, prob: 1, code: 'q96_q81' } ]
+#  - [ q82, q82, { weight: 1, prob: 1, code: 'q82_q82' } ]
+#  - [ q82, q83, { weight: 1, prob: 1, code: 'q82_q83' } ]
+#  - [ q83, q82, { weight: 1, prob: 1, code: 'q83_q82' } ]
+#  - [ q82, q97, { weight: 1, prob: 1, code: 'q82_q97' } ]
+#  - [ q97, q82, { weight: 1, prob: 1, code: 'q97_q82' } ]
+  - [ q83, q83, { weight: 1, prob: 1, code: 'q83_q83' } ]
+  - [ q83, q87, { weight: 4, prob: 1, code: 'q83_q87' } ]
+  - [ q87, q83, { weight: 4, prob: 1, code: 'q87_q83' } ]
+  - [ q83, q98, { weight: 1, prob: 1, code: 'q83_q98' } ]
+  - [ q98, q83, { weight: 1, prob: 1, code: 'q98_q83' } ]
+#  - [ q84, q84, { weight: 1, prob: 1, code: 'q84_q84' } ]
+#  - [ q84, q87, { weight: 3, prob: 1, code: 'q84_q87' } ]
+#  - [ q87, q84, { weight: 3, prob: 1, code: 'q87_q84' } ]
+#  - [ q84, q99, { weight: 1, prob: 1, code: 'q84_q99' } ]
+#  - [ q99, q84, { weight: 1, prob: 1, code: 'q99_q84' } ]
+#  - [ q85, q85, { weight: 1, prob: 1, code: 'q85_q85' } ]
+#  - [ q85, q86, { weight: 1, prob: 1, code: 'q85_q86' } ]
+#  - [ q86, q85, { weight: 1, prob: 1, code: 'q86_q85' } ]
+#  - [ q85, q100, { weight: 1, prob: 1, code: 'q85_q100' } ]
+#  - [ q100, q85, { weight: 1, prob: 1, code: 'q100_q85' } ]
+#  - [ q86, q86, { weight: 1, prob: 1, code: 'q86_q86' } ]
+#  - [ q86, q87, { weight: 1, prob: 1, code: 'q86_q87' } ]
+#  - [ q87, q86, { weight: 1, prob: 1, code: 'q87_q86' } ]
+#  - [ q86, q101, { weight: 1, prob: 1, code: 'q86_q101' } ]
+#  - [ q101, q86, { weight: 1, prob: 1, code: 'q101_q86' } ]
+  - [ q87, q87, { weight: 1, prob: 1, code: 'q87_q87' } ]
+  - [ q87, q88, { weight: 1, prob: 1, code: 'q87_q88' } ]
+  - [ q88, q87, { weight: 1, prob: 1, code: 'q88_q87' } ]
+#  - [ q87, q102, { weight: 1, prob: 1, code: 'q87_q102' } ]
+#  - [ q102, q87, { weight: 1, prob: 1, code: 'q102_q87' } ]
+  - [ q88, q88, { weight: 1, prob: 1, code: 'q88_q88' } ]
+  - [ q88, q90, { weight: 2, prob: 1, code: 'q88_q90' } ]
+  - [ q90, q88, { weight: 2, prob: 1, code: 'q90_q88' } ]
+#  - [ q88, q103, { weight: 1, prob: 1, code: 'q88_q103' } ]
+#  - [ q103, q88, { weight: 1, prob: 1, code: 'q103_q88' } ]
+#  - [ q89, q89, { weight: 1, prob: 1, code: 'q89_q89' } ]
+#  - [ q89, q90, { weight: 1, prob: 1, code: 'q89_q90' } ]
+#  - [ q90, q89, { weight: 1, prob: 1, code: 'q90_q89' } ]
+#  - [ q89, q104, { weight: 1, prob: 1, code: 'q89_q104' } ]
+#  - [ q104, q89, { weight: 1, prob: 1, code: 'q104_q89' } ]
+  - [ q90, q90, { weight: 1, prob: 1, code: 'q90_q90' } ]
+  - [ q90, q150, { weight: 4, prob: 1, code: 'q90_q105' } ]
+  - [ q150, q90, { weight: 4, prob: 1, code: 'q105_q90' } ]
+#  - [ q91, q91, { weight: 1, prob: 1, code: 'q91_q91' } ]
+#  - [ q91, q92, { weight: 1, prob: 1, code: 'q91_q92' } ]
+#  - [ q92, q91, { weight: 1, prob: 1, code: 'q92_q91' } ]
+#  - [ q91, q106, { weight: 1, prob: 1, code: 'q91_q106' } ]
+#  - [ q106, q91, { weight: 1, prob: 1, code: 'q106_q91' } ]
+#  - [ q92, q92, { weight: 1, prob: 1, code: 'q92_q92' } ]
+#  - [ q92, q93, { weight: 1, prob: 1, code: 'q92_q93' } ]
+#  - [ q93, q92, { weight: 1, prob: 1, code: 'q93_q92' } ]
+#  - [ q92, q107, { weight: 1, prob: 1, code: 'q92_q107' } ]
+#  - [ q107, q92, { weight: 1, prob: 1, code: 'q107_q92' } ]
+#  - [ q93, q93, { weight: 1, prob: 1, code: 'q93_q93' } ]
+#  - [ q93, q94, { weight: 1, prob: 1, code: 'q93_q94' } ]
+#  - [ q94, q93, { weight: 1, prob: 1, code: 'q94_q93' } ]
+#  - [ q93, q108, { weight: 1, prob: 1, code: 'q93_q108' } ]
+#  - [ q108, q93, { weight: 1, prob: 1, code: 'q108_q93' } ]
+#  - [ q94, q94, { weight: 1, prob: 1, code: 'q94_q94' } ]
+#  - [ q94, q95, { weight: 1, prob: 1, code: 'q94_q95' } ]
+#  - [ q95, q94, { weight: 1, prob: 1, code: 'q95_q94' } ]
+#  - [ q94, q109, { weight: 1, prob: 1, code: 'q94_q109' } ]
+#  - [ q109, q94, { weight: 1, prob: 1, code: 'q109_q94' } ]
+#  - [ q95, q95, { weight: 1, prob: 1, code: 'q95_q95' } ]
+#  - [ q95, q96, { weight: 1, prob: 1, code: 'q95_q96' } ]
+#  - [ q96, q95, { weight: 1, prob: 1, code: 'q96_q95' } ]
+#  - [ q95, q110, { weight: 1, prob: 1, code: 'q95_q110' } ]
+#  - [ q110, q95, { weight: 1, prob: 1, code: 'q110_q95' } ]
+#  - [ q96, q96, { weight: 1, prob: 1, code: 'q96_q96' } ]
+#  - [ q96, q97, { weight: 1, prob: 1, code: 'q96_q97' } ]
+#  - [ q97, q96, { weight: 1, prob: 1, code: 'q97_q96' } ]
+#  - [ q96, q111, { weight: 1, prob: 1, code: 'q96_q111' } ]
+#  - [ q111, q96, { weight: 1, prob: 1, code: 'q111_q96' } ]
+#  - [ q97, q97, { weight: 1, prob: 1, code: 'q97_q97' } ]
+#  - [ q97, q98, { weight: 1, prob: 1, code: 'q97_q98' } ]
+#  - [ q98, q97, { weight: 1, prob: 1, code: 'q98_q97' } ]
+#  - [ q97, q112, { weight: 1, prob: 1, code: 'q97_q112' } ]
+#  - [ q112, q97, { weight: 1, prob: 1, code: 'q112_q97' } ]
+  - [ q98, q98, { weight: 1, prob: 1, code: 'q98_q98' } ]
+#  - [ q98, q99, { weight: 1, prob: 1, code: 'q98_q99' } ]
+#  - [ q99, q98, { weight: 1, prob: 1, code: 'q99_q98' } ]
+  - [ q98, q113, { weight: 1, prob: 1, code: 'q98_q113' } ]
+  - [ q113, q98, { weight: 1, prob: 1, code: 'q113_q98' } ]
+#  - [ q99, q99, { weight: 1, prob: 1, code: 'q99_q99' } ]
+#  - [ q99, q100, { weight: 1, prob: 1, code: 'q99_q100' } ]
+#  - [ q100, q99, { weight: 1, prob: 1, code: 'q100_q99' } ]
+#  - [ q99, q114, { weight: 1, prob: 1, code: 'q99_q114' } ]
+#  - [ q114, q99, { weight: 1, prob: 1, code: 'q114_q99' } ]
+#  - [ q100, q100, { weight: 1, prob: 1, code: 'q100_q100' } ]
+#  - [ q100, q101, { weight: 1, prob: 1, code: 'q100_q101' } ]
+#  - [ q101, q100, { weight: 1, prob: 1, code: 'q101_q100' } ]
+#  - [ q100, q115, { weight: 1, prob: 1, code: 'q100_q115' } ]
+#  - [ q115, q100, { weight: 1, prob: 1, code: 'q115_q100' } ]
+#  - [ q101, q101, { weight: 1, prob: 1, code: 'q101_q101' } ]
+#  - [ q101, q102, { weight: 1, prob: 1, code: 'q101_q102' } ]
+#  - [ q102, q101, { weight: 1, prob: 1, code: 'q102_q101' } ]
+#  - [ q101, q116, { weight: 1, prob: 1, code: 'q101_q116' } ]
+#  - [ q116, q101, { weight: 1, prob: 1, code: 'q116_q101' } ]
+#  - [ q102, q102, { weight: 1, prob: 1, code: 'q102_q102' } ]
+#  - [ q102, q103, { weight: 1, prob: 1, code: 'q102_q103' } ]
+#  - [ q103, q102, { weight: 1, prob: 1, code: 'q103_q102' } ]
+  - [ q87, q117, { weight: 2, prob: 1, code: 'q87_q117' } ]
+  - [ q87, q117, { weight: 2, prob: 1, code: 'q117_q87' } ]
+#  - [ q103, q103, { weight: 1, prob: 1, code: 'q103_q103' } ]
+#  - [ q103, q104, { weight: 1, prob: 1, code: 'q103_q104' } ]
+#  - [ q104, q103, { weight: 1, prob: 1, code: 'q104_q103' } ]
+#  - [ q103, q118, { weight: 1, prob: 1, code: 'q103_q118' } ]
+#  - [ q118, q103, { weight: 1, prob: 1, code: 'q118_q103' } ]
+#  - [ q104, q104, { weight: 1, prob: 1, code: 'q104_q104' } ]
+#  - [ q104, q105, { weight: 1, prob: 1, code: 'q104_q105' } ]
+#  - [ q105, q104, { weight: 1, prob: 1, code: 'q105_q104' } ]
+#  - [ q104, q119, { weight: 1, prob: 1, code: 'q104_q119' } ]
+#  - [ q119, q104, { weight: 1, prob: 1, code: 'q119_q104' } ]
+#  - [ q105, q105, { weight: 1, prob: 1, code: 'q105_q105' } ]
+#  - [ q105, q120, { weight: 1, prob: 1, code: 'q105_q120' } ]
+#  - [ q120, q105, { weight: 1, prob: 1, code: 'q120_q105' } ]
+#  - [ q106, q106, { weight: 1, prob: 1, code: 'q106_q106' } ]
+#  - [ q106, q107, { weight: 1, prob: 1, code: 'q106_q107' } ]
+#  - [ q107, q106, { weight: 1, prob: 1, code: 'q107_q106' } ]
+#  - [ q106, q121, { weight: 1, prob: 1, code: 'q106_q121' } ]
+#  - [ q121, q106, { weight: 1, prob: 1, code: 'q121_q106' } ]
+#  - [ q107, q107, { weight: 1, prob: 1, code: 'q107_q107' } ]
+#  - [ q107, q108, { weight: 1, prob: 1, code: 'q107_q108' } ]
+#  - [ q108, q107, { weight: 1, prob: 1, code: 'q108_q107' } ]
+#  - [ q107, q122, { weight: 1, prob: 1, code: 'q107_q122' } ]
+#  - [ q122, q107, { weight: 1, prob: 1, code: 'q122_q107' } ]
+#  - [ q108, q108, { weight: 1, prob: 1, code: 'q108_q108' } ]
+#  - [ q108, q109, { weight: 1, prob: 1, code: 'q108_q109' } ]
+#  - [ q109, q108, { weight: 1, prob: 1, code: 'q109_q108' } ]
+#  - [ q108, q123, { weight: 1, prob: 1, code: 'q108_q123' } ]
+#  - [ q123, q108, { weight: 1, prob: 1, code: 'q123_q108' } ]
+#  - [ q109, q109, { weight: 1, prob: 1, code: 'q109_q109' } ]
+#  - [ q109, q110, { weight: 1, prob: 1, code: 'q109_q110' } ]
+#  - [ q110, q109, { weight: 1, prob: 1, code: 'q110_q109' } ]
+#  - [ q109, q124, { weight: 1, prob: 1, code: 'q109_q124' } ]
+#  - [ q124, q109, { weight: 1, prob: 1, code: 'q124_q109' } ]
+  - [ q110, q110, { weight: 1, prob: 1, code: 'q110_q110' } ]
+  - [ q110, q111, { weight: 1, prob: 1, code: 'q110_q111' } ]
+  - [ q111, q110, { weight: 1, prob: 1, code: 'q111_q110' } ]
+  - [ q110, q125, { weight: 1, prob: 1, code: 'q110_q125' } ]
+  - [ q125, q110, { weight: 1, prob: 1, code: 'q125_q110' } ]
+  - [ q111, q111, { weight: 1, prob: 1, code: 'q111_q111' } ]
+  - [ q111, q112, { weight: 1, prob: 1, code: 'q111_q112' } ]
+  - [ q112, q111, { weight: 1, prob: 1, code: 'q112_q111' } ]
+  - [ q111, q126, { weight: 1, prob: 1, code: 'q111_q126' } ]
+  - [ q126, q111, { weight: 1, prob: 1, code: 'q126_q111' } ]
+  - [ q112, q112, { weight: 1, prob: 1, code: 'q112_q112' } ]
+  - [ q112, q113, { weight: 1, prob: 1, code: 'q112_q113' } ]
+  - [ q113, q112, { weight: 1, prob: 1, code: 'q113_q112' } ]
+  - [ q112, q127, { weight: 1, prob: 1, code: 'q112_q127' } ]
+  - [ q127, q112, { weight: 1, prob: 1, code: 'q127_q112' } ]
+  - [ q113, q113, { weight: 1, prob: 1, code: 'q113_q113' } ]
+  - [ q113, q114, { weight: 1, prob: 1, code: 'q113_q114' } ]
+  - [ q114, q113, { weight: 1, prob: 1, code: 'q114_q113' } ]
+#  - [ q113, q128, { weight: 1, prob: 1, code: 'q113_q128' } ]
+#  - [ q128, q113, { weight: 1, prob: 1, code: 'q128_q113' } ]
+  - [ q114, q114, { weight: 1, prob: 1, code: 'q114_q114' } ]
+  - [ q114, q117, { weight: 3, prob: 1, code: 'q114_q117' } ]
+  - [ q117, q114, { weight: 3, prob: 1, code: 'q117_q114' } ]
+#  - [ q114, q129, { weight: 1, prob: 1, code: 'q114_q129' } ]
+#  - [ q129, q114, { weight: 1, prob: 1, code: 'q129_q114' } ]
+#  - [ q115, q115, { weight: 1, prob: 1, code: 'q115_q115' } ]
+#  - [ q115, q116, { weight: 1, prob: 1, code: 'q115_q116' } ]
+#  - [ q116, q115, { weight: 1, prob: 1, code: 'q116_q115' } ]
+#  - [ q115, q130, { weight: 1, prob: 1, code: 'q115_q130' } ]
+#  - [ q130, q115, { weight: 1, prob: 1, code: 'q130_q115' } ]
+#  - [ q116, q116, { weight: 1, prob: 1, code: 'q116_q116' } ]
+#  - [ q116, q117, { weight: 1, prob: 1, code: 'q116_q117' } ]
+#  - [ q117, q116, { weight: 1, prob: 1, code: 'q117_q116' } ]
+#  - [ q116, q131, { weight: 1, prob: 1, code: 'q116_q131' } ]
+#  - [ q131, q116, { weight: 1, prob: 1, code: 'q131_q116' } ]
+  - [ q117, q117, { weight: 1, prob: 1, code: 'q117_q117' } ]
+#  - [ q117, q118, { weight: 1, prob: 1, code: 'q117_q118' } ]
+#  - [ q118, q117, { weight: 1, prob: 1, code: 'q118_q117' } ]
+  - [ q117, q147, { weight: 2, prob: 1, code: 'q147_q132' } ]
+  - [ q147, q117, { weight: 2, prob: 1, code: 'q132_q147' } ]
+#  - [ q118, q118, { weight: 1, prob: 1, code: 'q118_q118' } ]
+#  - [ q118, q119, { weight: 1, prob: 1, code: 'q118_q119' } ]
+#  - [ q119, q118, { weight: 1, prob: 1, code: 'q119_q118' } ]
+#  - [ q118, q133, { weight: 1, prob: 1, code: 'q118_q133' } ]
+#  - [ q133, q118, { weight: 1, prob: 1, code: 'q133_q118' } ]
+#  - [ q119, q119, { weight: 1, prob: 1, code: 'q119_q119' } ]
+#  - [ q119, q120, { weight: 1, prob: 1, code: 'q119_q120' } ]
+#  - [ q120, q119, { weight: 1, prob: 1, code: 'q120_q119' } ]
+#  - [ q119, q134, { weight: 1, prob: 1, code: 'q119_q134' } ]
+#  - [ q134, q119, { weight: 1, prob: 1, code: 'q134_q119' } ]
+#  - [ q120, q120, { weight: 1, prob: 1, code: 'q120_q120' } ]
+#  - [ q120, q135, { weight: 1, prob: 1, code: 'q120_q135' } ]
+#  - [ q135, q120, { weight: 1, prob: 1, code: 'q135_q120' } ]
+#  - [ q121, q121, { weight: 1, prob: 1, code: 'q121_q121' } ]
+#  - [ q121, q122, { weight: 1, prob: 1, code: 'q121_q122' } ]
+#  - [ q122, q121, { weight: 1, prob: 1, code: 'q122_q121' } ]
+#  - [ q121, q136, { weight: 1, prob: 1, code: 'q121_q136' } ]
+#  - [ q136, q121, { weight: 1, prob: 1, code: 'q136_q121' } ]
+#  - [ q122, q122, { weight: 1, prob: 1, code: 'q122_q122' } ]
+#  - [ q122, q123, { weight: 1, prob: 1, code: 'q122_q123' } ]
+#  - [ q123, q122, { weight: 1, prob: 1, code: 'q123_q122' } ]
+#  - [ q122, q137, { weight: 1, prob: 1, code: 'q122_q137' } ]
+#  - [ q137, q122, { weight: 1, prob: 1, code: 'q137_q122' } ]
+#  - [ q123, q123, { weight: 1, prob: 1, code: 'q123_q123' } ]
+#  - [ q123, q124, { weight: 1, prob: 1, code: 'q123_q124' } ]
+#  - [ q124, q123, { weight: 1, prob: 1, code: 'q124_q123' } ]
+#  - [ q123, q138, { weight: 1, prob: 1, code: 'q123_q138' } ]
+#  - [ q138, q123, { weight: 1, prob: 1, code: 'q138_q123' } ]
+#  - [ q124, q124, { weight: 1, prob: 1, code: 'q124_q124' } ]
+#  - [ q124, q125, { weight: 1, prob: 1, code: 'q124_q125' } ]
+#  - [ q125, q124, { weight: 1, prob: 1, code: 'q125_q124' } ]
+#  - [ q124, q139, { weight: 1, prob: 1, code: 'q124_q139' } ]
+#  - [ q139, q124, { weight: 1, prob: 1, code: 'q139_q124' } ]
+  - [ q125, q125, { weight: 1, prob: 1, code: 'q125_q125' } ]
+  - [ q125, q126, { weight: 1, prob: 1, code: 'q125_q126' } ]
+  - [ q126, q125, { weight: 1, prob: 1, code: 'q126_q125' } ]
+  - [ q125, q140, { weight: 1, prob: 1, code: 'q125_q140' } ]
+  - [ q140, q125, { weight: 1, prob: 1, code: 'q140_q125' } ]
+  - [ q126, q126, { weight: 1, prob: 1, code: 'q126_q126' } ]
+  - [ q126, q127, { weight: 1, prob: 1, code: 'q126_q127' } ]
+  - [ q127, q126, { weight: 1, prob: 1, code: 'q127_q126' } ]
+  - [ q126, q141, { weight: 1, prob: 1, code: 'q126_q141' } ]
+  - [ q141, q126, { weight: 1, prob: 1, code: 'q141_q126' } ]
+  - [ q127, q127, { weight: 1, prob: 1, code: 'q127_q127' } ]
+#  - [ q127, q128, { weight: 1, prob: 1, code: 'q127_q128' } ]
+#  - [ q128, q127, { weight: 1, prob: 1, code: 'q128_q127' } ]
+  - [ q127, q142, { weight: 1, prob: 1, code: 'q127_q142' } ]
+  - [ q142, q127, { weight: 1, prob: 1, code: 'q142_q127' } ]
+  - [ q128, q128, { weight: 1, prob: 1, code: 'q128_q128' } ]
+  - [ q128, q129, { weight: 1, prob: 1, code: 'q128_q129' } ]
+  - [ q129, q128, { weight: 1, prob: 1, code: 'q129_q128' } ]
+  - [ q128, q143, { weight: 1, prob: 1, code: 'q128_q143' } ]
+  - [ q143, q128, { weight: 1, prob: 1, code: 'q143_q128' } ]
+  - [ q129, q129, { weight: 1, prob: 1, code: 'q129_q129' } ]
+  - [ q129, q130, { weight: 1, prob: 1, code: 'q129_q130' } ]
+  - [ q130, q129, { weight: 1, prob: 1, code: 'q130_q129' } ]
+  - [ q129, q144, { weight: 1, prob: 1, code: 'q129_q144' } ]
+  - [ q144, q129, { weight: 1, prob: 1, code: 'q144_q129' } ]
+  - [ q130, q130, { weight: 1, prob: 1, code: 'q130_q130' } ]
+#  - [ q130, q131, { weight: 1, prob: 1, code: 'q130_q131' } ]
+#  - [ q131, q130, { weight: 1, prob: 1, code: 'q131_q130' } ]
+  - [ q130, q145, { weight: 1, prob: 1, code: 'q130_q145' } ]
+  - [ q145, q130, { weight: 1, prob: 1, code: 'q145_q130' } ]
+#  - [ q131, q131, { weight: 1, prob: 1, code: 'q131_q131' } ]
+#  - [ q131, q132, { weight: 1, prob: 1, code: 'q131_q132' } ]
+#  - [ q132, q131, { weight: 1, prob: 1, code: 'q132_q131' } ]
+#  - [ q131, q146, { weight: 1, prob: 1, code: 'q131_q146' } ]
+#  - [ q146, q131, { weight: 1, prob: 1, code: 'q146_q131' } ]
+#  - [ q132, q132, { weight: 1, prob: 1, code: 'q132_q132' } ]
+#  - [ q132, q133, { weight: 1, prob: 1, code: 'q132_q133' } ]
+#  - [ q133, q132, { weight: 1, prob: 1, code: 'q133_q132' } ]
+  - [ q117, q147, { weight: 2, prob: 1, code: 'q117_q147' } ]
+  - [ q147, q117, { weight: 2, prob: 1, code: 'q147_q117' } ]
+#  - [ q133, q133, { weight: 1, prob: 1, code: 'q133_q133' } ]
+#  - [ q133, q134, { weight: 1, prob: 1, code: 'q133_q134' } ]
+#  - [ q134, q133, { weight: 1, prob: 1, code: 'q134_q133' } ]
+#  - [ q133, q148, { weight: 1, prob: 1, code: 'q133_q148' } ]
+#  - [ q148, q133, { weight: 1, prob: 1, code: 'q148_q133' } ]
+#  - [ q134, q134, { weight: 1, prob: 1, code: 'q134_q134' } ]
+#  - [ q134, q135, { weight: 1, prob: 1, code: 'q134_q135' } ]
+#  - [ q135, q134, { weight: 1, prob: 1, code: 'q135_q134' } ]
+#  - [ q134, q149, { weight: 1, prob: 1, code: 'q134_q149' } ]
+#  - [ q149, q134, { weight: 1, prob: 1, code: 'q149_q134' } ]
+#  - [ q135, q135, { weight: 1, prob: 1, code: 'q135_q135' } ]
+  - [ q90, q150, { weight: 4, prob: 1, code: 'q90_q150' } ]
+  - [ q150, q90, { weight: 4, prob: 1, code: 'q150_q90' } ]
+  - [ q136, q136, { weight: 1, prob: 1, code: 'q136_q136' } ]
+  - [ q136, q140, { weight: 4, prob: 1, code: 'q136_q140' } ]
+  - [ q140, q136, { weight: 4, prob: 1, code: 'q140_q136' } ]
+#  - [ q137, q137, { weight: 1, prob: 1, code: 'q137_q137' } ]
+#  - [ q137, q138, { weight: 1, prob: 1, code: 'q137_q138' } ]
+#  - [ q138, q137, { weight: 1, prob: 1, code: 'q138_q137' } ]
+#  - [ q138, q138, { weight: 1, prob: 1, code: 'q138_q138' } ]
+#  - [ q138, q139, { weight: 1, prob: 1, code: 'q138_q139' } ]
+#  - [ q139, q138, { weight: 1, prob: 1, code: 'q139_q138' } ]
+#  - [ q139, q139, { weight: 1, prob: 1, code: 'q139_q139' } ]
+#  - [ q139, q140, { weight: 1, prob: 1, code: 'q139_q140' } ]
+#  - [ q140, q139, { weight: 1, prob: 1, code: 'q140_q139' } ]
+  - [ q140, q140, { weight: 1, prob: 1, code: 'q140_q140' } ]
+  - [ q140, q141, { weight: 1, prob: 1, code: 'q140_q141' } ]
+  - [ q141, q140, { weight: 1, prob: 1, code: 'q141_q140' } ]
+  - [ q141, q141, { weight: 1, prob: 1, code: 'q141_q141' } ]
+  - [ q141, q142, { weight: 1, prob: 1, code: 'q141_q142' } ]
+  - [ q142, q141, { weight: 1, prob: 1, code: 'q142_q141' } ]
+  - [ q142, q142, { weight: 1, prob: 1, code: 'q142_q142' } ]
+  - [ q142, q143, { weight: 1, prob: 1, code: 'q142_q143' } ]
+  - [ q143, q142, { weight: 1, prob: 1, code: 'q143_q142' } ]
+  - [ q143, q143, { weight: 1, prob: 1, code: 'q143_q143' } ]
+  - [ q143, q144, { weight: 1, prob: 1, code: 'q143_q144' } ]
+  - [ q144, q143, { weight: 1, prob: 1, code: 'q144_q143' } ]
+  - [ q144, q144, { weight: 1, prob: 1, code: 'q144_q144' } ]
+  - [ q144, q145, { weight: 1, prob: 1, code: 'q144_q145' } ]
+  - [ q145, q144, { weight: 1, prob: 1, code: 'q145_q144' } ]
+  - [ q145, q145, { weight: 1, prob: 1, code: 'q145_q145' } ]
+  - [ q145, q147, { weight: 2, prob: 1, code: 'q145_q147' } ]
+  - [ q147, q145, { weight: 2, prob: 1, code: 'q147_q145' } ]
+#  - [ q146, q146, { weight: 1, prob: 1, code: 'q146_q146' } ]
+#  - [ q146, q147, { weight: 1, prob: 1, code: 'q146_q147' } ]
+#  - [ q147, q146, { weight: 1, prob: 1, code: 'q147_q146' } ]
+  - [ q147, q147, { weight: 1, prob: 1, code: 'q147_q147' } ]
+  - [ q147, q150, { weight: 3, prob: 1, code: 'q147_q150' } ]
+#  - [ q148, q147, { weight: 1, prob: 1, code: 'q148_q147' } ]
+#  - [ q148, q148, { weight: 1, prob: 1, code: 'q148_q148' } ]
+#  - [ q148, q149, { weight: 1, prob: 1, code: 'q148_q149' } ]
+#  - [ q149, q148, { weight: 1, prob: 1, code: 'q149_q148' } ]
+#  - [ q149, q149, { weight: 1, prob: 1, code: 'q149_q149' } ]
+  - [ q147, q150, { weight: 3, prob: 1, code: 'q147_q150' } ]
+  - [ q150, q147, { weight: 3, prob: 1, code: 'q150_q147' } ]
+  - [ q150, q150, { weight: 1, prob: 1, code: 'q150_q150' } ]
