@@ -189,12 +189,13 @@ class CATLFormula(object):
         return self.__string
 
     @classmethod
-    def from_formula(cls, formula):
+    def from_formula(cls, formula, binary_ops=False):
         '''Creates a CATLFormula object from a formula string.
 
         Parameters
         ----------
         formula (str) CATL formula
+        binary_ops (bool) if set to true, treats AND/OR as binary operators
 
         Returns
         -------
@@ -204,11 +205,26 @@ class CATLFormula(object):
         tokens = CommonTokenStream(lexer)
         parser = catlParser(tokens)
         t = parser.catlProperty()
-        return CATLAbstractSyntaxTreeExtractor().visit(t)
+        return CATLAbstractSyntaxTreeExtractor(binary_ops).visit(t)
 
 
 class CATLAbstractSyntaxTreeExtractor(catlVisitor):
     '''Parse Tree visitor that constructs the AST of an CATL formula'''
+
+    def __init__(self, binary_ops=False):
+        '''Initialize a CATLAbstractSyntaxTreeExtractor
+
+        Parameters
+        ----------
+        binary_ops (bool) if set to true, AND/OR operations will
+                          binary instead of n-ary. Default=False
+
+        Returns
+        -------
+        CATLAbstractSyntaxTreeExtractor
+        '''
+        super(CATLAbstractSyntaxTreeExtractor, self).__init__()
+        self._binary_ops = binary_ops
 
     def visitFormula(self, ctx):
         op = Operation.getCode(ctx.op.text)
@@ -218,12 +234,15 @@ class CATLAbstractSyntaxTreeExtractor(catlVisitor):
         if op in (Operation.AND, Operation.OR):
             left = self.visit(ctx.left)
             right = self.visit(ctx.right)
-            assert op != right.op
-            if left.op == op:
-                children = left.children
+            if self._binary_ops:
+                children = [left, right]
             else:
-                children = [left]
-            children.append(right)
+                assert op != right.op
+                if left.op == op:
+                    children = left.children
+                else:
+                    children = [left]
+                children.append(right)
             ret = CATLFormula(op, children=children)
         elif op == Operation.IMPLIES:
             ret = CATLFormula(op, left=self.visit(ctx.left),
