@@ -1,3 +1,4 @@
+#pragma once
 '''
  Copyright (C) 2018-2020 Cristian Ioan Vasile <cvasile@lehigh.edu>
  Explainable Robotics Lab (ERL), Autonomous and Intelligent Robotics (AIR) Lab,
@@ -5,18 +6,16 @@
  Hybrid and Networked Systems (HyNeSs) Group, BU Robotics Lab, Boston University
  See license.txt file for license information.
 '''
-
 from collections import defaultdict
 import logging
 
 from gurobipy import Model as GRBModel
 from gurobipy import GRB
 import gurobipy as grb
-
 from lomap import Timer
 
-from stl.stl2milp import stl2milp
-from stl.pstl2milp import pstl2milp
+from stl2milp import stl2milp
+from mstl2milp import mstl2milp
 from stl import Operation
 from catl import CATLFormula
 from catl import catl2stl
@@ -153,10 +152,10 @@ def add_system_constraints(m, ts, agent_classes, capability_distribution,
         for k in range(time_bound+1):
             for g, g_enc in agent_classes.items():
                 departing = sum([d['vars'][k][g]
-                            for _, _, d in ts.g.out_edges_iter(u, data=True)
+                            for _, _, d in ts.g.out_edges(u, data=True)
                                 if k + d['weight'] <= time_bound])
                 arriving = sum([d['vars'][k - d['weight']][g]
-                            for _, _, d in ts.g.in_edges_iter(u, data=True)
+                            for _, _, d in ts.g.in_edges(u, data=True)
                                 if k - d['weight'] >= 0])
 
                 if 0 < k < time_bound:
@@ -170,15 +169,6 @@ def add_system_constraints(m, ts, agent_classes, capability_distribution,
                 else:
                     team_state_eq = (ud['vars'][k][g] == arriving)
                 m.addConstr(team_state_eq, 'team_{}_{}_{}'.format(u, g_enc, k))
-
-#     # initial time constraints - encoding using transition variables
-#     for u in ts.g.nodes():
-#         for g, g_enc in agent_classes.items():
-#             conserve = sum([d['vars'][d['weight']][g]
-#                             for _, _, d in ts.g.out_edges_iter(u, data=True)
-#                                 if d['weight'] <= time_bound])
-#             conserve = (conserve == capability_distribution[u][g])
-#             m.addConstr(conserve, 'init_distrib_{}_{}'.format(u, g_enc))
 
     # initial time constraints - encoding using state variables
     for u, ud in ts.g.nodes(data=True):
@@ -205,7 +195,7 @@ def extract_propositions(ts, ast):
 
 def add_proposition_constraints(m, stl_milp, ts, ast, capabilities,
                                 agent_classes, time_bound, variable_bound,
-                                vtype=GRB.INTEGER):
+                                vtype=GRB.INTEGER, outerFlag=False):
     '''Adds the proposition constraints. First, the proposition-state variables
     are defined such that capabilities are not double booked. Second, contraints
     are added such that proposition are satisfied as best as possible. The
@@ -224,6 +214,8 @@ def add_proposition_constraints(m, stl_milp, ts, ast, capabilities,
     - Time bound.
     - The upper bound for variables.
     - Variable type (default: integer).
+    - Flag to indicate whether the constraints are being added for the inner or 
+    outer problem (default: False, i.e., inner problem).
     '''
     props = extract_propositions(ts, ast)
 
@@ -239,7 +231,6 @@ def add_proposition_constraints(m, stl_milp, ts, ast, capabilities,
                         prop=prop, state=u, cap=c, time=k)
                     ud['prop_vars'][c][k][prop] = m.addVar(
                         vtype=vtype, name=name, lb=0, ub=variable_bound)
-
     # constraints for relating (proposition, state) pairs to system states
     for u, ud in ts.g.nodes(data=True):
         for c in capabilities:
@@ -253,15 +244,22 @@ def add_proposition_constraints(m, stl_milp, ts, ast, capabilities,
 
     # add propositions constraints for only those variables appearing in the
     # MILP encoding of the formula
+
+    # Switch which variable set the AP's attach to for inner vs. outer problem
+    if outerFlag:
+        stateVariables = stl_milp.outer_state_vars
+    else:
+        stateVariables = stl_milp.variables
+    m.update()
     for prop in props:
         for c in capabilities:
             for k in range(time_bound+1):
                 variable = '{prop}_{cap}'.format(prop=prop, cap=c)
-                if (variable in stl_milp.variables
-                                        and k in stl_milp.variables[variable]):
+                if (variable in stateVariables
+                                        and k in stateVariables[variable]):
                     for u, ud in ts.g.nodes(data=True):
                         if prop in ud['prop']:
-                            min_prop = (stl_milp.variables[variable][k]
+                            min_prop = (stateVariables[variable][k]
                                                 <= ud['prop_vars'][c][k][prop])
                             m.addConstr(min_prop, 'min_prop_{}_{}_{}_{}'.format(
                                                                 prop, c, k, u))
@@ -281,171 +279,8 @@ def add_travel_time_objective(m, ts, weight, time_bound, variable_bound):
     travel_time /= (time_bound * variable_bound)
     m.setObjectiveN(travel_time, m.NumObj, weight=weight)
 
-def extract_trajetories(m, ts, agents, time_bound):
-    '''TODO:
-    '''
-    raise NotImplementedError
-    # initialize trajectories for each agent
-    trajectories = [[(state, 0)] for state, _ in agents]
-
-    for k in range(1, time_bound+1):
-        # setup matching problem
-        prev = [trajectories[agent][-1] for agent in len(agents)]
-
-        matching = dict()
-        constraints = {} # active transitions whose constraints have to be met
-        for a, (state, time) in enumerate(prev):
-            assert k-1 <= time
-            if time == k-1: # check if vehicle needs to be assigned next state
-                matching[prev] = [] # initialize possible future states
-                agent_class = agents[a][1] # extract agent class
-                # loop over outgoing transitions that have agents of the given
-                # class traversing them; add outgoing neighbors
-                for _, next_state, d in ts.g.out_edges_iter(state, data=True):
-                    if d['vars'][time+d['weight']][agent_class] > 0:
-                        matching[prev].append((next_state, time+d['weight']))
-                        constraints.add((state, next_state, time+d['weight']))
-
-        # create constraint matching problem
-        # TODO: each agent in `matching' has to be matched to a future state
-        # such that each active transition in `constraints' has exactly the
-        # the correct amount of agents traversing it
-        # NOTE: It seems to me to be an instance of the knapsack problem, but I
-        # am not sure. It can be posed as an ILP.
-
-    return trajectories
-
-
-def nsub_formulae_satisfied(stl, stl_milp, t=0):
-    '''TODO:
-    Returns Gurobi variable 
-    '''
-    m = stl_milp.model 
-    satis = stl_milp.variables[stl][t]
-    
-    if stl.op == Operation.PRED:
-        return satis
-    
-    elif stl.op == Operation.AND:
-        for child in stl.children:
-            satis += nsub_formulae_satisfied(child, stl_milp, t)
-        n = m.addVar(name="n_{}_{}".format(stl.identifier(), t))
-        m.addConstr(n == satis)
-        return n
-
-    elif stl.op == Operation.OR:
-        p = m.addVar();
-        m.addConstr(p == grb.max_([nsub_formulae_satisfied(child, stl_milp, t)
-                                    for child in stl.children]))
-        n = m.addVar(name="n_{}_{}".format(stl.identifier(), t))
-        m.addConstr(n == satis + p)
-        return n
-
-    elif stl.op == Operation.UNTIL:
-        a, b = int(stl.low), int(stl.high)
-        satis_until=[]
-        sum_left = sum([nsub_formulae_satisfied(stl.left, stl_milp, tau)
-                        for tau in range(t, t+a)])
-        for t_prime in range(a,b+1):
-            sum_left += nsub_formulae_satisfied(stl.left, stl_milp, t + t_prime)
-            aux = m.addVar()
-            m.addConstr(aux == nsub_formulae_satisfied(stl.right, stl_milp, t + t_prime)
-                             + sum_left)
-            satis_until.append(aux)
-        p = m.addVar();
-        m.addConstr(p == grb.max_(satis_until))
-        n = m.addVar(name="n_{}_{}".format(stl.identifier(), t))
-        m.addConstr(n == satis + p)
-        return n
-
-    elif stl.op == Operation.EVENT:
-        a, b = int(stl.low), int(stl.high)
-        child = stl.child
-        p = m.addVar()
-        m.addConstr(p == grb.max_([nsub_formulae_satisfied(child, stl_milp, t+tau)
-                                   for tau in range(a, b+1)]))
-        n = m.addVar(name="n_{}_{}".format(stl.identifier(), t))
-        m.addConstr(n == satis + p)
-        return n 
-
-    elif stl.op == Operation.ALWAYS:
-        a, b = int(stl.low), int(stl.high)
-        child = stl.child
-        p = m.addVar()
-        m.addConstr(p == sum([nsub_formulae_satisfied(child, stl_milp, t+tau)
-                              for tau in range(a, b+1)]))
-        n = m.addVar(name="n_{}_{}".format(stl.identifier(), t))
-        m.addConstr(n == satis + p)
-        return n 
-
-def partial_robustness(stl, stl_milp, t=0, max_robustness=1000):
- 
-    m = stl_milp.model 
-
-    if stl.op == Operation.PRED:
-        print(stl.variable)
-        r = m.addVar(name='ro_{}_{}'.format(stl.identifier, t)) 
-        term = m.addVar(name = 'term_{}_{}'.format(stl.identifier, t)) 
-        m.addConstr(r == (stl_milp.variables[stl.variable][t] - stl.threshold) / max_robustness) 
-        m.addConstr(term == grb.min_(r, stl_milp.variables[stl.variable][t])) 
-        return term, r, 1
-
-    elif stl.op == Operation.AND:
-        r = m.addVar(name = 'ro_{}_{}'.format(stl.identifier, t))
-        term = m.addVar(name = 'term_{}_{}'.format(stl.identifier, t))
-        term_children, r_children, n_term_children = zip(*[partial_robustness(ch, stl_milp, t, max_robustness) for ch in stl.children])
-        m.addConstr(r == grb.min_(r_children)) 
-        m.addConstr(term == grb.min_(r, stl_milp.variables[stl][t]))
-        return term + sum(term_children), r, 1 + sum(n_term_children)
-
-    elif stl.op == Operation.OR:
-        r = m.addVar(name = 'ro_{}_{}'.format(stl.identifier, t))
-        term = m.addVar(name = 'term_{}_{}'.format(stl.identifier, t))
-        term_children, r_children, n_term_children = zip(*[partial_robustness(ch, stl_milp, t, max_robustness) for ch in stl.children])
-        m.addConstr(r == grb.max_(r_children))
-        m.addConstr(term == grb.min_(r, stl_milp.variables[stl][t]))
-        return term + sum(term_children), r, 1 + sum(n_term_children)
-
-    elif stl.op == Operation.UNTIL:
-        r = m.addVar(name = 'ro_{}_{}'.format(stl.identifier, t))
-        term = m.addVar(name = 'term_{}_{}'.format(stl.identifier, t))
-        a, b = int(stl.low), int(stl.high)
-        r_until=[]
-        n_terms = 0
-        terms_children = 0
-        for t_ in range(a,b+1):
-            term_left, r_left, n_terms_left =  zip(*[partial_robustness(stl.left, stl_milp, t+t__, max_robustness) for t__ in range(0,t_)])
-            term_right, r_right, n_terms_right = partial_robustness(stl.rigth, stl_milp, t+t_)
-            terms_children += term_right + sum(term_left)
-            r_until.append(grb.min_(r_right, grb.min_(r_left)))
-            n_terms += n_terms_right + sum(n_terms_left)
-        m.addConstr(r == grb.max_(r_until))
-        m.addConstr(term == grb.min_(r, stl_milp.variables[stl][t]))
-        return term + terms_children, r, n_terms
-
-    elif stl.op == Operation.EVENT:
-        r = m.addVar(name = 'ro_{}_{}'.format(stl.identifier, t))
-        term = m.addVar(name = 'term_{}_{}'.format(stl.identifier, t))
-        a, b = int(stl.low), int(stl.high)
-        child = stl.child
-        term_child, r_child, n_term_child = zip(*[partial_robustness(child, stl_milp, t+tau, max_robustness) for tau in range(a, b+1)])
-        m.addConstr(r == grb.max_(r_child))
-        m.addConstr(term == grb.min_(r, stl_milp.variables[stl][t]))
-        return term + sum(term_child), r, 1 + sum(n_term_child)
-
-    elif stl.op == Operation.ALWAYS:
-        r = m.addVar(name = 'ro_{}_{}'.format(stl.identifier, t))
-        term = m.addVar(name = 'term_{}_{}'.format(stl.identifier, t))
-        a, b = int(stl.low), int(stl.high)
-        child = stl.child
-        term_child, r_child, n_term_child = zip(*[partial_robustness(child, stl_milp, t+tau, max_robustness) for tau in range(a, b+1)])
-        m.addConstr(r == grb.min_(r_child))
-        m.addConstr(term == grb.min_(r, stl_milp.variables[stl][t]))
-        return term + sum(term_child), r, 1 + sum(n_term_child)
-
-
 def route_planning(ts, agents, formula, time_bound=None, variable_bound=None,
-                   robust=True, travel_time_weight=0, flag=True):
+                   robust=True, travel_time_weight=0, maximalSatisfaction=False, balance=False, decouple=True):
     '''Performs route planning for agents `agents' moving in a transition system
     `ts' such that the CaTL specification `formula' is satisfied.
     Input
@@ -471,7 +306,7 @@ def route_planning(ts, agents, formula, time_bound=None, variable_bound=None,
         variable_bound = len(agents)
 
     # create MILP
-    m = GRBModel('milp')
+    m = GRBModel('mip')
 
     # create system variables
     capabilities = compute_capability_bitmap(agents)
@@ -487,51 +322,54 @@ def route_planning(ts, agents, formula, time_bound=None, variable_bound=None,
     # add CATL formula constraints
     stl = catl2stl(ast)
     ranges = {variable: (0, len(agents)) for variable in stl.variables()}
-    if flag == True:
-        stl_milp = pstl2milp(stl, ranges=ranges, model=m, robust=robust)
-        zi = stl_milp.translate()
-    elif flag==False:
-        stl_milp = stl2milp(stl, ranges=ranges, model=m, robust=robust)
-        stl_milp.translate(satisfaction=True) 
-    # add proposition constraints
-    add_proposition_constraints(m, stl_milp, ts, ast, capabilities,
-                                agent_classes, time_bound, variable_bound)
 
     # add travel time regularization
     if travel_time_weight > 0:
         add_travel_time_objective(m, ts, travel_time_weight, time_bound,
                                   variable_bound)
+    
+    
+    if maximalSatisfaction == True:
+        # Generate MIP object
+        stl_inner_MIP = mstl2milp(stl, ranges=ranges, model=m, robust=robust)
+        # Translate stl encoding to constraints
+        stl_inner_MIP.translate()
+        m.update()
 
-    if flag == True:
-        method = 1
+        # Attach CATL AP's to MILP variables
+        add_proposition_constraints(m, stl_inner_MIP, ts, ast, capabilities,
+                                    agent_classes, time_bound, variable_bound)
+        if decouple:
+            # Generate separate model for outer problem
+            lp = GRBModel('lp')
+            # Generate a second copy of system constraints on the outer problem model
+            create_system_variables(lp, ts, agent_classes, time_bound, variable_bound)
+            add_system_constraints(lp, ts, agent_classes, capability_distribution,
+                            time_bound)
+            # Solve the inner problem
+            stl_inner_MIP.hierarchical(balance=balance, completeSolve=False)
+            # Generate the constraints for the outer problem on the model for the outer problem
+            mstlrobust=stl_inner_MIP.mstl2lp(model=lp)
 
-        if method == 1:
-            d = stl_milp.method_1()
-            obj = [stl_milp.model.getObjective(objectives) for objectives in range(d+1)]
-            print(str(obj), ':', [obj[i].getValue() for i in range(d+1)], "MILP")
-            # pstlrobust = stl_milp.pstl2lp(stl)
-        elif method == 2: 
-            stl_milp.method_2()
-            # print('Objective')
-            obj = stl_milp.model.getObjective()
-            pstlrobust = stl_milp.pstl2lp(stl)
-            print(str(obj), obj.getValue(), "MILP")
-        elif method == 3:
-            stl_milp.method_3(zi)
-            # print('Objective')
-            obj = stl_milp.model.getObjective()
-            pstlrobust = stl_milp.pstl2lp(stl)
-            print(str(obj), obj.getValue(), "MILP")
+            # Attach CATL AP's to MILP variables
+            add_proposition_constraints(lp, stl_inner_MIP, ts, ast, capabilities,
+                                        agent_classes, time_bound, variable_bound, outerFlag=True)
+            
+            # Solve the outer problem
+            stl_inner_MIP.outerOptim(mstlrobust, balance=balance)
+
+            # Return the model for the outer problem instead of the inner
+            m = mstlrobust
+        else:
+            # Solve the entire problem as a single model
+            stl_inner_MIP.hierarchical(balance=balance, completeSolve=True)
     else:
-        m.optimize() 
+        stl_inner_MIP = stl2milp(stl, ranges=ranges, model=m, robust=robust)
+        stl_inner_MIP.translate(satisfaction=True) 
+        add_proposition_constraints(m, stl_inner_MIP, ts, ast, capabilities,
+                                    agent_classes, time_bound, variable_bound)
+        m.optimize()
     
-    
-
-    # stl_milp.pstl2lp(ast)
-    # run optimizer
-    # m.optimize()    
-
-
     if m.status == GRB.Status.OPTIMAL:
         logging.info('"Optimal objective MILP": %f', m.objVal)
     elif m.status == GRB.Status.INF_OR_UNBD:
@@ -543,5 +381,4 @@ def route_planning(ts, agents, formula, time_bound=None, variable_bound=None,
     else:
         logging.error('Optimization ended with status %s', m.status)
 
-#     return extract_trajetories(m, ts, agents, time_bound) #TODO:
-    return m
+    return m, stl_inner_MIP
