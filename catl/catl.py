@@ -68,7 +68,7 @@ class CATLFormula(object):
             self.right = kwargs['right']
 
         self.__string = None
-        self.__hash = None
+        self.__hash = kwargs['UUID'] if 'UUID' in kwargs else None
 
     def robustness(self, s, t):
         '''Computes the robustness of the CATL formula.'''
@@ -178,7 +178,7 @@ class CATLFormula(object):
         return self.__string
 
     @classmethod
-    def from_formula(cls, formula):
+    def from_formula(cls, formula, UUID=False):
         '''Creates a CATLFormula object from a formula string.
 
         Parameters
@@ -193,18 +193,28 @@ class CATLFormula(object):
         tokens = CommonTokenStream(lexer)
         parser = catlParser(tokens)
         t = parser.catlProperty()
-        return CATLAbstractSyntaxTreeExtractor().visit(t)
+        return CATLAbstractSyntaxTreeExtractor(UUID).visit(t)
 
 
 class CATLAbstractSyntaxTreeExtractor(catlVisitor):
     '''Parse Tree visitor that constructs the AST of an CATL formula'''
-
+    def __init__(self, UUID=False):
+        super().__init__()
+        self._trackUUID=UUID
+    def visit(self, ctx):
+        if self._trackUUID and not hasattr(ctx, 'ID'):
+            ctx.ID = hash(str(ctx))
+        return super().visit(ctx)
     def visitFormula(self, ctx):
         op = Operation.getCode(ctx.op.text)
         ret = None
         low = -1
         high = -1
+        UUID = (ctx.ID if self._trackUUID else None)
         if op in (Operation.AND, Operation.OR):
+            if self._trackUUID:
+                ctx.left.ID = hash(str(ctx.left)) ^ ctx.ID
+                ctx.right.ID = hash(str(ctx.right)) ^ ctx.ID
             left = self.visit(ctx.left)
             right = self.visit(ctx.right)
             assert op != right.op
@@ -213,40 +223,56 @@ class CATLAbstractSyntaxTreeExtractor(catlVisitor):
             else:
                 children = [left]
             children.append(right)
-            ret = CATLFormula(op, children=children)
+            ret = CATLFormula(op, children=children, UUID=UUID)
         elif op == Operation.IMPLIES:
+            if self._trackUUID:
+                ctx.left.ID = hash(str(ctx.left)) ^ ctx.ID
+                ctx.right.ID = hash(str(ctx.right)) ^ ctx.ID
             ret = CATLFormula(op, left=self.visit(ctx.left),
-                             right=self.visit(ctx.right))
+                             right=self.visit(ctx.right), UUID=UUID)
         elif op == Operation.NOT:
-            ret = CATLFormula(op, child=self.visit(ctx.child))
+            if self._trackUUID:
+                ctx.child.ID = hash(str(ctx.child)) ^ ctx.ID
+            ret = CATLFormula(op, child=self.visit(ctx.child), UUID=UUID)
         elif op == Operation.UNTIL:
+            if self._trackUUID:
+                ctx.left.ID = hash(str(ctx.left)+str(ctx.low.text)+str(ctx.high.text)) ^ ctx.ID
+                ctx.right.ID = hash(str(ctx.right)+str(ctx.low.text)+str(ctx.high.text)) ^ ctx.ID
             low = float(ctx.low.text)
             high = float(ctx.high.text)
             ret = CATLFormula(op, left=self.visit(ctx.left),
-                             right=self.visit(ctx.right), low=low, high=high)
+                             right=self.visit(ctx.right), low=low, high=high, UUID=UUID)
         elif op in (Operation.ALWAYS, Operation.EVENT):
+            if self._trackUUID:
+                ctx.child.ID = hash(str(ctx.child)+str(ctx.low.text)+str(ctx.high.text)) ^ ctx.ID
             low = float(ctx.low.text)
             high = float(ctx.high.text)
             ret = CATLFormula(op, child=self.visit(ctx.child),
-                             low=low, high=high)
+                             low=low, high=high, UUID=UUID)
         else:
             print('Error: unknown operation!')
         return ret
 
     def visitCatlPredicate(self, ctx):
-        return self.visit(ctx.predicate())
+        pred = ctx.predicate()
+        if self._trackUUID:
+            pred.ID = hash(str(pred)) ^ ctx.ID
+        return self.visit(pred)
 
     def visitPredicate(self, ctx):
+        UUID = (ctx.ID if self._trackUUID else None)
         if Operation.getCode(ctx.op.text) == Operation.PRED:
             if ctx.resources():
-                resources = self.visit(ctx.resources())
+                res = ctx.resources()
+                resources = self.visit(res)
             else:
                 resources = set()
+            cap = ctx.capabilities()
             return CATLFormula(Operation.PRED, duration=int(ctx.duration.text),
                                proposition=ctx.proposition.text,
-                               capabilities=self.visit(ctx.capabilities()),
-                               resources=resources)
-        return CATLFormula(Operation.BOOL, value=bool(ctx.op.text))
+                               capabilities=self.visit(cap),
+                               resources=resources, UUID = UUID)
+        return CATLFormula(Operation.BOOL, value=bool(ctx.op.text), UUID = UUID)
 
     def visitCapabilities(self, ctx):
         return {self.visit(ch) for ch in ctx.children
@@ -265,6 +291,8 @@ class CATLAbstractSyntaxTreeExtractor(catlVisitor):
                                quantity=float(ctx.quantity.text))
 
     def visitParprop(self, ctx):
+        if self._trackUUID:
+            ctx.child.ID = hash(str(ctx.child)) ^ ctx.ID
         return self.visit(ctx.child)
 
 

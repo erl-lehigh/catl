@@ -35,43 +35,44 @@ def catl2stl(catl_ast):
         \box_{[0, d]} \bigcup_{i=1}^{m} (z_{\pi, c_i} \geq n_i)
     '''
     if catl_ast.op == CATLOperation.BOOL:
-        return STLFormula(STLOperation.BOOL, value=catl_ast.value)
+        return STLFormula(STLOperation.BOOL, value=catl_ast.value, UUID=hash(catl_ast))
     elif catl_ast.op == CATLOperation.PRED:
         var = catl_ast.proposition + '_{cap}'
+        andHash = hash(catl_ast) + hash(var)
         conjunction_terms = \
             [STLFormula(STLOperation.PRED, relation=STLRelOperation.GE,
-                        variable=var.format(cap=cap), threshold=th)
+                        variable=var.format(cap=cap), threshold=th, UUID=andHash ^ hash(str(cap)) ^ hash(str(th)))
                                for cap, th in catl_ast.capability_requests]
-        child = STLFormula(STLOperation.AND, children=conjunction_terms)
+        child = STLFormula(STLOperation.AND, children=conjunction_terms, UUID=andHash)
 
         return STLFormula(STLOperation.ALWAYS, low=0, high=catl_ast.duration,
-                          child=child)
+                          child=child, UUID=hash(catl_ast))
     elif catl_ast.op in (CATLOperation.AND, CATLOperation.OR):
         children = [catl2stl(ch) for ch in catl_ast.children]
         if catl_ast.op == CATLOperation.AND:
             op = STLOperation.AND
         else:
             op = STLOperation.OR
-        return STLFormula(op, children=children)
+        return STLFormula(op, children=children, UUID=hash(catl_ast))
     elif catl_ast.op == CATLOperation.IMPLIES:
         left = catl2stl(catl_ast.left)
         right = catl2stl(catl_ast.right)
-        return STLFormula(STLOperation.IMPLIES, left=left, right=right)
+        return STLFormula(STLOperation.IMPLIES, left=left, right=right, UUID=hash(catl_ast))
     elif catl_ast.op == CATLOperation.NOT:
         child = catl2stl(catl_ast.child)
-        return STLFormula(STLOperation.NOT, child=child)
+        return STLFormula(STLOperation.NOT, child=child, UUID=hash(catl_ast))
     elif catl_ast.op in (CATLOperation.ALWAYS, CATLOperation.EVENT):
         child = catl2stl(catl_ast.child)
         if catl_ast.op == CATLOperation.ALWAYS:
             op = STLOperation.ALWAYS
         else:
             op = STLOperation.EVENT
-        return STLFormula(op, child=child, low=catl_ast.low, high=catl_ast.high)
+        return STLFormula(op, child=child, low=catl_ast.low, high=catl_ast.high, UUID=hash(catl_ast))
     elif catl_ast.op == CATLOperation.UNTIL:
         left = catl2stl(catl_ast.left)
         right = catl2stl(catl_ast.right)
         return STLFormula(STLOperation.UNTIL, left=left, right=right,
-                          low=catl_ast.low, high=catl_ast.high)
+                          low=catl_ast.low, high=catl_ast.high, UUID=hash(catl_ast))
 
 
 if __name__ == '__main__':
