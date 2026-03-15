@@ -298,7 +298,7 @@ def route_planning(ts, agents, formula, time_bound=None, variable_bound=None,
     ------
     TODO: TBD
     '''
-    ast = CATLFormula.from_formula(formula)
+    ast = CATLFormula.from_formula(formula, UUID=True)
     if time_bound is None:
         time_bound = int(ast.bound())
 

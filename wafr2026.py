@@ -58,21 +58,21 @@ def case_wafr2026(ts_filename='/home/erl/PyProj/catl/farm.yaml'):
     g = frozenset(['Vis', 'UV'])
     for child in stl_milp.formula.children:
         print(child)
-        var = stl_milp.variables[child][0]
+        var = stl_milp.variables[child][(0, )]
         name = var.VarName
         print(name, var.X)
     for child in stl_milp.formula.children[1].children:
         print(child)
-        var = stl_milp.variables[child][0]
+        var = stl_milp.variables[child][(0, )]
         name = var.VarName
         print(name, var.X)
     #print(stl_milp.rhoVariables[stl_milp.formula.children[0]][0])
     #print(stl_milp.rhoVariables[stl_milp.formula.children[1]][0])
     for t in range(11):
-        print([stl_milp.variables[child.variable][t] for child in stl_milp.formula.children[0].child.child.children if child.variable in stl_milp.variables])
+        print([stl_milp.outer_state_vars[child.variable][t] for child in stl_milp.formula.children[0].child.child.children if child.variable in stl_milp.variables])
     for k in range(4):
         for t in range(15):
-            print([stl_milp.variables[child.variable][t] for child in stl_milp.formula.children[1].children[k].child.child.children if child.variable in stl_milp.variables])
+            print([stl_milp.outer_state_vars[child.variable][t] for child in stl_milp.formula.children[1].children[k].child.child.children if child.variable in stl_milp.variables])
     print(sum(stl_milp.balanceRobustnessObjectives[1][i].getValue() for i in range(4)))
     print(stl_milp.rho)
     #print(ts.g.nodes[u]['vars'][0])
