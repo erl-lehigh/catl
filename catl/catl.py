@@ -236,15 +236,15 @@ class CATLAbstractSyntaxTreeExtractor(catlVisitor):
             ret = CATLFormula(op, child=self.visit(ctx.child), UUID=UUID)
         elif op == Operation.UNTIL:
             if self._trackUUID:
-                ctx.left.ID = hash(str(ctx.left)+str(ctx.low.text)+str(ctx.high.text)) ^ ctx.ID
-                ctx.right.ID = hash(str(ctx.right)+str(ctx.low.text)+str(ctx.high.text)) ^ ctx.ID
+                ctx.left.ID = hash(str(ctx.left)) ^ ctx.ID
+                ctx.right.ID = hash(str(ctx.right)) ^ ctx.ID
             low = float(ctx.low.text)
             high = float(ctx.high.text)
             ret = CATLFormula(op, left=self.visit(ctx.left),
                              right=self.visit(ctx.right), low=low, high=high, UUID=UUID)
         elif op in (Operation.ALWAYS, Operation.EVENT):
             if self._trackUUID:
-                ctx.child.ID = hash(str(ctx.child)+str(ctx.low.text)+str(ctx.high.text)) ^ ctx.ID
+                ctx.child.ID = hash(str(ctx.child)) ^ ctx.ID
             low = float(ctx.low.text)
             high = float(ctx.high.text)
             ret = CATLFormula(op, child=self.visit(ctx.child),
