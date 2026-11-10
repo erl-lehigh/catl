@@ -8,11 +8,11 @@
 
 from lomap import Ts
 
-from route_planning import route_planning
-from visualization import show_environment
+from src.catl.route_planning import route_planning
+from src.catl.visualization import show_environment
 
 
-def case_rss2019(ts_filename='farm.yaml'):
+def case_rss2019(ts_filename='tests/farm.yaml'):
     '''TODO:
     '''
 
@@ -22,7 +22,7 @@ def case_rss2019(ts_filename='farm.yaml'):
     show_environment(ts)
 
     for u in ts.g:
-        print(u, ts.g.node[u])
+        print(u, ts.g.nodes[u])
 
     agents = [('q1', {'UV', 'Mo'}), ('q1', {'UV', 'Mo'}),
               ('q2', {'Vis', 'Mo'}),
@@ -38,11 +38,11 @@ def case_rss2019(ts_filename='farm.yaml'):
 
     specification = 'TODO:'
     # Example
-    'F[0, 2] T(4, test, {(a, 2), (b, 3)})'
+    specification = 'F[0, 2] T(4, blue, {(a, 2), (b, 3)})'
     '&& G[1, 7] T(2, test, {(a, 1), (c, 4)})'
     '&& F[3, 5] T(3, test2, {(b, 1), (d, 2)})'
 
-#     route_planning(ts, agents, specification)
+    route_planning(ts, agents, specification)
 
 if __name__ == '__main__':
     case_rss2019()

@@ -1,5 +1,5 @@
 # Byte-compiled / optimized / DLL files
-__pycache__/
+*__pycache__/
 *.py[cod]
 *$py.class
 
@@ -108,14 +108,9 @@ venv.bak/
 .pydevproject
 .settings
 
-# ANTLR generated files
-*.tokens
-*.interp
-*Lexer.py
-*Parser.py
-*Visitor.py
-*Listener.py
+
 
 .vscode/
 science2020.py
 stl/
+*.lp

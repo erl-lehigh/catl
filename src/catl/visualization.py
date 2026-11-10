@@ -50,7 +50,7 @@ def drawGraph(viewport, g, node_color='blue', edge_color='black', zorder=2):
     x, y = zip(*[d['position'] for _, d in g.nodes(data=True)])
     viewport.scatter(x, y, c=node_color, zorder=zorder+1)
 
-    lines = [(g.node[u]['position'], g.node[v]['position'])
+    lines = [(g.nodes[u]['position'], g.nodes[v]['position'])
                                                 for u, v in g.edges() if u != v]
     artist = LineCollection(lines, colors=edge_color, zorder=zorder)
     viewport.add_collection(artist)
@@ -62,7 +62,7 @@ def drawPolicy(viewport, solution, color='black', alpha_min=1.0, zorder=2):
     else:
         transparency = np.linspace(alpha_min, 1.0, len(solution)-1)
 
-    for u, v, a in it.izip(solution, solution[1:], transparency):
+    for u, v, a in zip(solution, solution[1:], transparency):
         dx, dy = v.x - u.x, v.y - u.y
         plt.arrow(u.x, u.y, dx, dy, hold=True, color=color, alpha=a,
                   length_includes_head=True, head_width=0.08, zorder=zorder)

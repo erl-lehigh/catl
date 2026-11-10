@@ -10,9 +10,9 @@ import logging
 
 from lomap import Ts
 
-from route_planning import route_planning
-from visualization import show_environment
-from check_system_constraints import check_initial_states, check_flow_constraints
+from src.catl.route_planning import route_planning
+from src.catl.visualization import show_environment
+from src.catl.check_system_constraints import check_initial_states, check_flow_constraints
 
 
 def setup_logging(logfile='test_simple.log', loglevel=logging.DEBUG,
@@ -30,7 +30,7 @@ def setup_logging(logfile='test_simple.log', loglevel=logging.DEBUG,
     root.addHandler(ch)
 
 
-def case_simple(ts_filename='simple.yaml'):
+def case_simple(ts_filename='tests/simple.yaml'):
     '''TODO:
     '''
     setup_logging()
@@ -38,10 +38,10 @@ def case_simple(ts_filename='simple.yaml'):
     ts = Ts.load(ts_filename)
     for u, v in ts.g.edges():
         assert ts.g.has_edge(v, u)
-    # show_environment(ts)
+    show_environment(ts)
 
     for u in ts.g:
-        logging.debug('State: %u, Data: %s', u, str(ts.g.node[u]))
+        logging.debug('State: %s, Data: %s', u, str(ts.g.nodes[u]))
 
     agents = [('q1', {'a'}), ('q1', {'a'}),
              ]
@@ -51,9 +51,9 @@ def case_simple(ts_filename='simple.yaml'):
     initial_locations = set(initial_locations)
     capabilities = set.union(*capabilities)
 
-    logging.debug('Initial locations:', initial_locations)
-    logging.debug('Capabilities:', capabilities)
-    logging.debug('Agent classes:', agent_classes)
+    logging.debug('Initial locations: %s', initial_locations)
+    logging.debug('Capabilities: %s', capabilities)
+    logging.debug('Agent classes: %s', agent_classes)
 
     # make sure all agents' initial states are in the TS
     for state, _ in agents:
@@ -66,7 +66,7 @@ def case_simple(ts_filename='simple.yaml'):
                      )
 
     m = route_planning(ts, agents, specification)
-    time_bound = len(ts.g.nodes(data=True)[0][1]['vars']) - 1
+    time_bound = len(ts.g.nodes['q1']['vars']) - 1
 
     logging.debug('Planning horizon: %d', time_bound)
 

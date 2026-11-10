@@ -1,3 +1,4 @@
+#pragma once
 '''
  Copyright (C) 2018-2020 Cristian Ioan Vasile <cvasile@lehigh.edu>
  Explainable Robotics Lab (ERL), Autonomous and Intelligent Robotics (AIR) Lab,
@@ -14,10 +15,10 @@ from gurobipy import GRB
 
 from lomap import Timer
 
-from stl.stl2milp import stl2milp
-from catl import CATLFormula
-from catl import catl2stl
-from visualization import show_environment
+from pytelo.stl import stl2milp
+from .catl import CATLFormula
+from .catl2stl import catl2stl
+from .visualization import show_environment
 
 
 def compute_capability_bitmap(agents):
@@ -163,10 +164,10 @@ def add_system_constraints(m, ts, agent_classes, capability_distribution,
         for k in range(time_bound+1):
             for g, g_enc in agent_classes.items():
                 departing = sum([d['vars'][k][g]
-                            for _, _, d in ts.g.out_edges_iter(u, data=True)
+                            for _, _, d in ts.g.out_edges(u, data=True)
                                 if k + d['weight'] <= time_bound])
                 arriving = sum([d['vars'][k - d['weight']][g]
-                            for _, _, d in ts.g.in_edges_iter(u, data=True)
+                            for _, _, d in ts.g.in_edges(u, data=True)
                                 if k - d['weight'] >= 0])
 
                 if 0 < k < time_bound:
@@ -180,15 +181,6 @@ def add_system_constraints(m, ts, agent_classes, capability_distribution,
                 else:
                     team_state_eq = (ud['vars'][k][g] == arriving)
                 m.addConstr(team_state_eq, 'team_{}_{}_{}'.format(u, g_enc, k))
-
-#     # initial time constraints - encoding using transition variables
-#     for u in ts.g.nodes():
-#         for g, g_enc in agent_classes.items():
-#             conserve = sum([d['vars'][d['weight']][g]
-#                             for _, _, d in ts.g.out_edges_iter(u, data=True)
-#                                 if d['weight'] <= time_bound])
-#             conserve = (conserve == capability_distribution[u][g])
-#             m.addConstr(conserve, 'init_distrib_{}_{}'.format(u, g_enc))
 
     # initial time constraints - encoding using state variables
     for u, ud in ts.g.nodes(data=True):
@@ -315,7 +307,7 @@ def extract_trajetories(m, ts, agents, time_bound):
                 agent_class = agents[a][1] # extract agent class
                 # loop over outgoing transitions that have agents of the given
                 # class traversing them; add outgoing neighbors
-                for _, next_state, d in ts.g.out_edges_iter(state, data=True):
+                for _, next_state, d in ts.g.out_edges(state, data=True):
                     if d['vars'][time+d['weight']][agent_class] > 0:
                         matching[prev].append((next_state, time+d['weight']))
                         constraints.add((state, next_state, time+d['weight']))

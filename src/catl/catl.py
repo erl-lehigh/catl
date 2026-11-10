@@ -11,9 +11,9 @@ from collections import namedtuple
 
 from antlr4 import InputStream, CommonTokenStream, TerminalNode
 
-from catlLexer import catlLexer
-from catlParser import catlParser
-from catlVisitor import catlVisitor
+from .catlLexer import catlLexer
+from .catlParser import catlParser
+from .catlVisitor import catlVisitor
 
 
 class Operation(object):
@@ -298,7 +298,7 @@ class CATLAbstractSyntaxTreeExtractor(catlVisitor):
                                quantity=float(ctx.quantity.text))
 
     def visitParprop(self, ctx):
-        return self.visit(ctx.child);
+        return self.visit(ctx.child)
 
 
 if __name__ == '__main__':

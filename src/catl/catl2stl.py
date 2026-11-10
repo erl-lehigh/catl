@@ -8,16 +8,16 @@
 
 from antlr4 import InputStream, CommonTokenStream
 
-from catl import Operation as CATLOperation
-from catl import CATLFormula
-from catl import CATLAbstractSyntaxTreeExtractor
+from .catl import Operation as CATLOperation
+from .catl import CATLFormula
+from .catl import CATLAbstractSyntaxTreeExtractor
 
-from catlLexer import catlLexer
-from catlParser import catlParser
+from .catlLexer import catlLexer
+from .catlParser import catlParser
 
-from stl import Operation as STLOperation
-from stl import RelOperation as STLRelOperation
-from stl import STLFormula
+from pytelo.stl import Operation as STLOperation
+from pytelo.stl import RelOperation as STLRelOperation
+from pytelo.stl import STLFormula
 
 
 def catl2stl(catl_ast):
