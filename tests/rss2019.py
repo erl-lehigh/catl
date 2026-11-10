@@ -8,11 +8,11 @@
 
 from lomap import Ts
 
-from src.catl.route_planning import route_planning
-from src.catl.visualization import show_environment
+from catl.route_planning import route_planning
+from catl.visualization import show_environment
 
 
-def case_rss2019(ts_filename='tests/farm.yaml'):
+def case_rss2019(ts_filename='farm.yaml'):
     '''TODO:
     '''
 

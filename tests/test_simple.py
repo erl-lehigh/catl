@@ -10,9 +10,9 @@ import logging
 
 from lomap import Ts
 
-from src.catl.route_planning import route_planning
-from src.catl.visualization import show_environment
-from src.catl.check_system_constraints import check_initial_states, check_flow_constraints
+from catl.route_planning import route_planning
+from catl.visualization import show_environment
+from catl.check_system_constraints import check_initial_states, check_flow_constraints
 
 
 def setup_logging(logfile='test_simple.log', loglevel=logging.DEBUG,
@@ -30,7 +30,7 @@ def setup_logging(logfile='test_simple.log', loglevel=logging.DEBUG,
     root.addHandler(ch)
 
 
-def case_simple(ts_filename='tests/simple.yaml'):
+def case_simple(ts_filename='simple.yaml'):
     '''TODO:
     '''
     setup_logging()
